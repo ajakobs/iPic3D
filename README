@@ -4,9 +4,9 @@ To install and run iPic3D, you need to do the following:
   # make sure that you have installed MPI and HDF5
 
   # get the code:
-  git clone https://github.com/alecjohnson/iPic3D.git ipic3d
+  git clone https://github.com/ajakobs/iPic3D.git ipic3d
   # or
-  git clone git@github.com:alecjohnson/iPic3D.git ipic3d
+  git clone git@github.com:ajakobs/iPic3D.git ipic3d
 
   # set the following bootstrapping environment variable
   # (e.g. in ~/.profile):

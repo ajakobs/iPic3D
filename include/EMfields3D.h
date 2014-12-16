@@ -3,6 +3,7 @@
 #ifndef EMfields3D_H
 #define EMfields3D_H
 
+#include "MPIdata.h"
 #include "asserts.h"
 //#include "BCStructure.h"
 #include "ipic_fwd.h"
@@ -194,6 +195,18 @@ class EMfields3D
 
     // OpenBC
     void updateInfoFields();
+
+
+    //Functions for the communication between cluster and booster
+    //solver_typ=1 : fieldsolver (runs on cluster)
+    //solver_type=2 : momentsolver (runs on booster)
+    /*! Create MPI data types used in sync{Moments, Fields}() functions */
+    void syncInit(int solver_type, MPIdata *mpi);
+    /*! Free MPI data types used in sync{Moments, Fields}() functions */
+    void syncFinalize();
+    /*! Synchronize data between fields and particles solver */
+    void syncMoments(int solver_type, MPIdata *mpi, int iter);
+    void syncFields(int solver_type, MPIdata *mpi, int iter);
 
   public: // accessors
     const Collective& get_col()const{return _col;}

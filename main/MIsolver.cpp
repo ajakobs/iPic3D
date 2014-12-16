@@ -197,7 +197,7 @@ void MIsolver::send_field_to_kinetic_solver()
   EMf->set_fieldForPcls(*fieldForPcls);
 }
 //! MAXWELL SOLVER for Efield
-void MIsolver::advance_Efield() 
+void MIsolver::advance_Efield_Cluster() 
 {
   timeTasks_set_main_task(TimeTasks::FIELDS);
   if(I_am_field_solver())
@@ -207,6 +207,11 @@ void MIsolver::advance_Efield()
     EMf->calculateE(get_miMoments());
   }
   send_field_to_kinetic_solver();
+  //synch between cluster and booster
+}
+
+void MIsolver::advance_Efield_Booster(){
+  //synch between cluster and booster
 }
 
 //! update Bfield (assuming Eth has already been calculated)
@@ -1731,7 +1736,7 @@ void MIsolver::run()
       printf(" ======= Cycle %d ======= \n",i);
 
     timeTasks.resetCycle();
-    advance_Efield();
+    advance_Efield_Cluster();
     move_particles();
     advance_Bfield();
     compute_moments();
@@ -1742,8 +1747,8 @@ void MIsolver::run()
   //#pragma omp task device(mpi) onto(cluster,vct->get_rank()) copy_deps
   //for(int i = FirstCycle(); i <= FinalCycle(); i++)
   //{
-  //	advance_Efield();
-  //	advance_Bfield();
+  //	advance_Efield_Cluster();
+  //	advance_Bfield_Cluster();
   //}
   //
   //#pragma omp taskwait

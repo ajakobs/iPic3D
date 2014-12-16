@@ -78,7 +78,8 @@ namespace iPic3D
   protected:
     void accumulate_moments();
     void compute_moments();
-    void advance_Efield();
+    void advance_Efield_Cluster();
+    void advance_Efield_Booster();
     void move_particles();
     void advance_Bfield();
     //

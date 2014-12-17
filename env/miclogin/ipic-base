@@ -12,8 +12,9 @@ module-whatis "base environment for iPic3D"
 
 # compiling
 #
-module load impi
+#module load impi
 module load intel
+module load parastation
 # prefixing with mpi results in link error:
 # ld: MPIR_Thread: TLS definition in /opt/intel/impi/4.1.2.040/intel64/lib/libmpi_mt.so section .tbss mismatches non-TLS definition in /opt/intel/impi/4.1.2.040/        +intel64/lib/libmpi.so section .bss
 # /opt/intel/impi/4.1.2.040/intel64/lib/libmpi_mt.so: could not read symbols: Bad value

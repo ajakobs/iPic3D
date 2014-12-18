@@ -17,6 +17,11 @@ To install and run iPic3D, you need to do the following:
   #
   module use $IPIC_HOME/env/judge
   module load ipic
+
+  # when using the miclogin use
+  #
+  module use $IPIC_HOME/env/miclogin
+  module load ipic-nohdf5
   #
   # if porting to system_name, you can create a module for your
   # system, e.g. by copying modules in env/judge and modifying

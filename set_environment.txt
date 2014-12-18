@@ -1,5 +1,0 @@
-export IPIC_HOME="$HOME/DEEP/Leuven/ipic3d"
-module use $IPIC_HOME/env/miclogin
-module load ipic-nohdf5
-
-

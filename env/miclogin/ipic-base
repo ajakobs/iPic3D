@@ -22,13 +22,13 @@ module load parastation
 #setenv CXX mpiicpc
 #setenv CC mpiicc
 #setenv FC mpiifort
-setenv CXX icpc
-setenv CC icc
-setenv FC ifort
+setenv CXX mpicxx
+setenv CC mpicc
+setenv FC mpif90
 
 # running
 #
-setenv IPIC_MPIRUN mpiexec.hydra
+setenv IPIC_MPIRUN mpiexec
 
 prepend-path PATH $env(IPIC_HOME)/scripts
 
@@ -36,7 +36,7 @@ prepend-path PATH $env(IPIC_HOME)/scripts
 #
 module load OmpSs
 # library needed if you want to use nanox to offload
-prepend-path LD_LIBRARY_PATH /home/fsainz/runtime/nanox-mpi-09072014/lib/performance
-setenv NX_OFFL_HOSTFILE $env(IPIC_HOME)/env/miclogin/offload_hosts
+prepend-path LD_LIBRARY_PATH /home/fsainz/runtime/nanox-mpi-15122014/lib/performance
+setenv PSI_HOSTFILE $env(IPIC_HOME)/env/miclogin/offload_hosts
 
 setenv IPIC_RUNENV miclogin.xeon

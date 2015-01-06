@@ -15,6 +15,7 @@
 #include "ipic_math.h"
 #include "ompdefs.h"
 #include "asserts.h"
+#include "aligned_vector.h"
 #include <new> // needed for placement new
 
 using namespace iPic3D;
@@ -79,7 +80,7 @@ void MImoments::ConstantChargeOpenBCv2()
 {
   const Collective& col = setting.col();
   const VirtualTopology3D *vct = &setting.vct();
-  const Grid &grid = setting.grid();
+  const Grid3DCU &grid = setting.grid();
 
   int nx = grid.get_nxn();
   int ny = grid.get_nyn();
@@ -163,7 +164,7 @@ void MImoments::ConstantChargeOpenBC()
 {
   const Collective& col = setting.col();
   const VirtualTopology3D *vct = &setting.vct();
-  const Grid grid = setting.grid();
+  const Grid3DCU grid = setting.grid();
 
   int nx = grid.get_nxn();
   int ny = grid.get_nyn();
@@ -253,7 +254,7 @@ void MImoments::ConstantChargePlanet()
   const double y_center = col.gety_center();
   const double z_center = col.getz_center();
 
-  const Grid &grid = setting.grid();
+  const Grid3DCU &grid = setting.grid();
 
   for (int is = 0; is < ns; is++)
   {
@@ -378,7 +379,7 @@ void SpeciesMoms::calculateJhat(
 {
   const Collective& col = setting.col();
   const VirtualTopology3D *vct = &setting.vct();
-  const Grid& grid = setting.grid();
+  const Grid3DCU& grid = setting.grid();
 
   // temporary arrays to compute hatted moments
   //
@@ -520,7 +521,7 @@ void SpeciesMoms::setZeroSpeciesMoms(int is)
 {
   // set primary moments to zero
   //
-  #pragma omp for collapse(2)
+  #pragma omp for collapse(1)
   for (register int i = 0; i < nxn; i++)
   for (register int j = 0; j < nyn; j++)
   for (register int k = 0; k < nzn; k++)
@@ -541,7 +542,7 @@ void SpeciesMoms::setZeroSpeciesMoms(int is)
 // This was Particles3Dcomm::interpP2G()
 void SpeciesMoms::sumMomentsOld(const Particles3Dcomm& pcls)
 {
-  const Grid& grid = setting.grid();
+  const Grid3DCU& grid = setting.grid();
 
   const double inv_dx = 1.0 / grid.getDX();
   const double inv_dy = 1.0 / grid.getDY();
@@ -752,7 +753,7 @@ void SpeciesMoms::sumMoments_vec(const Particles3Dcomm& pcls)
   const int Np=8;
   const int num_threads = omp_get_max_threads();
 
-  const Grid& grid = setting.grid();
+  const Grid3DCU& grid = setting.grid();
   const double invVOL = grid.getInvVOL();
 
   const double inv_dx = 1.0 / grid.getDX();
@@ -798,8 +799,9 @@ void SpeciesMoms::sumMoments_vec(const Particles3Dcomm& pcls)
   //
   {
       const int is = pcls.get_species_num();
-
-      const vector_SpeciesParticle& pcl_list = pcls.get_pcl_list();
+      
+      //typedef aligned_vector(SpeciesParticle) vector_SpeciesParticle;
+      //const vector_SpeciesParticle& pcl_list = pcls.get_pcl_list();
 
       const int nop = pcls.getNOP();
 
@@ -811,7 +813,7 @@ void SpeciesMoms::sumMoments_vec(const Particles3Dcomm& pcls)
       {
 	double *arrptr = &node_destined_moms_arr[0][0][0];
 	const int numel = ncells*10*8;
-	#pragma simd // this should vectorize
+	//#pragma simd // this should vectorize
         for(int i=0; i<numel;i++) arrptr[i]=0;
       }
       #pragma omp for
@@ -836,7 +838,7 @@ void SpeciesMoms::sumMoments_vec(const Particles3Dcomm& pcls)
         {
           // use fast matrix transpose to generate block to process
           assert_eq(Np,8);
-          const double(*in)[8]=reinterpret_cast<const double(*)[8]>(&pcl_list[p0]);
+          const double(*in)[8]=reinterpret_cast<const double(*)[8]>(&pcls.get_pcl_list()[p0]);
           double(*out)[8] = reinterpret_cast<double(*)[8]>(storage_for_AoS_case[0]);
           transpose_8x8_double(storage_for_AoS_case, in);
           u = storage_for_AoS_case[0];
@@ -863,7 +865,7 @@ void SpeciesMoms::sumMoments_vec(const Particles3Dcomm& pcls)
         double weights[8][Np] ALLOC_ALIGNED;
         int cell_index[Np]; // one-dimensional index of underlying array
         // will the compiler be smart enough to expand and vectorize this?
-        #pragma simd
+        //#pragma simd
         for(int ip=0;ip<Np;ip++)
         {
           int cx,cy,cz;
@@ -884,7 +886,7 @@ void SpeciesMoms::sumMoments_vec(const Particles3Dcomm& pcls)
         // 2. For each of 10 moments:
         //    a. for pcl=1:Np: (<=2 of 3) charge velocities -> (1) moment
         double velmoments[10][Np];
-        #pragma simd
+        //#pragma simd
         for(int ip=0;ip<Np;ip++)
         {
           const double ui=u[ip];
@@ -908,7 +910,7 @@ void SpeciesMoms::sumMoments_vec(const Particles3Dcomm& pcls)
           //  b. for pcl=1:Np: (1)moment, (8)weights -> (8)node-destined moments
           double node_moments[8][Np];
           for(int id=0;id<8;id++)
-          #pragma simd
+          //#pragma simd
           for(int ip=0;ip<Np;ip++)
           {
             node_moments[id][ip]=weights[id][ip]*velmoments[im][ip];
@@ -921,7 +923,7 @@ void SpeciesMoms::sumMoments_vec(const Particles3Dcomm& pcls)
           {
             double* cell_node_moms = node_moms_arr[cell_index[ip]];
             double* node_moms = node_moments[ip];
-            #pragma simd
+            //#pragma simd
             for(int id=0;id<8;id++)
             {
               cell_node_moms[id] += node_moms[id];
@@ -1036,7 +1038,7 @@ void SpeciesMoms::sumMoments_vec(const Particles3Dcomm& pcls)
 // This was Particles3Dcomm::interpP2G()
 void SpeciesMoms::sumMoments(const Particles3Dcomm& pcls)
 {
-  const Grid& grid = setting.grid();
+  const Grid3DCU& grid = setting.grid();
 
   const double inv_dx = 1.0 / grid.getDX();
   const double inv_dy = 1.0 / grid.getDY();
@@ -1184,7 +1186,7 @@ void SpeciesMoms::sumMoments(const Particles3Dcomm& pcls)
     for(int thread_num=0;thread_num<get_sizeMomentsArray();thread_num++)
     {
       arr4_double moments = fetch_moments10Array(thread_num).fetch_arr();
-      #pragma omp for collapse(2)
+      #pragma omp for collapse(1)
       for(int i=0;i<nxn;i++)
       for(int j=0;j<nyn;j++)
       for(int k=0;k<nzn;k++)
@@ -1243,7 +1245,7 @@ void SpeciesMoms::sumMoments(const Particles3Dcomm& pcls)
 
 void SpeciesMoms::sumMoments_AoS(const Particles3Dcomm& pcls)
 {
-  const Grid& grid = setting.grid();
+  const Grid3DCU& grid = setting.grid();
 
   const double inv_dx = 1.0 / grid.getDX();
   const double inv_dy = 1.0 / grid.getDY();
@@ -1376,7 +1378,7 @@ void SpeciesMoms::sumMoments_AoS(const Particles3Dcomm& pcls)
     for(int thread_num=0;thread_num<get_sizeMomentsArray();thread_num++)
     {
       arr4_double moments = fetch_moments10Array(thread_num).fetch_arr();
-      #pragma omp for collapse(2)
+      #pragma omp for collapse(1)
       for(int i=0;i<nxn;i++)
       for(int j=0;j<nyn;j++)
       for(int k=0;k<nzn;k++)
@@ -1472,7 +1474,7 @@ void SpeciesMoms::sumMoments_AoS_intr(const Particles3Dcomm& pcls)
 #ifndef __MIC__
   eprintf("not implemented");
 #else
-  const Grid& grid = setting.grid();
+  const Grid3DCU& grid = setting.grid();
   const double invVOL = grid.getInvVOL();
 
   // define global parameters
@@ -1575,22 +1577,22 @@ void SpeciesMoms::sumMoments_AoS_intr(const Particles3Dcomm& pcls)
       //
       // number or particles processed at a time
       const int num_pcls_per_loop = 2;
-      const vector_SpeciesParticle& pcl_list = pcls.get_pcl_list();
-      const int nop = pcl_list.size();
+      //const SpeciesParticle& pcl_list = pcls.get_pcl_list();
+      const int nop = pcls.get_pcl_list().size();
       // if the number of particles is odd, then make
       // sure that the data after the last particle
       // will not contribute to the moments.
       #pragma omp single // the implied omp barrier is needed
       {
         // make sure that we will not overrun the array
-        assert_divides(num_pcls_per_loop,pcl_list.capacity());
+        assert_divides(num_pcls_per_loop,pcls.get_pcl_list().capacity());
         // round up number of particles
         int nop_rounded_up = roundup_to_multiple(nop,num_pcls_per_loop);
         for(int pidx=nop; pidx<nop_rounded_up; pidx++)
         {
           // (This is a benign violation of particle
           // encapsulation and requires a cast).
-          SpeciesParticle& pcl = (SpeciesParticle&) pcl_list[pidx];
+          SpeciesParticle& pcl = (SpeciesParticle&) pcls.get_pcl_list()[pidx];
           pcl.set_to_zero();
         }
       }
@@ -1599,8 +1601,8 @@ void SpeciesMoms::sumMoments_AoS_intr(const Particles3Dcomm& pcls)
       {
         // cast particles as vectors
         // (assumes each particle exactly fits a cache line)
-        const F64vec8& pcl0 = (const F64vec8&)pcl_list[pidx];
-        const F64vec8& pcl1 = (const F64vec8&)pcl_list[pidx+1];
+        const F64vec8& pcl0 = (const F64vec8&)pcls.get_pcl_list()[pidx];
+        const F64vec8& pcl1 = (const F64vec8&)pcls.get_pcl_list()[pidx+1];
         // gather position data from particles
         // (assumes position vectors are in upper half)
         const F64vec8 xpos = cat_hgh_halves(pcl0,pcl1);
@@ -1660,7 +1662,7 @@ void SpeciesMoms::sumMoments_AoS_intr(const Particles3Dcomm& pcls)
 
         // distribute moments from cells to nodes
         //
-        #pragma omp for collapse(2)
+        #pragma omp for collapse(1)
         for(int cx=1;cx<nxc;cx++)
         for(int cy=1;cy<nyc;cy++)
         for(int cz=1;cz<nzc;cz++)
@@ -1757,7 +1759,7 @@ void SpeciesMoms::sumMoments_AoS_intr(const Particles3Dcomm& pcls)
 
         // at each node add moments to moments of first thread
         //
-        #pragma omp for collapse(2)
+        #pragma omp for collapse(1)
         for(int nx=1;nx<nxn;nx++)
         for(int ny=1;ny<nyn;ny++)
         {
@@ -1782,7 +1784,7 @@ void SpeciesMoms::sumMoments_AoS_intr(const Particles3Dcomm& pcls)
 
         // transpose moments for field solver
         //
-        #pragma omp for collapse(2)
+        #pragma omp for collapse(1)
         for(int nx=1;nx<nxn;nx++)
         for(int ny=1;ny<nyn;ny++)
         {
@@ -2133,7 +2135,7 @@ inline void add_moments_for_pcl_vec(double momentsAccVec[8][10][8],
 //    for(int cxmod2=0; cxmod2<2; cxmod2++)
 //    for(int cymod2=0; cymod2<2; cymod2++)
 //    // each mesh cell is handled by its own thread
-//    #pragma omp for collapse(2)
+//    #pragma omp for collapse(1)
 //    for(int cx=cxmod2;cx<nxc;cx+=2)
 //    for(int cy=cymod2;cy<nyc;cy+=2)
 //    for(int cz=0;cz<nzc;cz++)
@@ -2217,7 +2219,7 @@ inline void add_moments_for_pcl_vec(double momentsAccVec[8][10][8],
 //    #pragma omp master
 //    { timeTasks_begin_task(TimeTasks::MOMENT_REDUCTION); }
 //    {
-//      #pragma omp for collapse(2)
+//      #pragma omp for collapse(1)
 //      for(int i=0;i<nxn;i++){
 //      for(int j=0;j<nyn;j++){
 //      for(int k=0;k<nzn;k++)
@@ -2278,7 +2280,7 @@ inline void add_moments_for_pcl_vec(double momentsAccVec[8][10][8],
 //    for(int cxmod2=0; cxmod2<2; cxmod2++)
 //    for(int cymod2=0; cymod2<2; cymod2++)
 //    // each mesh cell is handled by its own thread
-//    #pragma omp for collapse(2)
+//    #pragma omp for collapse(1)
 //    for(int cx=cxmod2;cx<nxc;cx+=2)
 //    for(int cy=cymod2;cy<nyc;cy+=2)
 //    for(int cz=0;cz<nzc;cz++)
@@ -2421,7 +2423,7 @@ inline void add_moments_for_pcl_vec(double momentsAccVec[8][10][8],
 //    #pragma omp master
 //    { timeTasks_begin_task(TimeTasks::MOMENT_REDUCTION); }
 //    {
-//      #pragma omp for collapse(2)
+//      #pragma omp for collapse(1)
 //      for(int i=0;i<nxn;i++){
 //      for(int j=0;j<nyn;j++){
 //      for(int k=0;k<nzn;k++)

@@ -3,6 +3,7 @@
 #include <cstddef> // for alignment stuff
 #include "asserts.h" // for assert_le, assert_lt
 #include "arraysfwd.h"
+#include <mm_malloc.h>
 //#include "arrays.h" // fixed-dimension arrays
 
 /*
@@ -108,8 +109,8 @@
 #define ALIGNMENT (64)
 #ifdef __INTEL_COMPILER
     #define ALLOC_ALIGNED __attribute__((aligned(ALIGNMENT)))
-    #define ASSUME_ALIGNED(X) __assume_aligned(X, ALIGNMENT)
-    #define ALIGNED(X) __assume_aligned(X, ALIGNMENT)
+    #define ASSUME_ALIGNED(X) __assume_aligned((void *)X, ALIGNMENT)
+    #define ALIGNED(X) __assume_aligned((void *)X, ALIGNMENT)
     #define AlignedAlloc(T, NUM) \
         (T *const __restrict__)(_mm_malloc(sizeof(T)*NUM, ALIGNMENT))
     #define AlignedFree(S) (_mm_free(S))

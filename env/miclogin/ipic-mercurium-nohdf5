@@ -13,4 +13,4 @@ module-whatis "set environment for iPic3D"
 module load ipic-mercurium-base
 
 setenv I_MPI_FABRICS shm:tcp
-setenv IPIC_CMAKE_ARGS "-DCMAKE_CXX_FLAGS='-fno-exceptions -O3 -vec-report' -DIPIC_HDF5_OUTPUT=OFF"
+setenv IPIC_CMAKE_ARGS "-DCMAKE_CXX_FLAGS='--ompss -fno-exceptions -O3 -vec-report -pthread -ldl -Wl,--export-dynamic -lnsl -lutil -lm -lmpich -lmpichcxx -lnanox-ss' -DIPIC_HDF5_OUTPUT=OFF "

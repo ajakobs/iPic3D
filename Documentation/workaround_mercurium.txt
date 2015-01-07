@@ -1,0 +1,30 @@
+The following errors occured when trying to compile with Mercurium. They were fixed with these workarounds:
+
+mm_malloc not found -> #include <mm_malloc.h> in include/Alloc.h
+
+/home/ajakobs/DEEP/Leuven/offload_ipic3d/build/src/main/../include/errors.h:7: error: type name 'FILE' has not been found in the current scope
+/home/ajakobs/DEEP/Leuven/offload_ipic3d/build/src/main/../include/errors.h:10: error: type name 'FILE' has not been found in the current scope
+/home/ajakobs/DEEP/Leuven/offload_ipic3d/build/src/main/../include/asserts.h:41: name 'eprintf_fileLine' has already been declared as a different entity kind
+	
+	-> #include <stdio.h> in include/errors.h
+
+/home/ajakobs/DEEP/Leuven/offload_ipic3d/build/src/fields/Moments.cpp:854: error: identifier '__assume_aligned' does not name a type
+/home/ajakobs/DEEP/Leuven/offload_ipic3d/build/src/fields/Moments.cpp:854: error: failed overload call to '__assume_aligned(const double *&, int)'
+/home/ajakobs/DEEP/Leuven/offload_ipic3d/build/src/fields/Moments.cpp:854: info: candidates are:
+(builtin-function):0: note:    void ::__assume_aligned(void *, int) [built-in]
+
+	-> in include/Alloc.h (void *)  	#define ASSUME_ALIGNED(X) __assume_aligned((void *)X, ALIGNMENT)
+						#define ALIGNED(X) __assume_aligned((void *)X, ALIGNMENT)
+
+/home/ajakobs/DEEP/Leuven/offload_ipic3d/build/src/fields/Moments.cpp:814: warning: unknown '#pragma simd' -> comment out
+
+/home/ajakobs/DEEP/Leuven/offload_ipic3d/build/src/fields/Moments.cpp:523: error: only collapse(1) is supported -> collapse(2) change in collapse(1)
+
+mpimcxx_imcc_base_Moments.cpp(17790): error: the global scope has no "Grid"
+      void smp_ol_sumMomentsOld_1_unpacked(::nanos_loop_info_t wsd_2, const int &nop, const double *const &u, const double *const &v, const double *const &w, const double *const &x, const double &xstart, const double &inv_dx, const double *const &y, const double &ystart, const double &inv_dy, const double *const &z, const double &zstart, const double &inv_dz, const ::Grid &grid, const double *const &q, const double &invVOL, ::arr4_double &moments) throw();
+
+	-> change every Grid in Grid3DCU in Moments.cpp
+
+mpimcxx_imcc_base_Moments.cpp(17792): error: the global scope has no "vector_SpeciesParticle"
+
+	-> comment const SpeciesParticle& pcl_list = pcls.get_pcl_list();, replace pcl_list with pcls.get_pcl_list() in Moments.cpp

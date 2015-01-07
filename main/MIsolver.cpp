@@ -1727,9 +1727,18 @@ void MIsolver::run()
   initialize();
   // shouldn't we call this?
   //WriteOutput(FirstCycle()-1);
-  //MPI_Comm cluster; //This communicater should run on the cluster
-  //DEEP_Booster_alloc(MPI_COMM_WORLD, vct->get_rank(), 1, &cluster);
-  //#pragma omp task //this for-loop should run on the booster (where we start)
+  MPI_Comm cluster; //This communicater should run on the cluster
+  deep_booster_alloc(MPI_COMM_WORLD, 1, 1, &cluster);
+
+#pragma omp task device(mpi) onto(cluster,0) copy_deps
+    for(int i = FirstCycle(); i <= FinalCycle(); i++)
+    {
+	    //timeTasks.print_cycle_times(i);
+     //advance_Efield_Cluster();
+     //advance_Bfield_Cluster();
+    }
+
+  //#pragma omp task device(mpi) //this for-loop should run on the booster (where we start)
   for (int i = FirstCycle(); i <= FinalCycle(); i++)
   {
     if (is_rank0())
@@ -1747,11 +1756,11 @@ void MIsolver::run()
   //#pragma omp task device(mpi) onto(cluster,vct->get_rank()) copy_deps
   //for(int i = FirstCycle(); i <= FinalCycle(); i++)
   //{
-  //	advance_Efield_Cluster();
-  //	advance_Bfield_Cluster();
+  	//advance_Efield_Cluster();
+  	//advance_Bfield_Cluster();
   //}
-  //
-  //#pragma omp taskwait
-  //DEEP_Booster_free(MPI_COMM_WORLD,vct->get_rank(), 1, &cluster);
+  
+  #pragma omp taskwait
+  deep_booster_free(&cluster);
   Finalize();
 }

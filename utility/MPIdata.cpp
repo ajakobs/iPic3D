@@ -40,7 +40,7 @@ void MPIdata::init(int *argc, const char **argv) {
   nprocs = 1;
  #else // NO_MPI
   /* Initialize the MPI API */
-  MPI_Init(argc, (char***)&argv);
+  nanos_mpi_init(argc, (char***)&argv);
 
   /* Set rank */
   MPI_Comm_rank(MPI_COMM_WORLD, &rank);
@@ -59,7 +59,7 @@ void MPIdata::exit(int code) {
 
 void MPIdata::finalize_mpi() {
  #ifndef NO_MPI
-  MPI_Finalize();
+  nanos_mpi_finalize();
  #endif
 }
 

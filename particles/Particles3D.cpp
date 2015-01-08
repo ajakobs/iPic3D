@@ -351,15 +351,15 @@ inline void get_field_components_for_cell(
 /** mover with a Predictor-Corrector scheme */
 void Particles3D::mover_PC(const_arr4_double fieldForPcls) {
   convertParticlesToSoA();
-  #pragma omp master
+  //#pragma omp master
   if (vct->getCartesian_rank() == 0) {
     cout << "*** MOVER species " << is << " ***" << NiterMover << " ITERATIONS   ****" << endl;
   }
 
-  #pragma omp master
+  //#pragma omp master
   { timeTasks_begin_task(TimeTasks::MOVER_PCL_MOVING); }
   const double dto2 = .5 * dt, qdto2mc = qom * dto2 / c;
-  #pragma omp for schedule(static)
+  //#pragma omp for schedule(static)
   // why does single precision make no difference in execution speed?
   //#pragma simd vectorlength(VECTOR_WIDTH)
   for (int pidx = 0; pidx < getNOP(); pidx++) {
@@ -463,7 +463,7 @@ void Particles3D::mover_PC(const_arr4_double fieldForPcls) {
         const double* field_components_c=field_components[c];
         ASSUME_ALIGNED(field_components_c);
         const double weights_c = weights[c];
-        #pragma simd
+        //#pragma simd
         for(int i=0; i<num_field_components; i++)
         {
           sampled_field[i] += weights_c*field_components_c[i];
@@ -499,22 +499,22 @@ void Particles3D::mover_PC(const_arr4_double fieldForPcls) {
     fetchV(pidx) = 2.0 * vavg - vorig;
     fetchW(pidx) = 2.0 * wavg - worig;
   }                             // END OF ALL THE PARTICLES
-  #pragma omp master
+  //#pragma omp master
   { timeTasks_end_task(TimeTasks::MOVER_PCL_MOVING); }
 }
 
 void Particles3D::mover_PC_AoS(const_arr4_double fieldForPcls)
 {
   convertParticlesToAoS();
-  #pragma omp master
+  //#pragma omp master
   if (vct->getCartesian_rank() == 0) {
     cout << "*** MOVER species " << is << " ***" << NiterMover << " ITERATIONS   ****" << endl;
   }
 
-  #pragma omp master
+  //#pragma omp master
   { timeTasks_begin_task(TimeTasks::MOVER_PCL_MOVING); }
   const double dto2 = .5 * dt, qdto2mc = qom * dto2 / c;
-  #pragma omp for schedule(static)
+ // #pragma omp for schedule(static)
   for (int pidx = 0; pidx < getNOP(); pidx++) {
     // copy the particle
     SpeciesParticle* pcl = &_pcls[pidx];
@@ -569,7 +569,7 @@ void Particles3D::mover_PC_AoS(const_arr4_double fieldForPcls)
         const double* field_components_c=field_components[c];
         ASSUME_ALIGNED(field_components_c);
         const double weights_c = weights[c];
-        #pragma simd
+        //#pragma simd
         for(int i=0; i<num_field_components; i++)
         {
           sampled_field[i] += weights_c*field_components_c[i];
@@ -624,7 +624,7 @@ void Particles3D::mover_PC_AoS(const_arr4_double fieldForPcls)
     pcl->set_v(2.0 * vavg - vorig);
     pcl->set_w(2.0 * wavg - worig);
   }                             // END OF ALL THE PARTICLES
-  #pragma omp master
+  //#pragma omp master
   { timeTasks_end_task(TimeTasks::MOVER_PCL_MOVING); }
 }
 
@@ -658,20 +658,20 @@ void Particles3D::mover_PC_AoS_vec_intr(const_arr4_double fieldForPcls)
   // starting position of cell in high corner of ghost domain
   // in canonical coordinates
   const F64vec8 nXc = make_F64vec8(nxc,nyc,nzc);
-  #pragma omp master
+  //#pragma omp master
   if (vct->getCartesian_rank() == 0) {
     cout << "*** MOVER species " << is << " ***" << NiterMover << " ITERATIONS   ****" << endl;
   }
 
   SpeciesParticle * pcls = &_pcls[0];
   ALIGNED(pcls);
-  #pragma omp master
+  //#pragma omp master
   { timeTasks_begin_task(TimeTasks::MOVER_PCL_MOVING); }
   const double dto2_d = .5 * dt;
   const double qdto2mc_d = qom * dto2_d / c;
   const F64vec8 dto2 = F64vec8(dto2_d);
   const F64vec8 qdto2mc = F64vec8(qdto2mc_d);
-  #pragma omp for schedule(static)
+  //#pragma omp for schedule(static)
   for (int pidx = 0; pidx < getNOP(); pidx+=2)
   {
     // copy the particle
@@ -749,7 +749,7 @@ void Particles3D::mover_PC_AoS_vec_intr(const_arr4_double fieldForPcls)
     _mm512_store_pd(&pcl[0], pcl0);
     _mm512_store_pd(&pcl[1], pcl1);
   }
-  #pragma omp master
+  //#pragma omp master
   { timeTasks_end_task(TimeTasks::MOVER_PCL_MOVING); }
  #endif
 }
@@ -757,7 +757,7 @@ void Particles3D::mover_PC_AoS_vec_intr(const_arr4_double fieldForPcls)
 void Particles3D::mover_PC_AoS_vec(const_arr4_double fieldForPcls)
 {
   convertParticlesToAoS();
-  #pragma omp master
+  //#pragma omp master
   if (vct->getCartesian_rank() == 0) {
     cout << "*** MOVER species " << is << " ***" << NiterMover << " ITERATIONS   ****" << endl;
   }
@@ -767,10 +767,10 @@ void Particles3D::mover_PC_AoS_vec(const_arr4_double fieldForPcls)
   int needed_capacity = roundup_to_multiple(getNOP(),NUM_PCLS_MOVED_AT_A_TIME);
   assert_le(needed_capacity,_pcls.capacity());
 
-  #pragma omp master
+  //#pragma omp master
   { timeTasks_begin_task(TimeTasks::MOVER_PCL_MOVING); }
   const double dto2 = .5 * dt, qdto2mc = qom * dto2 / c;
-  #pragma omp for schedule(static)
+  //#pragma omp for schedule(static)
   for (int pidx = 0; pidx < getNOP(); pidx+=NUM_PCLS_MOVED_AT_A_TIME)
   {
     // copy the particles
@@ -886,7 +886,7 @@ void Particles3D::mover_PC_AoS_vec(const_arr4_double fieldForPcls)
       pcl[i]->set_u(j, 2.*uavg[i][j] - uorig[i][j]);
     }
   }
-  #pragma omp master
+  //#pragma omp master
   { timeTasks_end_task(TimeTasks::MOVER_PCL_MOVING); }
 }
 

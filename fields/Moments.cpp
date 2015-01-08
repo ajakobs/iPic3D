@@ -521,7 +521,7 @@ void SpeciesMoms::setZeroSpeciesMoms(int is)
 {
   // set primary moments to zero
   //
-  #pragma omp for collapse(1)
+  //#pragma omp for collapse(1)
   for (register int i = 0; i < nxn; i++)
   for (register int j = 0; j < nyn; j++)
   for (register int k = 0; k < nzn; k++)
@@ -571,7 +571,7 @@ void SpeciesMoms::sumMomentsOld(const Particles3Dcomm& pcls)
   // subarrays.
   //#ifdef _OPENMP
   TimeTasks timeTasksAcc;
-  #pragma omp parallel private(timeTasks)
+  //#pragma omp parallel private(timeTasks)
   {
     int thread_num = omp_get_thread_num();
     timeTasks_begin_task(TimeTasks::MOMENT_ACCUMULATION);
@@ -581,7 +581,7 @@ void SpeciesMoms::sumMomentsOld(const Particles3Dcomm& pcls)
     // The following loop is expensive, so it is wise to assume that the
     // compiler is stupid.  Therefore we should on the one hand
     // expand things out and on the other hand avoid repeating computations.
-    #pragma omp for
+    //#pragma omp for
     for (int i = 0; i < nop; i++)
     {
       // compute the quadratic moments of velocity
@@ -664,39 +664,39 @@ void SpeciesMoms::sumMomentsOld(const Particles3Dcomm& pcls)
 
     // reduce arrays
     {
-      #pragma omp critical (reduceMoment0)
+      //#pragma omp critical (reduceMoment0)
       for(int i=0;i<nxn;i++){for(int j=0;j<nyn;j++) for(int k=0;k<nzn;k++)
         { rhons[is][i][j][k] += invVOL*moments[i][j][k][0]; }}
-      #pragma omp critical (reduceMoment1)
+      //#pragma omp critical (reduceMoment1)
       for(int i=0;i<nxn;i++){for(int j=0;j<nyn;j++) for(int k=0;k<nzn;k++)
         { Jxs  [is][i][j][k] += invVOL*moments[i][j][k][1]; }}
-      #pragma omp critical (reduceMoment2)
+      //#pragma omp critical (reduceMoment2)
       for(int i=0;i<nxn;i++){for(int j=0;j<nyn;j++) for(int k=0;k<nzn;k++)
         { Jys  [is][i][j][k] += invVOL*moments[i][j][k][2]; }}
-      #pragma omp critical (reduceMoment3)
+      //#pragma omp critical (reduceMoment3)
       for(int i=0;i<nxn;i++){for(int j=0;j<nyn;j++) for(int k=0;k<nzn;k++)
         { Jzs  [is][i][j][k] += invVOL*moments[i][j][k][3]; }}
-      #pragma omp critical (reduceMoment4)
+      //#pragma omp critical (reduceMoment4)
       for(int i=0;i<nxn;i++){for(int j=0;j<nyn;j++) for(int k=0;k<nzn;k++)
         { pXXsn[is][i][j][k] += invVOL*moments[i][j][k][4]; }}
-      #pragma omp critical (reduceMoment5)
+     // #pragma omp critical (reduceMoment5)
       for(int i=0;i<nxn;i++){for(int j=0;j<nyn;j++) for(int k=0;k<nzn;k++)
         { pXYsn[is][i][j][k] += invVOL*moments[i][j][k][5]; }}
-      #pragma omp critical (reduceMoment6)
+      //#pragma omp critical (reduceMoment6)
       for(int i=0;i<nxn;i++){for(int j=0;j<nyn;j++) for(int k=0;k<nzn;k++)
         { pXZsn[is][i][j][k] += invVOL*moments[i][j][k][6]; }}
-      #pragma omp critical (reduceMoment7)
+     // #pragma omp critical (reduceMoment7)
       for(int i=0;i<nxn;i++){for(int j=0;j<nyn;j++) for(int k=0;k<nzn;k++)
         { pYYsn[is][i][j][k] += invVOL*moments[i][j][k][7]; }}
-      #pragma omp critical (reduceMoment8)
+      //#pragma omp critical (reduceMoment8)
       for(int i=0;i<nxn;i++){for(int j=0;j<nyn;j++) for(int k=0;k<nzn;k++)
         { pYZsn[is][i][j][k] += invVOL*moments[i][j][k][8]; }}
-      #pragma omp critical (reduceMoment9)
+      //#pragma omp critical (reduceMoment9)
       for(int i=0;i<nxn;i++){for(int j=0;j<nyn;j++) for(int k=0;k<nzn;k++)
         { pZZsn[is][i][j][k] += invVOL*moments[i][j][k][9]; }}
     }
     timeTasks_end_task(TimeTasks::MOMENT_REDUCTION);
-    #pragma omp critical
+   // #pragma omp critical
     timeTasksAcc += timeTasks;
   }
   // reset timeTasks to be its average value for all threads
@@ -775,7 +775,7 @@ void SpeciesMoms::sumMoments_vec(const Particles3Dcomm& pcls)
   // code that gathers moments will work.
   const int ncells=nxc*nyc*nzc;
   double ****node_destined_moms;
-  #pragma omp single
+  //#pragma omp single
   {
     node_destined_moms = newArray4<double>(num_threads,10,ncells,8);
   }
@@ -816,7 +816,7 @@ void SpeciesMoms::sumMoments_vec(const Particles3Dcomm& pcls)
 	//#pragma simd // this should vectorize
         for(int i=0; i<numel;i++) arrptr[i]=0;
       }
-      #pragma omp for
+      //#pragma omp for
       for (int p0 = 0; p0 < nop; p0+=Np)
       {
         const double *u,*v,*w,*q;
@@ -973,7 +973,7 @@ void SpeciesMoms::sumMoments_vec(const Particles3Dcomm& pcls)
         // could add a check to verify that ghost node
         // moments are zero.
 	//
-        #pragma omp for
+        //#pragma omp for
         for(int it=0;it<num_threads;it++)
         for(int im=0;im<10;im++)
         for(int ix=1;ix<nxc;ix++)
@@ -1003,7 +1003,7 @@ void SpeciesMoms::sumMoments_vec(const Particles3Dcomm& pcls)
         // threads from writing to same node).
         //
           for(int it=0;it<num_threads;it++)
-          #pragma omp for
+          //#pragma omp for
           for(int im=0;im<10;im++)
           for(int cx=1;cx<nxc-1;cx++)
           for(int cy=1;cy<nyc-1;cy++)
@@ -1029,7 +1029,7 @@ void SpeciesMoms::sumMoments_vec(const Particles3Dcomm& pcls)
       // when we change to use asynchronous communication.
       // communicateGhostP2G(is, vct);
   }
-  #pragma omp master
+  //#pragma omp master
   { delArray4<double>(node_destined_moms); }
 }
 //
@@ -1069,7 +1069,7 @@ void SpeciesMoms::sumMoments(const Particles3Dcomm& pcls)
 
     const int nop = pcls.getNOP();
 
-    #pragma omp master
+    //#pragma omp master
     { timeTasks_begin_task(TimeTasks::MOMENT_ACCUMULATION); }
     int thread_num = omp_get_thread_num();
     Moments10& speciesMoments10 = fetch_moments10Array(thread_num);
@@ -1083,11 +1083,11 @@ void SpeciesMoms::sumMoments(const Particles3Dcomm& pcls)
     for(int i=0; i<moments1dsize; i++) moments1d[i]=0;
     //
     // This barrier is not needed
-    #pragma omp barrier
+    //#pragma omp barrier
     // The following loop is expensive, so it is wise to assume that the
     // compiler is stupid.  Therefore we should on the one hand
     // expand things out and on the other hand avoid repeating computations.
-    #pragma omp for // used nowait with the old way
+    //#pragma omp for // used nowait with the old way
     for (int i = 0; i < nop; i++)
     {
       // compute the quadratic moments of velocity
@@ -1174,11 +1174,11 @@ void SpeciesMoms::sumMoments(const Particles3Dcomm& pcls)
         }
       }
     }
-    #pragma omp master
+    //#pragma omp master
     { timeTasks_end_task(TimeTasks::MOMENT_ACCUMULATION); }
 
     // reduction
-    #pragma omp master
+    //#pragma omp master
     { timeTasks_begin_task(TimeTasks::MOMENT_REDUCTION); }
 
     // reduce moments in parallel
@@ -1186,7 +1186,7 @@ void SpeciesMoms::sumMoments(const Particles3Dcomm& pcls)
     for(int thread_num=0;thread_num<get_sizeMomentsArray();thread_num++)
     {
       arr4_double moments = fetch_moments10Array(thread_num).fetch_arr();
-      #pragma omp for collapse(1)
+      //#pragma omp for collapse(1)
       for(int i=0;i<nxn;i++)
       for(int j=0;j<nyn;j++)
       for(int k=0;k<nzn;k++)
@@ -1238,7 +1238,7 @@ void SpeciesMoms::sumMoments(const Particles3Dcomm& pcls)
     //  for(int i=0;i<nxn;i++){for(int j=0;j<nyn;j++) for(int k=0;k<nzn;k++)
     //    { pZZsn[is][i][j][k] += invVOL*moments[i][j][k][9]; }}
     //}
-    #pragma omp master
+    //#pragma omp master
     { timeTasks_end_task(TimeTasks::MOMENT_REDUCTION); }
   }
 }
@@ -1279,8 +1279,8 @@ void SpeciesMoms::sumMoments_AoS(const Particles3Dcomm& pcls)
     int moments1dsize = moments.get_size();
     for(int i=0; i<moments1dsize; i++) moments1d[i]=0;
     //
-    #pragma omp barrier
-    #pragma omp for
+    //#pragma omp barrier
+    //#pragma omp for
     for (int pidx = 0; pidx < nop; pidx++)
     {
       const SpeciesParticle& pcl = pcls.get_pcl(pidx);
@@ -1378,7 +1378,7 @@ void SpeciesMoms::sumMoments_AoS(const Particles3Dcomm& pcls)
     for(int thread_num=0;thread_num<get_sizeMomentsArray();thread_num++)
     {
       arr4_double moments = fetch_moments10Array(thread_num).fetch_arr();
-      #pragma omp for collapse(1)
+      //#pragma omp for collapse(1)
       for(int i=0;i<nxn;i++)
       for(int j=0;j<nyn;j++)
       for(int k=0;k<nzn;k++)
@@ -1510,12 +1510,12 @@ void SpeciesMoms::sumMoments_AoS_intr(const Particles3Dcomm& pcls)
   //
   const int num_threads = omp_get_max_threads();
   array4<F64vec8>* cell_moments_per_thr;
-  #pragma omp single
+  //#pragma omp single
   {
     cell_moments_per_thr
     = (array4<F64vec8>*) malloc(num_threads*sizeof(array4<F64vec8>));
   }
-  #pragma omp single //#pragma omp for // (is memory allocation thread-safe?)
+  //#pragma omp single //#pragma omp for // (is memory allocation thread-safe?)
   for(int thread_num=0;thread_num<num_threads;thread_num++)
   {
     // use placement new to allocate array to accumulate moments for thread
@@ -1526,14 +1526,14 @@ void SpeciesMoms::sumMoments_AoS_intr(const Particles3Dcomm& pcls)
   //
   array3<F64vec8>* node_moments_first8_per_thr;
   array4<double>* node_moments_last2_per_thr;
-  #pragma omp single
+  //#pragma omp single
   {
     node_moments_first8_per_thr
     = (array3<F64vec8>*) malloc(num_threads*sizeof(array3<F64vec8>));
     node_moments_last2_per_thr
     = (array4<double>*) malloc(num_threads*sizeof(array4<double>));
   }
-  #pragma omp single //#pragma omp for // (is memory allocation thread-safe?)
+  //#pragma omp single //#pragma omp for // (is memory allocation thread-safe?)
   for(int thread_num=0;thread_num<num_threads;thread_num++)
   {
     // use placement new to allocate array to accumulate moments for thread
@@ -1582,7 +1582,7 @@ void SpeciesMoms::sumMoments_AoS_intr(const Particles3Dcomm& pcls)
       // if the number of particles is odd, then make
       // sure that the data after the last particle
       // will not contribute to the moments.
-      #pragma omp single // the implied omp barrier is needed
+      //#pragma omp single // the implied omp barrier is needed
       {
         // make sure that we will not overrun the array
         assert_divides(num_pcls_per_loop,pcls.get_pcl_list().capacity());
@@ -1596,7 +1596,7 @@ void SpeciesMoms::sumMoments_AoS_intr(const Particles3Dcomm& pcls)
           pcl.set_to_zero();
         }
       }
-      #pragma omp for
+      //#pragma omp for
       for (int pidx = 0; pidx < nop; pidx+=2)
       {
         // cast particles as vectors
@@ -1662,7 +1662,7 @@ void SpeciesMoms::sumMoments_AoS_intr(const Particles3Dcomm& pcls)
 
         // distribute moments from cells to nodes
         //
-        #pragma omp for collapse(1)
+        //#pragma omp for collapse(1)
         for(int cx=1;cx<nxc;cx++)
         for(int cy=1;cy<nyc;cy++)
         for(int cz=1;cz<nzc;cz++)
@@ -1759,7 +1759,7 @@ void SpeciesMoms::sumMoments_AoS_intr(const Particles3Dcomm& pcls)
 
         // at each node add moments to moments of first thread
         //
-        #pragma omp for collapse(1)
+        //#pragma omp for collapse(1)
         for(int nx=1;nx<nxn;nx++)
         for(int ny=1;ny<nyn;ny++)
         {
@@ -1784,7 +1784,7 @@ void SpeciesMoms::sumMoments_AoS_intr(const Particles3Dcomm& pcls)
 
         // transpose moments for field solver
         //
-        #pragma omp for collapse(1)
+        //#pragma omp for collapse(1)
         for(int nx=1;nx<nxn;nx++)
         for(int ny=1;ny<nyn;ny++)
         {
@@ -1821,7 +1821,7 @@ void SpeciesMoms::sumMoments_AoS_intr(const Particles3Dcomm& pcls)
     }
   }
 
-  #pragma omp single
+  //#pragma omp single
   {
     // deallocate memory per mesh node for accumulating moments
     //

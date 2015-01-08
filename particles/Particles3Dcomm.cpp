@@ -305,7 +305,7 @@ Particles3Dcomm::Particles3Dcomm(
 //
 void Particles3Dcomm::pad_capacities()
 {
- #pragma omp single
+ //#pragma omp single
  {
   _pcls.reserve(roundup_to_multiple(_pcls.size(),DVECWIDTH));
   u.reserve(roundup_to_multiple(u.size(),DVECWIDTH));
@@ -321,7 +321,7 @@ void Particles3Dcomm::pad_capacities()
 
 void Particles3Dcomm::resize_AoS(int nop)
 {
- #pragma omp master
+ //#pragma omp master
  {
   const int padded_nop = roundup_to_multiple(nop,DVECWIDTH);
   _pcls.reserve(padded_nop);
@@ -331,7 +331,7 @@ void Particles3Dcomm::resize_AoS(int nop)
 
 void Particles3Dcomm::resize_SoA(int nop)
 {
- #pragma omp master
+ //#pragma omp master
  {
   //
   // allocate space for particles including padding
@@ -1743,7 +1743,7 @@ void Particles3Dcomm::copyParticlesToSoA()
   assert_eq(u.size(),_pcls.size());
   timeTasks_set_task(TimeTasks::TRANSPOSE_PCLS_TO_SOA);
  #ifndef __MIC__
-  #pragma omp for
+  //#pragma omp for
   for(int pidx=0; pidx<nop; pidx++)
   {
     const SpeciesParticle& pcl = _pcls[pidx];
@@ -1760,7 +1760,7 @@ void Particles3Dcomm::copyParticlesToSoA()
   // rather than doing stride-8 scatter,
   // copy and transpose data 8 particles at a time
   assert_divides(8,u.capacity());
-  #pragma omp for
+  //#pragma omp for
   for(int pidx=0; pidx<nop; pidx+=8)
   {
     F64vec8* SoAdata[8] = {
@@ -1799,7 +1799,7 @@ void Particles3Dcomm::copyParticlesToAoS()
   timeTasks_set_task(TimeTasks::TRANSPOSE_PCLS_TO_AOS);
  #ifndef __MIC__
   // use a simple stride-8 gather
-  #pragma omp for
+  //#pragma omp for
   for(int pidx=0; pidx<nop; pidx++)
   {
     _pcls[pidx].set(
@@ -1810,7 +1810,7 @@ void Particles3Dcomm::copyParticlesToAoS()
   // for efficiency, copy data 8 particles at a time,
   // transposing each block of particles
   assert_divides(8,_pcls.capacity());
-  #pragma omp for
+  //#pragma omp for
   for(int pidx=0; pidx<nop; pidx+=8)
   {
     F64vec8* AoSdata = reinterpret_cast<F64vec8*>(&_pcls[pidx]);

@@ -116,7 +116,7 @@ void MIsolver::accumulate_moments()
 
   if(I_am_kinetic_solver())
   {
-    #pragma omp parallel
+    //#pragma omp parallel 
     for (int is = 0; is < ns; is++)
     {
       Particles3Dcomm& pcls = kinetics->fetch_pcls(is);
@@ -1727,16 +1727,16 @@ void MIsolver::run()
   initialize();
   // shouldn't we call this?
   //WriteOutput(FirstCycle()-1);
-  MPI_Comm cluster; //This communicater should run on the cluster
-  deep_booster_alloc(MPI_COMM_WORLD, 1, 1, &cluster);
+  //MPI_Comm cluster; //This communicater should run on the cluster
+  //deep_booster_alloc(MPI_COMM_WORLD, 1, 1, &cluster);
 
-#pragma omp task device(mpi) onto(cluster,0) copy_deps
-    for(int i = FirstCycle(); i <= FinalCycle(); i++)
-    {
+//#pragma omp task device(mpi) onto(cluster,0) copy_deps
+  //  for(int i = FirstCycle(); i <= FinalCycle(); i++)
+    //{
 	    //timeTasks.print_cycle_times(i);
      //advance_Efield_Cluster();
      //advance_Bfield_Cluster();
-    }
+    //}
 
   //#pragma omp task device(mpi) //this for-loop should run on the booster (where we start)
   for (int i = FirstCycle(); i <= FinalCycle(); i++)
@@ -1760,7 +1760,7 @@ void MIsolver::run()
   	//advance_Bfield_Cluster();
   //}
   
-  #pragma omp taskwait
-  deep_booster_free(&cluster);
+  //#pragma omp taskwait
+  //deep_booster_free(&cluster);
   Finalize();
 }

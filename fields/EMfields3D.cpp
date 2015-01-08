@@ -761,7 +761,7 @@ void EMfields3D::fixBforcefree()
 void EMfields3D::set_fieldForPcls(array4_double& fieldForPcls)
 {
   //EMf->set_fieldForPcls(fetch_fieldForPcls());
-  #pragma omp parallel for collapse(1)
+  //#pragma omp parallel for collapse(1)
   for(int i=0;i<nxn;i++)
   for(int j=0;j<nyn;j++)
   for(int k=0;k<nzn;k++)

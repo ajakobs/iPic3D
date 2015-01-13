@@ -200,13 +200,13 @@ void MIsolver::send_field_to_kinetic_solver()
 void MIsolver::advance_Efield_Cluster() 
 {
   timeTasks_set_main_task(TimeTasks::FIELDS);
-  if(I_am_field_solver())
-  {
-    EMf->calculateRhoHat(get_miMoments());
+  //if(I_am_field_solver())
+  //{
+    //EMf->calculateRhoHat(get_miMoments());
     // advance the E field
-    EMf->calculateE(get_miMoments());
-  }
-  send_field_to_kinetic_solver();
+    //EMf->calculateE(get_miMoments());
+  
+  //send_field_to_kinetic_solver();
   //synch between cluster and booster
 }
 
@@ -1727,16 +1727,17 @@ void MIsolver::run()
   initialize();
   // shouldn't we call this?
   //WriteOutput(FirstCycle()-1);
-  //MPI_Comm cluster; //This communicater should run on the cluster
-  //deep_booster_alloc(MPI_COMM_WORLD, 1, 1, &cluster);
+  MPI_Comm cluster; //This communicater should run on the cluster
+  deep_booster_alloc(MPI_COMM_WORLD, 1, 4, &cluster);
 
-//#pragma omp task device(mpi) onto(cluster,0) copy_deps
-  //  for(int i = FirstCycle(); i <= FinalCycle(); i++)
-    //{
-	    //timeTasks.print_cycle_times(i);
-     //advance_Efield_Cluster();
-     //advance_Bfield_Cluster();
-    //}
+#pragma omp task device(mpi) onto(cluster,vct->get_rank()) copy_deps
+    {
+    int rank;
+    MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+    printf("********** In offload with rank %d\n",rank );
+    //advance_Efield_Cluster();
+    //advance_Bfield_Cluster();
+    }
 
   //#pragma omp task device(mpi) //this for-loop should run on the booster (where we start)
   for (int i = FirstCycle(); i <= FinalCycle(); i++)
@@ -1760,7 +1761,7 @@ void MIsolver::run()
   	//advance_Bfield_Cluster();
   //}
   
-  //#pragma omp taskwait
-  //deep_booster_free(&cluster);
+  #pragma omp taskwait
+  deep_booster_free(&cluster);
   Finalize();
 }

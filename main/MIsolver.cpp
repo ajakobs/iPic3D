@@ -200,12 +200,9 @@ void MIsolver::send_field_to_kinetic_solver()
 void MIsolver::advance_Efield_Cluster() 
 {
   timeTasks_set_main_task(TimeTasks::FIELDS);
-  //if(I_am_field_solver())
-  //{
     //EMf->calculateRhoHat(get_miMoments());
-    // advance the E field
+    //advance the E field
     //EMf->calculateE(get_miMoments());
-  
   //send_field_to_kinetic_solver();
   //synch between cluster and booster
 }
@@ -1722,7 +1719,11 @@ void MIsolver::Finalize() {
 // * smoothing requires exchange of boundary data.
 // * computing Jhat requires exchange of boundary data.
 //
-void MIsolver::run()
+//
+//changed to run(argc,argv) because when serializing EMf an instance of Setting is needed, which needs the input
+//parameters
+//
+void MIsolver::run(int argc, const char **argv)
 {
   initialize();
   // shouldn't we call this?
@@ -1730,12 +1731,18 @@ void MIsolver::run()
   MPI_Comm cluster; //This communicater should run on the cluster
   deep_booster_alloc(MPI_COMM_WORLD, 1, 4, &cluster);
 
+  std::stringstream stream;
+  stream << "Test";
+  EMf->serializeEMf(stream);
+  //Collective coloffload = new Collective(argc, argv);
+
 #pragma omp task device(mpi) onto(cluster,vct->get_rank()) copy_deps
     {
+    //EMf = new EMfields3D();
     int rank;
     MPI_Comm_rank(MPI_COMM_WORLD, &rank);
     printf("********** In offload with rank %d\n",rank );
-    //advance_Efield_Cluster();
+    advance_Efield_Cluster();
     //advance_Bfield_Cluster();
     }
 
@@ -1761,7 +1768,7 @@ void MIsolver::run()
   	//advance_Bfield_Cluster();
   //}
   
-  #pragma omp taskwait
+#pragma omp taskwait
   deep_booster_free(&cluster);
   Finalize();
 }

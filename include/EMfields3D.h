@@ -9,6 +9,9 @@
 #include "ipic_fwd.h"
 #include "Alloc.h"
 #include "Setting.h"
+#include <iostream>
+
+
 class const_vector_arr3_double;
 class MImoments;
 struct injInfoFields;
@@ -23,6 +26,9 @@ class EMfields3D
 
     /*! initialize the electromagnetic fields with constant values */
     //virtual void init();
+
+//SERIALIZATION NEEDED FOR OMPSS OFFLOAD    
+    void serializeEMf(std::ostream &stream);
 
     /*! init beam */
     void initBEAM(double x_center, double y_center, double z_center, double radius);

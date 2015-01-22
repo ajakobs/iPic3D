@@ -14,7 +14,7 @@ int main(int argc, const char **argv) {
  Parameters::init_parameters();
  {
  iPic3D::c_Solver solver(argc, argv);
- solver.run();
+ solver.run(argc,argv);
  }
  MPIdata::instance().finalize_mpi();
 

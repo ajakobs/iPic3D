@@ -194,6 +194,14 @@ EMfields3D::EMfields3D(const Setting& setting_)
   injFieldsRear   = new injInfoFields(nxn, nyn, nzn);
 }
 
+//SERIALIZATION NEEDED FOR OMPSS OFFLOAD    
+void EMfields3D::serializeEMf(std::ostream &stream){
+	stream << nxn << nyn << nzn;
+	stream.flush();
+}
+
+
+
 // === end of initialization_and_cleanup ===
 
 // === Section: field_solver_routines ===

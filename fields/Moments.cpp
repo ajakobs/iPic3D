@@ -35,6 +35,27 @@ MImoments::MImoments(const Setting& setting_)
 {
 }
 
+// serialization for OmpSs offload
+void serializeMoments(void* buffer, int& currOffset)
+{
+	
+}
+
+int MImoments::getSerializeSize()const
+{
+	int totalsize=sizeof(nxn);
+	totalsize+=sizeof(nyn);
+	totalsize+=sizeof(nzn);
+	totalsize+=sizeof(ns);
+	return totalsize;
+}
+void copyIntoBuffer(size_t &currOffset, void* buffer, void* data, size_t size)
+{
+
+
+}
+
+
 void MImoments::compute_from_speciesMoms(const SpeciesMoms& speciesMoms,
   const_arr3_double Bx,
   const_arr3_double By,

@@ -33,8 +33,15 @@ class MImoments
     const_arr3_double get_Jyh()const{return Jyh;}
     const_arr3_double get_Jzh()const{return Jzh;}
 
+    // serialization for OmpSs offload
+    void serializeMoments(void* buffer, int& currOffset);
+    int getSerializeSize()const;
+    void copyIntoBuffer(size_t &currOffset, void* buffer, void* data, size_t size); 
+
+
   public:
     MImoments(const Setting& setting_);
+    MImoments();
     void compute_from_speciesMoms(const SpeciesMoms& speciesMoms,
       const_arr3_double Bx, const_arr3_double By, const_arr3_double Bz);
   public:

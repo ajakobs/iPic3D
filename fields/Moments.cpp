@@ -36,9 +36,25 @@ MImoments::MImoments(const Setting& setting_)
 }
 
 // serialization for OmpSs offload
-void serializeMoments(void* buffer, int& currOffset)
+void MImoments::serializeMoments(void* buffer)const
 {
-	
+/*	size_t off=0;
+	copyIntoBuffer(off, buffer, (void*) nxn,sizeof(nxn));
+	copyIntoBuffer(off, buffer, (void*) nyn,sizeof(nyn));
+	copyIntoBuffer(off, buffer, (void*) nzn,sizeof(nzn));
+	copyIntoBuffer(off, buffer, (void*) ns,sizeof(ns));
+	for(int i=0;i<nxn;i++)
+		for(int j=0;j<nyn;j++)
+		{
+			copyIntoBuffer(off, buffer, Jxh[i][j], sizeof(double)*nzn);
+			copyIntoBuffer(off, buffer, (void*) Jyh[i][j], sizeof(double)*nzn);
+			copyIntoBuffer(off, buffer, (void*) Jzh[i][j], sizeof(double)*nzn);
+			for(int k=0;k<nzn;k++)
+				copyIntoBuffer(off, buffer, (void*) rhons[i][j][k], sizeof(double)*ns);
+		}*/
+	//double test = rhons[1][1][1][1];
+
+	      
 }
 
 int MImoments::getSerializeSize()const
@@ -47,11 +63,16 @@ int MImoments::getSerializeSize()const
 	totalsize+=sizeof(nyn);
 	totalsize+=sizeof(nzn);
 	totalsize+=sizeof(ns);
+	totalsize+=sizeof(double)*ns*nxn*nyn*nzn; //rhons
+	totalsize+=sizeof(double)*nxn*nyn*nzn; //Jxh
+	totalsize+=sizeof(double)*nxn*nyn*nzn; //Jyh
+	totalsize+=sizeof(double)*nxn*nyn*nzn; //Jzh
 	return totalsize;
 }
-void copyIntoBuffer(size_t &currOffset, void* buffer, void* data, size_t size)
+void MImoments::copyIntoBuffer(size_t &currOffset, void* buffer, void* data, size_t size)
 {
-
+       memcpy((void*) (buffer+currOffset), data, size );
+       currOffset+=size;
 
 }
 

@@ -1731,35 +1731,40 @@ void MIsolver::run(int argc, const char **argv)
   MPI_Comm cluster; //This communicater should run on the cluster
   deep_booster_alloc(MPI_COMM_WORLD, 1, 4, &cluster);
 
+//offloading argc and argv for testing
+
   char *buff = new char[100];
   int offset=0, argsize=0;
   memcpy(buff, argv[0],strlen(argv[0]));
   offset=strlen(argv[0]);
   memcpy((void*)(buff+offset), argv[1],strlen(argv[1]));
-  //EMf->serializeEMf();
   argsize=strlen(argv[0])+strlen(argv[1]);
   int arglen[3] = {strlen(argv[0]),strlen(argv[1]),0};
 
-  int i = (get_miMoments()).getSerializeSize();
-  printf("(get_miMoments()).getSerializeSize() = %d\n",i);
+//serialize miMoments, needed for calculateRhoHat in advance_Efield_Cluster() 
+
+  int sizeMoments = (get_miMoments()).getSerializeSize();
+  printf("(get_miMoments()).getSerializeSize() = %d\n",sizeMoments);
+  char *buffMoments = new char[sizeMoments];
+  (get_miMoments()).serializeMoments(buffMoments);
 
 
-#pragma omp task device(mpi) onto(cluster,vct->get_rank()) in(argc, buff[0;argsize], arglen[0;2]) copy_deps
+#pragma omp task device(mpi) onto(cluster,vct->get_rank()) in(argc, buff[0;argsize], arglen[0;2], buffMoments[0;sizeMoments]) copy_deps
     {
-    //EMf = new EMfields3D();
-
+    
     char **argv=new char*[argc];
     argv[0] = new char[arglen[0]];
     argv[1] = new char[arglen[1]];
     memcpy(argv[0],buff,arglen[0]);
     memcpy(argv[1],buff+arglen[0],arglen[1]); 
-     
-    printf("+++++++++++++++++++++ argc = %d, arglen = {%d , %d}, argv = {%s , %s}\n",argc,arglen[0],arglen[1],argv[0],argv[1]);
-    //Collective col2((int)argc,(const char **)argv);
     
-    int rank;
-    MPI_Comm_rank(MPI_COMM_WORLD, &rank);
-    printf("********** In offload with rank %d\n",rank );
+    //printf("argc = %d, arglen = {%d , %d}, argv = {%s , %s}\n",argc,arglen[0],arglen[1],argv[0],argv[1]);
+    
+    // no default constructor available yet... look in code from Florentino, perhaps working with struct
+    //
+    //MImoments moments = new MImoments();
+    //moments->deserializeMoments(buffMoments);
+    
     //advance_Efield_Cluster();
     //advance_Bfield_Cluster();
     }

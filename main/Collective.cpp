@@ -628,7 +628,8 @@ int Collective::ReadRestart(string inputfile) {
 /*! constructor */
 Collective::Collective(int argc, const char **argv) {
   if (argc < 2) {
-    inputfile = "inputfile";
+    //inputfile = "inputfile";
+    inputfile = "./data/parameters.inp";
     RESTART1 = false;
   }
   else if (argc < 3) {

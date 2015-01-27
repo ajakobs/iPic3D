@@ -425,6 +425,7 @@ void EMfields3D::calculateRhoHat(const MImoments& miMoments)
       rhon[i][j][k] += rhons[is][i][j][k];
     // calculate densities on centers from nodes
     get_grid().interpN2C(rhoc, rhon);
+
   }
 
   if(Parameters::use_original_smoothing())
@@ -443,6 +444,105 @@ void EMfields3D::calculateRhoHat(const MImoments& miMoments)
   communicateCenterBC_P(nxc, nyc, nzc, rhoh, BCs, &get_vct());
 }
 
+void EMfields3D::calculateRhoHat(const_vector_arr3_double rhons, const_arr3_double Jxh, const_arr3_double Jyh, const_arr3_double Jzh, const double Smooth, double dx, double dy, double dz)
+{
+  // sum charge density over species and interpolate to cell centers
+  //   // (also needed for Poisson solve)
+  {
+    array3_double rhon(nxn,nyn,nzn);
+    rhon.setall(0.);
+    for (int is = 0; is < ns; is++)
+      for (register int i = 0; i < nxn; i++)
+        for (register int j = 0; j < nyn; j++)
+          for (register int k = 0; k < nzn; k++)
+            rhon[i][j][k] += rhons[is][i][j][k];
+    // calculate densities on centers from nodes
+    //get_grid().interpN2C(rhoc, rhon);
+    for (register int i = 1; i < nxc - 1; i++)
+      for (register int j = 1; j < nyc - 1; j++)
+        for (register int k = 1; k < nzc - 1; k++)
+          rhoc[i][j][k] = .125 * (rhon[i][j][k] + rhon[i + 1][j][k] + rhon[i][j + 1][k] + rhon[i][j][k + 1] + rhon[i + 1][j + 1][k] + rhon[i + 1][j][k + 1] + rhon[i][j + 1][k + 1] + rhon[i + 1][j + 1][k + 1]);
+
+  }
+
+  if(Parameters::use_original_smoothing())
+  // otherwise rhon is already smoothed
+  {
+    //get_grid().smooth(rhoc, 0);
+    int type=0;
+    int BCs[6];
+    double value = Smooth;
+    // default BCs use 2 for every component
+    for(int i=0;i<6;i++) BCs[i]=2;
+    int nvolte = 6;
+    for (int icount = 1; icount < nvolte + 1; icount++){
+      if (value != 1.0) {
+        double alpha;
+        const int nx = rhoc.dim1();
+        const int ny = rhoc.dim2();
+        const int nz = rhoc.dim3();
+        switch (type) {
+          default:
+            unsupported_value_error(type);
+          case (0): // cell-centered
+            assert_eq(nxn-1,nx);
+            assert_eq(nyn-1,ny);
+            assert_eq(nzn-1,nz);
+            break;
+          case (1): // node array
+            assert_eq(nxn,nx);
+            assert_eq(nyn,ny);
+            assert_eq(nzn,nz);
+            break;
+        }
+        communicateNodeBoxStencilBC_P(nx,ny,nz, rhoc,BCs, &get_vct());
+        double ***temp = newArr3(double, nx, ny, nz);
+        if (icount % 2 == 1) {
+          value = 0.;
+        }
+        else {
+          value = 0.5;
+        }
+        alpha = (1.0 - value) / 6;
+        for (int i = 1; i < nx - 1; i++)
+          for (int j = 1; j < ny - 1; j++)
+            for (int k = 1; k < nz - 1; k++){
+              temp[i][j][k] = value * rhoc[i][j][k] + alpha * (rhoc[i - 1][j][k] + rhoc[i + 1][j][k] + rhoc[i][j - 1][k] + rhoc[i][j + 1][k] + rhoc[i][j][k - 1] + rhoc[i][j][k + 1]);
+            }
+        for (int i = 1; i < nx - 1; i++)
+          for (int j = 1; j < ny - 1; j++)
+            for (int k = 1; k < nz - 1; k++){
+              rhoc[i][j][k] = temp[i][j][k];
+            }
+        delArr3(temp, nx, ny);
+      }
+    }
+  }
+  
+  // calculate rho hat = rho - (dt*theta)div(jhat)
+  //get_grid().divN2C(tempXC, Jxh, Jyh, Jzh); tempXC=divC, Jxh=vecFieldXN, Jyh=vecFieldYN, Jzh=vecFieldZN
+  double compX;
+  double compY;
+  double compZ;
+  double invdx=1.0/dx;
+  double invdy=1.0/dy;
+  double invdz=1.0/dz;
+  for (register int i = 1; i < nxn - 2; i++)
+    for (register int j = 1; j < nyn - 2; j++)
+      for (register int k = 1; k < nzn - 2; k++) {
+        compX = .25 * (Jxh[i + 1][j][k] - Jxh[i][j][k]) * invdx + .25 * (Jxh[i + 1][j][k + 1] - Jxh[i][j][k + 1]) * invdx + .25 * (Jxh[i + 1][j + 1][k] - Jxh[i][j + 1][k]) * invdx + .25 * (Jxh[i + 1][j + 1][k + 1] - Jxh[i][j + 1][k + 1]) * invdx;
+        compY = .25 * (Jyh[i][j + 1][k] - Jyh[i][j][k]) * invdy + .25 * (Jyh[i][j + 1][k + 1] - Jyh[i][j][k + 1]) * invdy + .25 * (Jyh[i + 1][j + 1][k] - Jyh[i + 1][j][k]) * invdy + .25 * (Jyh[i + 1][j + 1][k + 1] - Jyh[i + 1][j][k + 1]) * invdy;
+        compZ = .25 * (Jzh[i][j][k + 1] - Jzh[i][j][k]) * invdz + .25 * (Jzh[i + 1][j][k + 1] - Jzh[i + 1][j][k]) * invdz + .25 * (Jzh[i][j + 1][k + 1] - Jzh[i][j + 1][k]) * invdz + .25 * (Jzh[i + 1][j + 1][k + 1] - Jzh[i + 1][j + 1][k]) * invdz;
+        tempXC[i][j][k] = compX + compY + compZ;
+      }
+  scale(tempXC, -dt * th, nxc, nyc, nzc);
+  sum(tempXC, rhoc, nxc, nyc, nzc);
+  eq(rhoh, tempXC, nxc, nyc, nzc);
+  // communicate rhoh
+  const int BCs[6] = {2,2,2,2,2,2};
+  communicateCenterBC_P(nxc, nyc, nzc, rhoh, BCs, &get_vct());
+}
+  
 /*! Calculate source term for Maxwell solver */
 void EMfields3D::MaxwellSource(double *bkrylov, const MImoments& miMoments)
 {

@@ -34,9 +34,9 @@ class MImoments
     const_arr3_double get_Jzh()const{return Jzh;}
 
   public:  // serialization for OmpSs offload
-    void serializeMoments(void* buffer)const;
-    void deserializeMoments(void* buffer)const;
-    int getSerializeSize()const;
+    void serializeMoments(void* buffer);
+    void deserializeMoments(void* buffer);
+    int getSerializeSize();
     void copyIntoBuffer(size_t &currOffset, void* buffer, void* data, size_t size); 
 
 //probably default constructor needed

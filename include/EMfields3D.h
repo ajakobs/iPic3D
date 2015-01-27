@@ -56,6 +56,7 @@ class EMfields3D
       const MImoments& miMoments);
     // rhohat := rho - theta*dt*div(Jhat)
     void calculateRhoHat(const MImoments& miMoments);
+    void calculateRhoHat(const_vector_arr3_double rhons, const_arr3_double Jxh, const_arr3_double Jyh, const_arr3_double Jzh, const double Smooth, double dx, double dy, double dz);
     /*! Maxwell source term (for SOLVER) */
     void MaxwellSource(double *bkrylov, const MImoments& miMoments);
     /*! Impose a constant charge inside a spherical zone of the domain */

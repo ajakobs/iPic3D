@@ -46,21 +46,21 @@ int main(int argc, const char **argv) {
    Parameters::init_parameters();
    
    MIsolver::MIsolver solver(1,NULL);
-   solver.run(1,NULL);
+   solver.run_Cluster();
   }
 
 
 //part which runs on Booster
 
- {
- iPic3D::c_Solver solver(argc, argv);
- solver.run(argc,argv);
- }
- MPIdata::instance().finalize_mpi();
+  {
+    iPic3D::c_Solver solver(argc, argv);
+    solver.run(argc,argv);
+  }
+  MPIdata::instance().finalize_mpi();
 
 #pragma omp taskwait
-// deep_booster_free(&cluster);
- return 0;
+  deep_booster_free(&cluster);
+  return 0;
 }
 
 void c_Solver::set_initial_conditions()

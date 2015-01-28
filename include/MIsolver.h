@@ -57,6 +57,7 @@ namespace iPic3D
     ~MIsolver();
     MIsolver(int argc, const char **argv);
     void run(int argc, const char **argv);
+    void run_Cluster();
   protected:
     // virtual so inheriting application can override
     virtual void set_initial_conditions();

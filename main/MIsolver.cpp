@@ -1736,7 +1736,7 @@ void MIsolver::run(int argc, const char **argv)
       printf(" ======= Cycle %d ======= \n",i);
 
     timeTasks.resetCycle();
-    advance_Efield_Cluster();
+    //advance_Efield_Cluster();
     move_particles();
     advance_Bfield();
     compute_moments();
@@ -1745,4 +1745,13 @@ void MIsolver::run(int argc, const char **argv)
     timeTasks.print_cycle_times(i);
   }
   Finalize();
+}
+
+void MIsolver::run_Cluster(){
+  initialize();
+  for (int i = FirstCycle(); i <= FinalCycle(); i++){
+    if (is_rank0())
+      printf(" ======= Cycle %d ======= \n",i);
+    advance_Efield_Cluster();
+  }
 }

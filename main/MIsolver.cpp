@@ -200,7 +200,7 @@ void MIsolver::send_field_to_kinetic_solver()
 void MIsolver::advance_Efield_Cluster() 
 {
   timeTasks_set_main_task(TimeTasks::FIELDS);
-  EMf->calculateRhoHat(get_miMoments().get_rhons(),get_miMoments().get_Jxh(), get_miMoments().get_Jyh(), get_miMoments().get_Jzh(), col->getSmooth(), col->getDx(), col->getDy(), col->getDz());
+  EMf->calculateRhoHat(get_miMoments());
   //advance the E field
   EMf->calculateE(get_miMoments());
   
@@ -1729,56 +1729,7 @@ void MIsolver::run(int argc, const char **argv)
   initialize();
   // shouldn't we call this?
   //WriteOutput(FirstCycle()-1);
-  MPI_Comm cluster; //This communicater should run on the cluster
-  deep_booster_alloc(MPI_COMM_WORLD, 1, 4, &cluster);
 
-//offloading argc and argv for testing
-
-  char *buff = new char[100];
-  int offset=0, argsize=0;
-  memcpy(buff, argv[0],strlen(argv[0]));
-  offset=strlen(argv[0]);
-  memcpy((void*)(buff+offset), argv[1],strlen(argv[1]));
-  argsize=strlen(argv[0])+strlen(argv[1]);
-  int arglen[3] = {strlen(argv[0]),strlen(argv[1]),0};
-
-//serialize miMoments, needed for calculateRhoHat in advance_Efield_Cluster() 
-  //MImoments mo(get_miMoments());
-  //int sizeMoments = mo.getSerializeSize();
-  //printf("(get_miMoments()).getSerializeSize() = %d\n",sizeMoments);
-  //char *buffMoments = new char[sizeMoments];
-  //mo.serializeMoments((void*)buffMoments);
-
-
-//#pragma omp task device(mpi) onto(cluster,vct->get_rank()) in(argc, buff[0;argsize], arglen[0;2], buffMoments[0;sizeMoments]) copy_deps
-  #pragma omp task device(mpi) onto(cluster,vct->get_rank()) in(argc, buff[0;argsize],arglen[0;1]) copy_deps
-  {
-    
-    char **argv=new char*[argc];
-    argv[0] = new char[arglen[0]];
-    argv[1] = new char[arglen[1]];
-    memcpy(argv[0],buff,arglen[0]);
-    memcpy(argv[1],buff+arglen[0],arglen[1]); 
-    
-    printf("argc = %d, arglen = {%d , %d}, argv = {%s , %s}\n",argc,arglen[0],arglen[1],argv[0],argv[1]);
-    MPIdata::init(&argc, NULL);
-    Parameters::init_parameters();
-    Setting set(1,NULL);
-    MImoments mo(set);
-    EMfields3D tmpEMf(set);
-    timeTasks_set_main_task(TimeTasks::FIELDS);
-    (&tmpEMf)->calculateRhoHat(mo);
-    //tmpEMf->calculateE(mo);
-    // no default constructor available yet... look in code from Florentino, perhaps working with struct
-    //
-    //MImoments moments = new MImoments();
-    //moments->deserializeMoments(buffMoments);
-    
-    //advance_Efield_Cluster();
-    //advance_Bfield_Cluster();
-  }
-
-  //#pragma omp task device(mpi) //this for-loop should run on the booster (where we start)
   for (int i = FirstCycle(); i <= FinalCycle(); i++)
   {
     if (is_rank0())
@@ -1793,13 +1744,5 @@ void MIsolver::run(int argc, const char **argv)
     // print out total time for all tasks
     timeTasks.print_cycle_times(i);
   }
-  //#pragma omp task device(mpi) onto(cluster,vct->get_rank()) copy_deps
-  //for(int i = FirstCycle(); i <= FinalCycle(); i++)
-  //{
-  	//advance_Efield_Cluster();
-  	//advance_Bfield_Cluster();
-  //}
-#pragma omp taskwait
-  deep_booster_free(&cluster);
   Finalize();
 }

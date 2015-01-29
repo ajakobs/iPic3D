@@ -192,9 +192,9 @@ void MIsolver::compute_moments()
 // on the Booster should be minor compared to 
 // the reduction in communication expense.
 //
-void MIsolver::send_field_to_kinetic_solver()
+void MIsolver::send_field_to_kinetic_solver(bool sender)
 {
-  EMf->set_fieldForPcls(*fieldForPcls);
+  EMf->set_fieldForPcls(*fieldForPcls,sender);
 }
 //! MAXWELL SOLVER for Efield
 void MIsolver::advance_Efield_Cluster() 
@@ -204,12 +204,13 @@ void MIsolver::advance_Efield_Cluster()
   //advance the E field
   EMf->calculateE(get_miMoments());
   
-  send_field_to_kinetic_solver();
+  send_field_to_kinetic_solver(true);
   //synch between cluster and booster
 }
 
 void MIsolver::advance_Efield_Booster(){
   //synch between cluster and booster
+  send_field_to_kinetic_solver(false);
 }
 
 //! update Bfield (assuming Eth has already been calculated)
@@ -1736,7 +1737,7 @@ void MIsolver::run(int argc, const char **argv)
       printf(" ======= Cycle %d ======= \n",i);
 
     timeTasks.resetCycle();
-    //advance_Efield_Cluster();
+    advance_Efield_Booster();
     move_particles();
     advance_Bfield();
     compute_moments();

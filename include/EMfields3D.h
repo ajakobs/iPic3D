@@ -86,7 +86,7 @@ class EMfields3D
       const_vector_arr3_double rhons);
 
     /*! copy the field data to the array used to move the particles */
-    void set_fieldForPcls(array4_double& fieldForPcls);
+    void set_fieldForPcls(array4_double& fieldForPcls, bool sender);
 
     /*! Perfect conductor boundary conditions LEFT wall */
     void perfectConductorLeft(

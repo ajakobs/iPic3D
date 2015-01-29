@@ -96,7 +96,7 @@ namespace iPic3D
     void Finalize();
 
   private:
-    void send_field_to_kinetic_solver();
+    void send_field_to_kinetic_solver(bool sender);
     void set_fieldForPcls();
     int FirstCycle();
     int FinalCycle();

@@ -858,21 +858,40 @@ void EMfields3D::fixBforcefree()
   }
 }
 
-void EMfields3D::set_fieldForPcls(array4_double& fieldForPcls)
+void EMfields3D::set_fieldForPcls(array4_double& fieldForPcls, bool sender)
 {
   //EMf->set_fieldForPcls(fetch_fieldForPcls());
   //#pragma omp parallel for collapse(1)
-  for(int i=0;i<nxn;i++)
-  for(int j=0;j<nyn;j++)
-  for(int k=0;k<nzn;k++)
-  {
-    fieldForPcls[i][j][k][0] = Bx_smooth[i][j][k];
-    fieldForPcls[i][j][k][1] = By_smooth[i][j][k];
-    fieldForPcls[i][j][k][2] = Bz_smooth[i][j][k];
-    fieldForPcls[i][j][k][0+DFIELD_3or4] = Ex_smooth[i][j][k];
-    fieldForPcls[i][j][k][1+DFIELD_3or4] = Ey_smooth[i][j][k];
-    fieldForPcls[i][j][k][2+DFIELD_3or4] = Ez_smooth[i][j][k];
+  double *fieldInfo;
+  fieldInfo=(double*)malloc(sizeof(double)*nxn*nyn*nzn*6);
+  int rank;
+  MPI_Comm_rank(MPI_COMM_WORLD,&rank);
+  if(sender){
+    for(int i=0;i<nxn;i++)
+      for(int j=0;j<nyn;j++)
+        for(int k=0;k<nzn;k++)
+        {
+          fieldForPcls[i][j][k][0] = Bx_smooth[i][j][k];
+          fieldForPcls[i][j][k][1] = By_smooth[i][j][k];
+          fieldForPcls[i][j][k][2] = Bz_smooth[i][j][k];
+          fieldForPcls[i][j][k][0+DFIELD_3or4] = Ex_smooth[i][j][k];
+          fieldForPcls[i][j][k][1+DFIELD_3or4] = Ey_smooth[i][j][k];
+          fieldForPcls[i][j][k][2+DFIELD_3or4] = Ez_smooth[i][j][k];
+          fieldInfo[i*nyn+j*nzn+k*6+0] = fieldForPcls[i][j][k][0];
+          fieldInfo[i*nyn+j*nzn+k*6+1] = fieldForPcls[i][j][k][1];
+          fieldInfo[i*nyn+j*nzn+k*6+2] = fieldForPcls[i][j][k][2];
+          fieldInfo[i*nyn+j*nzn+k*6+3] = fieldForPcls[i][j][k][0+DFIELD_3or4];
+          fieldInfo[i*nyn+j*nzn+k*6+4] = fieldForPcls[i][j][k][1+DFIELD_3or4];
+          fieldInfo[i*nyn+j*nzn+k*6+5] = fieldForPcls[i][j][k][2+DFIELD_3or4];
+        }
+    MPI_Comm parent;
+    MPI_Comm_get_parent(&parent);
+    MPI_Send(fieldInfo,nxn*nyn*nzn*6, MPI_DOUBLE, rank, 77, parent);
   }
+  else{
+    MPI_Status stat;
+    MPI_Recv(fieldInfo,nxn*nyn*nzn*6, MPI_DOUBLE, rank, 77, MPI_COMM_WORLD, &stat);
+  }    
 }
 
 

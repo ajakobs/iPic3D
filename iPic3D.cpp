@@ -4,6 +4,7 @@
 #include "Parameters.h"
 #include "debug.h"
 #include "TimeTasks.h"
+#include "arg_serializer.h"
 #include <stdio.h>
 
 using namespace iPic3D;
@@ -18,30 +19,22 @@ int main(int argc, const char **argv) {
   MPI_Comm cluster; //The communicater for the offload to the cluster
   deep_booster_alloc(MPI_COMM_WORLD, 1, 4, &cluster);
 
-  //serialising argc and argv
-    
-   char *buff = new char[100];
-   int offset=0, argsize=0;
-   memcpy(buff, argv[0],strlen(argv[0]));
-   offset=strlen(argv[0]);
-   memcpy((void*)(buff+offset), argv[1],strlen(argv[1]));
-   argsize=strlen(argv[0])+strlen(argv[1]);
-   int arglen[3] = {strlen(argv[0]),strlen(argv[1]),0};
+  /* Serialise argc and argv */
+  char *argv_ser = arg_serializer(argc, argv);
+  int argv_ser_len = strlen(argv_ser);
 
-   int rank;
-   MPI_Comm_rank(MPI_COMM_WORLD,&rank);
+  int rank;
+  MPI_Comm_rank(MPI_COMM_WORLD,&rank);
 
 
-#pragma omp task device(mpi) onto(cluster,rank) in(argc, buff[0;argsize],arglen[0;1]) copy_deps
+#pragma omp task device(mpi) onto(cluster,rank) in(argv_ser[0;argv_ser_len+1]) copy_deps
   {
-   //deserialize argc and argv
-   char **argv=new char*[argc];
-   argv[0] = new char[arglen[0]];
-   argv[1] = new char[arglen[1]];
-   memcpy(argv[0],buff,arglen[0]);
-   memcpy(argv[1],buff+arglen[0],arglen[1]);
-   printf("argc = %d, arglen = {%d , %d}, argv = {%s , %s}\n",argc,arglen[0],arglen[1],argv[0],argv[1]);
+   /* Deserialize argc and argv */
+   char **argv =  NULL;
+   int argc = 0;
+   arg_deserializer(argv_ser, &argc, &argv);
 
+   /* Why NULL? */
    MPIdata::init(&argc, NULL);
    Parameters::init_parameters();
    

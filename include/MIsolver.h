@@ -56,7 +56,7 @@ namespace iPic3D
   public:
     ~MIsolver();
     MIsolver(int argc, const char **argv);
-    void run(int argc, const char **argv);
+    void run_Booster(MPI_Comm clustercomm);
     void run_Cluster();
   protected:
     // virtual so inheriting application can override
@@ -80,7 +80,7 @@ namespace iPic3D
     void accumulate_moments();
     void compute_moments();
     void advance_Efield_Cluster();
-    void advance_Efield_Booster();
+    void advance_Efield_Booster(MPI_Comm clustercomm);
     void move_particles();
     void advance_Bfield();
     //
@@ -96,8 +96,8 @@ namespace iPic3D
     void Finalize();
 
   private:
-    void send_field_to_kinetic_solver(bool sender);
-    void set_fieldForPcls();
+    void send_field_to_kinetic_solver(bool sender, MPI_Comm *clustercomm);
+    void set_fieldForPcls(MPI_Comm clustercomm);
     int FirstCycle();
     int FinalCycle();
     bool is_rank0();

@@ -192,9 +192,9 @@ void MIsolver::compute_moments()
 // on the Booster should be minor compared to 
 // the reduction in communication expense.
 //
-void MIsolver::send_field_to_kinetic_solver(bool sender)
+void MIsolver::send_field_to_kinetic_solver(bool sender,MPI_Comm *clustercomm)
 {
-  EMf->set_fieldForPcls(*fieldForPcls,sender);
+  EMf->set_fieldForPcls(*fieldForPcls,sender,clustercomm);
 }
 //! MAXWELL SOLVER for Efield
 void MIsolver::advance_Efield_Cluster() 
@@ -203,14 +203,16 @@ void MIsolver::advance_Efield_Cluster()
   EMf->calculateRhoHat(get_miMoments());
   //advance the E field
   EMf->calculateE(get_miMoments());
-  
-  send_field_to_kinetic_solver(true);
+ 
+ // functions expects a MPI_Comm as second parameter, but is not needed on the offload part,
+ // it uses MPI_Comm_get_parent, so use NULL here
+  send_field_to_kinetic_solver(true,NULL);
   //synch between cluster and booster
 }
 
-void MIsolver::advance_Efield_Booster(){
-  //synch between cluster and booster
-  send_field_to_kinetic_solver(false);
+void MIsolver::advance_Efield_Booster(MPI_Comm clustercomm){
+  //synch from booster to cluster
+  send_field_to_kinetic_solver(false,&clustercomm);
 }
 
 //! update Bfield (assuming Eth has already been calculated)
@@ -1721,11 +1723,10 @@ void MIsolver::Finalize() {
 // * smoothing requires exchange of boundary data.
 // * computing Jhat requires exchange of boundary data.
 //
+// MPI_Comm clustercomm needs to be forwarded for communication
+// between cluster and booster
 //
-//changed to run(argc,argv) because when serializing EMf an instance of Setting is needed, which needs the input
-//parameters
-//
-void MIsolver::run(int argc, const char **argv)
+void MIsolver::run_Booster(MPI_Comm cluster)
 {
   initialize();
   // shouldn't we call this?
@@ -1737,7 +1738,7 @@ void MIsolver::run(int argc, const char **argv)
       printf(" ======= Cycle %d ======= \n",i);
 
     timeTasks.resetCycle();
-    advance_Efield_Booster();
+    advance_Efield_Booster(cluster);
     move_particles();
     advance_Bfield();
     compute_moments();

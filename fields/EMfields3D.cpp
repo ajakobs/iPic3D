@@ -858,7 +858,8 @@ void EMfields3D::fixBforcefree()
   }
 }
 
-void EMfields3D::set_fieldForPcls(array4_double& fieldForPcls, bool sender)
+//the MPI_Comm is needed for the processes on the host to receive the data
+void EMfields3D::set_fieldForPcls(array4_double& fieldForPcls, bool sender, MPI_Comm *clustercomm)
 {
   //EMf->set_fieldForPcls(fetch_fieldForPcls());
   //#pragma omp parallel for collapse(1)
@@ -890,7 +891,7 @@ void EMfields3D::set_fieldForPcls(array4_double& fieldForPcls, bool sender)
   }
   else{
     MPI_Status stat;
-    MPI_Recv(fieldInfo,nxn*nyn*nzn*6, MPI_DOUBLE, rank, 77, MPI_COMM_WORLD, &stat);
+    MPI_Recv(fieldInfo,nxn*nyn*nzn*6, MPI_DOUBLE, rank, 77, *clustercomm, &stat);
     for(int i=0;i<nxn;i++)
       for(int j=0;j<nyn;j++)
         for(int k=0;k<nzn;k++)

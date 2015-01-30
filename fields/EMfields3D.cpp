@@ -891,6 +891,17 @@ void EMfields3D::set_fieldForPcls(array4_double& fieldForPcls, bool sender)
   else{
     MPI_Status stat;
     MPI_Recv(fieldInfo,nxn*nyn*nzn*6, MPI_DOUBLE, rank, 77, MPI_COMM_WORLD, &stat);
+    for(int i=0;i<nxn;i++)
+      for(int j=0;j<nyn;j++)
+        for(int k=0;k<nzn;k++)
+        {
+		fieldForPcls[i][j][k][0] = fieldInfo[i*nyn+j*nzn+k*6+0];
+		fieldForPcls[i][j][k][1] = fieldInfo[i*nyn+j*nzn+k*6+1];
+		fieldForPcls[i][j][k][2] = fieldInfo[i*nyn+j*nzn+k*6+2];
+		fieldForPcls[i][j][k][0+DFIELD_3or4] = fieldInfo[i*nyn+j*nzn+k*6+3];
+		fieldForPcls[i][j][k][1+DFIELD_3or4] = fieldInfo[i*nyn+j*nzn+k*6+4];
+		fieldForPcls[i][j][k][2+DFIELD_3or4] = fieldInfo[i*nyn+j*nzn+k*6+5];
+	}
   }    
 }
 

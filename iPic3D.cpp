@@ -52,10 +52,11 @@ int main(int argc, const char **argv) {
    MPI_Comm parent;
    MPI_Comm_get_parent(&parent);
    MPI_Comm_rank(parent, &parentRank);
-   MPI_Comm_size(parent,&parentSize);
-   //test+=parentRank;  
+   MPI_Comm_size(parent,&parentSize);     
    //printf("My rank in the communicator parent: %d\n",parentRank);
-   //MPI_Send(&test, 1, MPI_INT, parentRank, 77, parent);
+   //MPI_Status stat;
+   //MPI_Recv(&test, 1, MPI_INT, parentRank, 77, parent,&stat);
+   // printf("I (rank %d) on Cluster (in offload) receive %d \n",rank,test);  
    MIsolver::MIsolver solver(1,NULL);
    solver.run_Cluster();
   }
@@ -64,11 +65,10 @@ int main(int argc, const char **argv) {
 //part which runs on Booster
 
   {
+    //int tmp=10+rank;
+    //MPI_Send(&tmp, 1, MPI_INT, newRank, 77, cluster);
+    //printf("I (rank %d) on Booster sent %d \n",rank,tmp);  
     iPic3D::c_Solver solver(argc, argv);
-    //int tmp;
-    //MPI_Status stat;
-    //MPI_Recv(&tmp, 1, MPI_INT, newRank, 77, cluster, &stat);
-    //printf("I (rank %d) receive %d \n",rank,tmp);  
     solver.run(argc,argv);
   }
   MPIdata::instance().finalize_mpi();

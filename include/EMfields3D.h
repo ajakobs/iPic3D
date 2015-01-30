@@ -87,6 +87,7 @@ class EMfields3D
 
     /*! copy the field data to the array used to move the particles */
     void set_fieldForPcls(array4_double& fieldForPcls, bool sender, MPI_Comm *clustercomm);
+    void set_fieldForMoments(bool sender, MPI_Comm *clustercomm);
 
     /*! Perfect conductor boundary conditions LEFT wall */
     void perfectConductorLeft(

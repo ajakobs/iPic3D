@@ -906,7 +906,41 @@ void EMfields3D::set_fieldForPcls(array4_double& fieldForPcls, bool sender, MPI_
   }    
 }
 
-
+/*void EMfields3D::set_fieldForMoments(bool sender, MPI_Comm *clustercomm){
+  double *momentsBuf;
+  momentsBuf=(double*)malloc(sizeof(double)*(ns*nxn*nyn*nzn+nxn*nyn*nzn*3));
+  int rank;
+  MPI_Comm_rank(MPI_COMM_WORLD,&rank);
+  if(sender){
+    for(int i=0;i<nxn;i++)
+      for(int j=0;j<nyn;j++)
+        for(int k=0;k<nzn;k++){
+          momentsBuf[i*nyn+j*nzn+k*(3+ns)+0]=Jxh[i][j][k];
+          momentsBuf[i*nyn+j*nzn+k*(3+ns)+1]=Jyh[i][j][k];
+          momentsBuf[i*nyn+j*nzn+k*(3+ns)+2]=Jzh[i][j][k];
+          for(int l=0;l<ns;l++){
+            momentsBuf[i*nyn+j*nzn+k*(3+ns)+3+l]=rhons[l][i][j][k];
+          }
+        }
+    MPI_Send(momentsBuf,ns*nxn*nyn*nzn+nxn*nyn*nzn*3, MPI_DOUBLE, rank, 77, *clustercomm);
+  }
+  else{
+    MPI_Status stat;
+    MPI_Comm parent;
+    MPI_Comm_get_parent(&parent);
+    MPI_Recv(momentsBuf,ns*nxn*nyn*nzn+nxn*nyn*nzn*3, MPI_DOUBLE, rank, 77, parent, &stat);
+    for(int i=0;i<nxn;i++)
+      for(int j=0;j<nyn;j++)
+        for(int k=0;k<nzn;k++){
+          Jxh[i][j][k]=momentsBuf[i*nyn+j*nzn+k*(3+ns)+0];
+          Jyh[i][j][k]=momentsBuf[i*nyn+j*nzn+k*(3+ns)+1];
+          Jzh[i][j][k]=momentsBuf[i*nyn+j*nzn+k*(3+ns)+2];
+          for(int l=0;l<ns;l++){
+            rhons[l][i][j][k]=momentsBuf[i*nyn+j*nzn+k*(3+ns)+3+l];
+          }
+        }
+  }
+}*/
 // update B_tot and B_smooth based on Bn and B_ext
 //
 void EMfields3D::update_total_B()

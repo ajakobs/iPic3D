@@ -43,6 +43,7 @@ class MImoments
   public:
     MImoments(const Setting& setting_);
 
+    void set_fieldForMoments(bool sender, MPI_Comm *clustercomm);
     void compute_from_speciesMoms(const SpeciesMoms& speciesMoms,
       const_arr3_double Bx, const_arr3_double By, const_arr3_double Bz);
   public:

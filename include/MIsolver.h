@@ -62,7 +62,7 @@ namespace iPic3D
     // virtual so inheriting application can override
     virtual void set_initial_conditions();
     void initialize_output();
-    void initialize();
+    void initialize(MPI_Comm clustercomm);
     void init_kinetics_from_restart();
     void init_fields_from_restart();
     void init_from_restart();
@@ -78,7 +78,8 @@ namespace iPic3D
     void initForceFree();
   protected:
     void accumulate_moments();
-    void compute_moments();
+    void compute_moments_Booster(MPI_Comm clustercomm);
+    void compute_moments_Cluster();
     void advance_Efield_Cluster();
     void advance_Efield_Booster(MPI_Comm clustercomm);
     void move_particles();
@@ -97,6 +98,7 @@ namespace iPic3D
 
   private:
     void send_field_to_kinetic_solver(bool sender, MPI_Comm *clustercomm);
+    void send_moments_to_field_solver(bool sender,MPI_Comm *clustercomm);
     void set_fieldForPcls(MPI_Comm clustercomm);
     int FirstCycle();
     int FinalCycle();

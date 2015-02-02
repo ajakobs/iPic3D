@@ -136,39 +136,6 @@ void MIsolver::accumulate_moments()
   }
 }
 void MIsolver::send_moments_to_field_solver(bool sender,MPI_Comm *clustercomm){
-  /*double *momentsBuf;
-  momentsBuf=(double*)malloc(sizeof(double)*(ns*nxn*nyn*nzn+nxn*nyn*nzn*3));
-  int rank;
-  MPI_Comm_rank(MPI_COMM_WORLD,&rank);
-  if(sender){
-    for(int i=0;i<nxn;i++)
-      for(int j=0;j<nyn;j++)
-        for(int k=0;k<nzn;k++){
-          momentsBuf[i*nyn+j*nzn+k*(3+ns)+0]=Jxh[i][j][k];
-          momentsBuf[i*nyn+j*nzn+k*(3+ns)+1]=Jyh[i][j][k];
-          momentsBuf[i*nyn+j*nzn+k*(3+ns)+2]=Jzh[i][j][k];
-          for(int l=0;l<ns;l++){
-            momentsBuf[i*nyn+j*nzn+k*(3+ns)+3+l]=rhons[l][i][j][k];
-          }
-        }
-    MPI_Send(momentsBuf,ns*nxn*nyn*nzn+nxn*nyn*nzn*3, MPI_DOUBLE, rank, 77, clustercomm); 
-  }
-  else{
-    MPI_Status stat;
-    MPI_Comm parent;
-    MPI_Comm_get_parent(&parent);
-    MPI_Recv(momentsBuf,ns*nxn*nyn*nzn+nxn*nyn*nzn*3, MPI_DOUBLE, rank, 77, parent, &stat);
-    for(int i=0;i<nxn;i++)
-      for(int j=0;j<nyn;j++)
-        for(int k=0;k<nzn;k++){
-          Jxh[i][j][k]=momentsBuf[i*nyn+j*nzn+k*(3+ns)+0];
-          Jyh[i][j][k]=momentsBuf[i*nyn+j*nzn+k*(3+ns)+1];
-          Jzh[i][j][k]=momentsBuf[i*nyn+j*nzn+k*(3+ns)+2];
-          for(int l=0;l<ns;l++){
-            rhons[l][i][j][k]=momentsBuf[i*nyn+j*nzn+k*(3+ns)+3+l];
-          }
-        }
-  }*/
   miMoments->set_fieldForMoments(sender, clustercomm);
 }
 
@@ -283,6 +250,7 @@ void MIsolver::move_particles()
   if(I_am_kinetic_solver())
   {
     //[...receive field from fieldsolver...]
+    //getting particles from Cluster already done in advance_Efield
     kinetics->moveParticles(get_fieldForPcls());
   }
 }
@@ -1779,9 +1747,10 @@ void MIsolver::run_Booster(MPI_Comm clustercomm)
   //WriteOutput(FirstCycle()-1);
 
   for (int i = FirstCycle(); i <= FinalCycle(); i++)
+//  for (int i = FirstCycle(); i <= 3; i++)
   {
     if (is_rank0())
-      printf(" ======= Cycle %d ======= \n",i);
+      printf(" ======= Cycle %d on Booster ======= \n",i);
 
     timeTasks.resetCycle();
     advance_Efield_Booster(clustercomm);
@@ -1798,8 +1767,9 @@ void MIsolver::run_Booster(MPI_Comm clustercomm)
 void MIsolver::run_Cluster(){
   initialize(MPI_COMM_NULL);
   for (int i = FirstCycle(); i <= FinalCycle(); i++){
-    if (is_rank0())
-      printf(" ======= Cycle %d ======= \n",i);
+//  for (int i = FirstCycle(); i <= 3; i++){ 
+  if (is_rank0())
+      printf(" ======= Cycle %d on Cluster ======= \n",i);
     advance_Efield_Cluster();
     compute_moments_Cluster();
   }

@@ -50,6 +50,8 @@ int main(int argc, const char **argv) {
  
    MIsolver::MIsolver solver(argc,(const char **)argv);
    solver.run_Cluster();
+   //trying to call finalize_mpi here leads to the application hanging after "simulation ended succesfully"
+   //MPIdata::instance().finalize_mpi();
   }
 
 
@@ -59,9 +61,9 @@ int main(int argc, const char **argv) {
     iPic3D::c_Solver solver(argc, argv);
     solver.run_Booster(clustercomm);
   }
-  MPIdata::instance().finalize_mpi();
 
-#pragma omp taskwait
+#pragma omp taskwait 
+  MPIdata::instance().finalize_mpi();
   deep_booster_free(&clustercomm);
   return 0;
 }

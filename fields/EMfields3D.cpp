@@ -867,23 +867,36 @@ void EMfields3D::set_fieldForPcls(array4_double& fieldForPcls, bool sender, MPI_
   fieldInfo=(double*)malloc(sizeof(double)*nxn*nyn*nzn*6);
   int rank;
   MPI_Comm_rank(MPI_COMM_WORLD,&rank);
+  int count=0;
   if(sender){
     for(int i=0;i<nxn;i++)
       for(int j=0;j<nyn;j++)
         for(int k=0;k<nzn;k++)
         {
-          fieldForPcls[i][j][k][0] = Bx_smooth[i][j][k];
+/*          fieldForPcls[i][j][k][0] = Bx_smooth[i][j][k];
           fieldForPcls[i][j][k][1] = By_smooth[i][j][k];
           fieldForPcls[i][j][k][2] = Bz_smooth[i][j][k];
           fieldForPcls[i][j][k][0+DFIELD_3or4] = Ex_smooth[i][j][k];
           fieldForPcls[i][j][k][1+DFIELD_3or4] = Ey_smooth[i][j][k];
-          fieldForPcls[i][j][k][2+DFIELD_3or4] = Ez_smooth[i][j][k];
-          fieldInfo[i*nyn+j*nzn+k*6+0] = fieldForPcls[i][j][k][0];
+          fieldForPcls[i][j][k][2+DFIELD_3or4] = Ez_smooth[i][j][k];*/
+/*          fieldInfo[i*nyn+j*nzn+k*6+0] = fieldForPcls[i][j][k][0];
           fieldInfo[i*nyn+j*nzn+k*6+1] = fieldForPcls[i][j][k][1];
           fieldInfo[i*nyn+j*nzn+k*6+2] = fieldForPcls[i][j][k][2];
           fieldInfo[i*nyn+j*nzn+k*6+3] = fieldForPcls[i][j][k][0+DFIELD_3or4];
           fieldInfo[i*nyn+j*nzn+k*6+4] = fieldForPcls[i][j][k][1+DFIELD_3or4];
-          fieldInfo[i*nyn+j*nzn+k*6+5] = fieldForPcls[i][j][k][2+DFIELD_3or4];
+          fieldInfo[i*nyn+j*nzn+k*6+5] = fieldForPcls[i][j][k][2+DFIELD_3or4];*/
+/*	  fieldInfo[count++] = fieldForPcls[i][j][k][0];
+	  fieldInfo[count++] = fieldForPcls[i][j][k][1];
+	  fieldInfo[count++] = fieldForPcls[i][j][k][2];
+	  fieldInfo[count++] = fieldForPcls[i][j][k][0+DFIELD_3or4];
+	  fieldInfo[count++] = fieldForPcls[i][j][k][1+DFIELD_3or4];
+	  fieldInfo[count++] = fieldForPcls[i][j][k][2+DFIELD_3or4];*/
+	  fieldInfo[count++] = Bx_smooth[i][j][k];
+	  fieldInfo[count++] = By_smooth[i][j][k];
+	  fieldInfo[count++] = Bz_smooth[i][j][k];
+	  fieldInfo[count++] = Ex_smooth[i][j][k];
+	  fieldInfo[count++] = Ey_smooth[i][j][k];
+	  fieldInfo[count++] = Ez_smooth[i][j][k];
         }
     MPI_Comm parent;
     MPI_Comm_get_parent(&parent);
@@ -896,51 +909,22 @@ void EMfields3D::set_fieldForPcls(array4_double& fieldForPcls, bool sender, MPI_
       for(int j=0;j<nyn;j++)
         for(int k=0;k<nzn;k++)
         {
-		fieldForPcls[i][j][k][0] = fieldInfo[i*nyn+j*nzn+k*6+0];
+/*		fieldForPcls[i][j][k][0] = fieldInfo[i*nyn+j*nzn+k*6+0];
 		fieldForPcls[i][j][k][1] = fieldInfo[i*nyn+j*nzn+k*6+1];
 		fieldForPcls[i][j][k][2] = fieldInfo[i*nyn+j*nzn+k*6+2];
 		fieldForPcls[i][j][k][0+DFIELD_3or4] = fieldInfo[i*nyn+j*nzn+k*6+3];
 		fieldForPcls[i][j][k][1+DFIELD_3or4] = fieldInfo[i*nyn+j*nzn+k*6+4];
-		fieldForPcls[i][j][k][2+DFIELD_3or4] = fieldInfo[i*nyn+j*nzn+k*6+5];
+		fieldForPcls[i][j][k][2+DFIELD_3or4] = fieldInfo[i*nyn+j*nzn+k*6+5];*/
+		fieldForPcls[i][j][k][0] = fieldInfo[count++];
+		fieldForPcls[i][j][k][1] = fieldInfo[count++];
+		fieldForPcls[i][j][k][2] = fieldInfo[count++];
+		fieldForPcls[i][j][k][0+DFIELD_3or4] = fieldInfo[count++];
+		fieldForPcls[i][j][k][1+DFIELD_3or4] = fieldInfo[count++];
+		fieldForPcls[i][j][k][2+DFIELD_3or4] = fieldInfo[count++];
 	}
   }    
 }
 
-/*void EMfields3D::set_fieldForMoments(bool sender, MPI_Comm *clustercomm){
-  double *momentsBuf;
-  momentsBuf=(double*)malloc(sizeof(double)*(ns*nxn*nyn*nzn+nxn*nyn*nzn*3));
-  int rank;
-  MPI_Comm_rank(MPI_COMM_WORLD,&rank);
-  if(sender){
-    for(int i=0;i<nxn;i++)
-      for(int j=0;j<nyn;j++)
-        for(int k=0;k<nzn;k++){
-          momentsBuf[i*nyn+j*nzn+k*(3+ns)+0]=Jxh[i][j][k];
-          momentsBuf[i*nyn+j*nzn+k*(3+ns)+1]=Jyh[i][j][k];
-          momentsBuf[i*nyn+j*nzn+k*(3+ns)+2]=Jzh[i][j][k];
-          for(int l=0;l<ns;l++){
-            momentsBuf[i*nyn+j*nzn+k*(3+ns)+3+l]=rhons[l][i][j][k];
-          }
-        }
-    MPI_Send(momentsBuf,ns*nxn*nyn*nzn+nxn*nyn*nzn*3, MPI_DOUBLE, rank, 77, *clustercomm);
-  }
-  else{
-    MPI_Status stat;
-    MPI_Comm parent;
-    MPI_Comm_get_parent(&parent);
-    MPI_Recv(momentsBuf,ns*nxn*nyn*nzn+nxn*nyn*nzn*3, MPI_DOUBLE, rank, 77, parent, &stat);
-    for(int i=0;i<nxn;i++)
-      for(int j=0;j<nyn;j++)
-        for(int k=0;k<nzn;k++){
-          Jxh[i][j][k]=momentsBuf[i*nyn+j*nzn+k*(3+ns)+0];
-          Jyh[i][j][k]=momentsBuf[i*nyn+j*nzn+k*(3+ns)+1];
-          Jzh[i][j][k]=momentsBuf[i*nyn+j*nzn+k*(3+ns)+2];
-          for(int l=0;l<ns;l++){
-            rhons[l][i][j][k]=momentsBuf[i*nyn+j*nzn+k*(3+ns)+3+l];
-          }
-        }
-  }
-}*/
 // update B_tot and B_smooth based on Bn and B_ext
 //
 void EMfields3D::update_total_B()

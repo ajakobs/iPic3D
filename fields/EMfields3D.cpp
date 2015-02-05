@@ -925,6 +925,39 @@ void EMfields3D::set_fieldForPcls(array4_double& fieldForPcls, bool sender, MPI_
   }    
 }
 
+void EMfields3D::set_Bsmooth(bool sender, MPI_Comm *clustercomm)
+{
+  double *buffer;
+  buffer=(double*)malloc(sizeof(double)*nxn*nyn*nzn*3);
+  int rank;
+  MPI_Comm_rank(MPI_COMM_WORLD,&rank);
+  int count=0;
+  if(sender){
+     for(int i=0;i<nxn;i++)
+       for(int j=0;j<nyn;j++)
+         for(int k=0;k<nzn;k++)
+         {
+	buffer[count++] = Bx_smooth[i][j][k]; 
+        buffer[count++] = By_smooth[i][j][k];
+        buffer[count++] = Bz_smooth[i][j][k];
+	}
+     MPI_Comm parent;
+     MPI_Comm_get_parent(&parent);
+     MPI_Send(buffer,nxn*nyn*nzn*3, MPI_DOUBLE, rank, 77, parent);
+  }
+  else{
+     MPI_Status stat;
+     MPI_Recv(buffer,nxn*nyn*nzn*3, MPI_DOUBLE, rank, 77, *clustercomm, &stat);
+     for(int i=0;i<nxn;i++)
+       for(int j=0;j<nyn;j++)
+         for(int k=0;k<nzn;k++){
+         Bx_smooth[i][j][k] = buffer[count++]; 
+         By_smooth[i][j][k] = buffer[count++];
+         Bz_smooth[i][j][k] = buffer[count++];
+         }    
+  }
+}     
+
 // update B_tot and B_smooth based on Bn and B_ext
 //
 void EMfields3D::update_total_B()

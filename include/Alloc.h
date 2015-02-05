@@ -3,9 +3,9 @@
 #include <cstddef> // for alignment stuff
 #include "asserts.h" // for assert_le, assert_lt
 #include "arraysfwd.h"
-//#ifndef __INTEL_COMPILER
+#ifndef __INTEL_COMPILER
   #include <mm_malloc.h>
-//#endif
+#endif
 //#include "arrays.h" // fixed-dimension arrays
 
 /*

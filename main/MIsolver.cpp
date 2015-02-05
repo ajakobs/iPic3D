@@ -225,24 +225,35 @@ void MIsolver::advance_Efield_Booster(MPI_Comm clustercomm){
   send_field_to_kinetic_solver(false,&clustercomm);
 }
 
+
+
+void MIsolver::send_Bsmooth_to_kinetic_solver(bool sender, MPI_Comm *clustercomm){
+   EMf->set_Bsmooth(sender, clustercomm);     
+}
+
 //! update Bfield (assuming Eth has already been calculated)
 //  B^{n+1} = B^n - curl(Eth)
-void MIsolver::advance_Bfield()
+void MIsolver::advance_Bfield_Cluster()
 {
   timeTasks_set_main_task(TimeTasks::FIELDS);
   timeTasks_set_task(TimeTasks::BFIELD); // subtask
   // calculate the B field
   EMf->advanceB();
 
-  if(I_am_field_solver())
-  {
-    // begin sending of B_smooth to kinetic solver
-    //send_Bsmooth_to_kinetic_solver(
+  // send B_smooth to kinetic solver
+  send_Bsmooth_to_kinetic_solver(true, NULL);
     //  EMf->fetch_Bx_smooth(),
     //  EMf->fetch_By_smooth(),
     //  EMf->fetch_Bz_smooth());
-  }
 }
+
+//receive Bfield from Cluster where it was updated
+void MIsolver::advance_Bfield_Booster(MPI_Comm clustercomm)
+{
+//receive B_smooth from field solver
+    send_Bsmooth_to_kinetic_solver(false, &clustercomm);
+}
+
 
 // this method should be a no-op on the cluster
 void MIsolver::move_particles()
@@ -1755,7 +1766,7 @@ void MIsolver::run_Booster(MPI_Comm clustercomm)
     timeTasks.resetCycle();
     advance_Efield_Booster(clustercomm);
     move_particles();
-    advance_Bfield();
+    advance_Bfield_Booster(clustercomm);
     compute_moments_Booster(clustercomm);
     WriteOutput(i);
     // print out total time for all tasks
@@ -1771,6 +1782,7 @@ void MIsolver::run_Cluster(){
   if (is_rank0())
       printf(" ======= Cycle %d on Cluster ======= \n",i);
     advance_Efield_Cluster();
+    advance_Bfield_Cluster();
     compute_moments_Cluster();
   }
 }

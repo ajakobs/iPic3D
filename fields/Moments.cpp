@@ -563,10 +563,10 @@ void SpeciesMoms::accumulateMoments(const int is, Particles3Dcomm& pcls)
         pcls.convertParticlesToAoS();
         sumMoments_AoS(pcls);
         break;
-      case Parameters::AoSintr:
-        pcls.convertParticlesToAoS();
-        sumMoments_AoS_intr(pcls);
-        break;
+      //case Parameters::AoSintr:
+        //pcls.convertParticlesToAoS();
+        //sumMoments_AoS_intr(pcls);
+        //break;
       default:
         unsupported_value_error(Parameters::get_MOMENTS_TYPE());
     }
@@ -1455,42 +1455,42 @@ void SpeciesMoms::sumMoments_AoS(const Particles3Dcomm& pcls)
   }
 }
 
-#ifdef __MIC__
+//#ifdef __MIC__
 // add moment weights to all ten moments for the cell of the particle
 // (assumes that particle data is aligned with cache boundary and
 // begins with the velocity components)
-inline void addto_cell_moments(
-  F64vec8* cell_moments,
-  F64vec8 weights,
-  F64vec8 vel)
-{
+//inline void addto_cell_moments(
+  //F64vec8* cell_moments,
+  //F64vec8 weights,
+  //F64vec8 vel)
+//{
   // broadcast particle velocities
-  const F64vec8 u = F64vec8(vel[0]);
-  const F64vec8 v = F64vec8(vel[1]);
-  const F64vec8 w = F64vec8(vel[2]);
+  //const F64vec8 u = F64vec8(vel[0]);
+  //const F64vec8 v = F64vec8(vel[1]);
+  //const F64vec8 w = F64vec8(vel[2]);
   // construct kronecker product of moments and weights
-  const F64vec8 u_weights = u*weights;
-  const F64vec8 v_weights = v*weights;
-  const F64vec8 w_weights = w*weights;
-  const F64vec8 uu_weights = u*u_weights;
-  const F64vec8 uv_weights = u*v_weights;
-  const F64vec8 uw_weights = u*w_weights;
-  const F64vec8 vv_weights = v*v_weights;
-  const F64vec8 vw_weights = v*w_weights;
-  const F64vec8 ww_weights = w*w_weights;
+  //const F64vec8 u_weights = u*weights;
+  //const F64vec8 v_weights = v*weights;
+  //const F64vec8 w_weights = w*weights;
+  //const F64vec8 uu_weights = u*u_weights;
+  //const F64vec8 uv_weights = u*v_weights;
+  //const F64vec8 uw_weights = u*w_weights;
+  //const F64vec8 vv_weights = v*v_weights;
+  //const F64vec8 vw_weights = v*w_weights;
+  //const F64vec8 ww_weights = w*w_weights;
   // add moment weights to accumulated moment weights in mesh mesh
-  cell_moments[0] += weights;
-  cell_moments[1] += u_weights;
-  cell_moments[2] += v_weights;
-  cell_moments[3] += w_weights;
-  cell_moments[4] += uu_weights;
-  cell_moments[5] += uv_weights;
-  cell_moments[6] += uw_weights;
-  cell_moments[7] += vv_weights;
-  cell_moments[8] += vw_weights;
-  cell_moments[9] += ww_weights;
-}
-#endif // __MIC__
+  //cell_moments[0] += weights;
+  //cell_moments[1] += u_weights;
+  //cell_moments[2] += v_weights;
+  //cell_moments[3] += w_weights;
+  //cell_moments[4] += uu_weights;
+  //cell_moments[5] += uv_weights;
+  //cell_moments[6] += uw_weights;
+  //cell_moments[7] += vv_weights;
+  //cell_moments[8] += vw_weights;
+  //cell_moments[9] += ww_weights;
+//}
+//#endif // __MIC__
 
 // sum moments of AoS using MIC intrinsics
 // 
@@ -1525,7 +1525,7 @@ inline void addto_cell_moments(
 //
 // See notes at the top of sumMoments().
 //
-void SpeciesMoms::sumMoments_AoS_intr(const Particles3Dcomm& pcls)
+/*void SpeciesMoms::sumMoments_AoS_intr(const Particles3Dcomm& pcls)
 {
 #ifndef __MIC__
   eprintf("not implemented");
@@ -1900,7 +1900,7 @@ void SpeciesMoms::sumMoments_AoS_intr(const Particles3Dcomm& pcls)
     free(cell_moments_per_thr);
   }
 #endif // __MIC__
-}
+}*/
 
 inline void compute_moments(double velmoments[10], double weights[8],
   int i,

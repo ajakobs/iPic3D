@@ -1,7 +1,7 @@
 #ifndef mic_particles_h
 #define mic_particles_h
 #include "debug.h"
-#if defined(__MIC__)
+/*#if defined(__MIC__)
   #include "mic_basics.h"
   #include "arraysfwd.h"
 
@@ -94,7 +94,7 @@
   inline F64vec8 compute_uvg_for_2pcls(F64vec8 uorig, F64vec8 B, F64vec8 E, F64vec8 qdto2mc)
   {
     /* F64vec8::aaaa() etc is (defectively) not declared const */
-    /*const*/ F64vec8 Om = qdto2mc*B;
+    /*const*/ /*F64vec8 Om = qdto2mc*B;
     const F64vec8 Omx = Om.aaaa();
     const F64vec8 Omy = Om.bbbb();
     const F64vec8 Omz = Om.cccc();
@@ -105,7 +105,7 @@
     // is there a faster way to implement the reciprocal?
     const F64vec8 denom = reciprocal_F64vec8(omsq_p1);
     // solve the position equation
-    /*const*/ F64vec8 ut = uorig + qdto2mc*E;
+    /*const*/ /*F64vec8 ut = uorig + qdto2mc*E;
     const F64vec8 udotOm =
         ut.aaaa()*Omx
       + ut.bbbb()*Omy
@@ -207,5 +207,5 @@
     }
   }
 
-#endif
+#endif*/
 #endif

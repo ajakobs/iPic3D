@@ -6,7 +6,7 @@
 #include "TimeTasks.h"
 #include "arg_serializer.h"
 #include <stdio.h>
-
+#include <omp.h>
 using namespace iPic3D;
 
 int main(int argc, const char **argv) {
@@ -42,6 +42,7 @@ int main(int argc, const char **argv) {
 
    MPIdata::init(&argc, (const char **)argv);
    Parameters::init_parameters();
+   omp_set_num_threads(1);
    int parentSize, parentRank, test=5;
    MPI_Comm parent;
    MPI_Comm_get_parent(&parent);

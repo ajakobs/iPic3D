@@ -1742,7 +1742,7 @@ void Particles3Dcomm::copyParticlesToSoA()
   resize_SoA(nop);
   assert_eq(u.size(),_pcls.size());
   timeTasks_set_task(TimeTasks::TRANSPOSE_PCLS_TO_SOA);
- #ifndef __MIC__
+ //#ifndef __MIC__
   //#pragma omp for
   for(int pidx=0; pidx<nop; pidx++)
   {
@@ -1756,10 +1756,10 @@ void Particles3Dcomm::copyParticlesToSoA()
     z[pidx] = pcl.get_z();
     t[pidx] = pcl.get_t();
   }
- #else // __MIC__
+ //#else // __MIC__
   // rather than doing stride-8 scatter,
   // copy and transpose data 8 particles at a time
-  assert_divides(8,u.capacity());
+  /*assert_divides(8,u.capacity());
   //#pragma omp for
   for(int pidx=0; pidx<nop; pidx+=8)
   {
@@ -1785,7 +1785,7 @@ void Particles3Dcomm::copyParticlesToSoA()
     //  (F64vec8*) &_pcls[pidx+7]};
     transpose_8x8_double(SoAdata,AoSdata);
   }
- #endif // __MIC__
+ #endif // __MIC__*/
   particleType = ParticleType::synched;
 }
 
@@ -1797,7 +1797,7 @@ void Particles3Dcomm::copyParticlesToAoS()
   resize_AoS(nop);
   assert_eq(u.size(),_pcls.size());
   timeTasks_set_task(TimeTasks::TRANSPOSE_PCLS_TO_AOS);
- #ifndef __MIC__
+ //#ifndef __MIC__
   // use a simple stride-8 gather
   //#pragma omp for
   for(int pidx=0; pidx<nop; pidx++)
@@ -1806,7 +1806,7 @@ void Particles3Dcomm::copyParticlesToAoS()
       u[pidx],v[pidx],w[pidx], q[pidx],
       x[pidx],y[pidx],z[pidx], t[pidx]);
   }
- #else // __MIC__
+ /*#else // __MIC__
   // for efficiency, copy data 8 particles at a time,
   // transposing each block of particles
   assert_divides(8,_pcls.capacity());
@@ -1825,7 +1825,7 @@ void Particles3Dcomm::copyParticlesToAoS()
       (F64vec8*) &t[pidx]};
     transpose_8x8_double(AoSdata, SoAdata);
   }
- #endif
+ #endif*/
   particleType = ParticleType::synched;
 }
 

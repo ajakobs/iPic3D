@@ -9,7 +9,7 @@
 //     http://software.intel.com/en-us/node/462716
 // * AVX-512 intrinsics (for KNL):
 //     http://software.intel.com/en-us/node/485150
-
+/*
 #if defined(__MIC__)
   #include <micvec.h>
   #define printexpr(var) std::cout << "line " << __LINE__ << ": " \
@@ -495,7 +495,7 @@
 
   // methods to transpose consecutive data in place
 
-  inline void transpose_8x8_double_new(double in_[8][8])
+  /*inline void transpose_8x8_double_new(double in_[8][8])
   {
     ASSUME_ALIGNED(in_);
     F64vec8* data = (F64vec8*) in_[0];
@@ -605,8 +605,8 @@
 
   /*** end methods for fast transpose ***/
 
-  typedef I32vec16 Ivec;
-  typedef F64vec8 Dvec;
+  //typedef I32vec16 Ivec;
+  //typedef F64vec8 Dvec;*/
 
 //#elif defined(__AVX__)
 //  // see http://software.intel.com/en-us/node/462716
@@ -614,7 +614,7 @@
 //  typedef I32vec8 Ivec;
 //  typedef F64vec4 Dvec;
 //#elif defined(__SSE2__)
-#else // #assert undef(__MIC__)
+//#else // #assert undef(__MIC__)
   //inline void transpose_8x8_double(double *out_, const double* in_)
   inline void transpose_8x8_double(double out[8][8], const double in[8][8])
   {
@@ -662,6 +662,6 @@
   //}
   //typedef Ivec8 Ivec;
   typedef Dvec4 Dvec;
-#endif
+//#endif
 
 #endif

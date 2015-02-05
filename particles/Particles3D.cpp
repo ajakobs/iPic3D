@@ -631,11 +631,11 @@ void Particles3D::mover_PC_AoS(const_arr4_double fieldForPcls)
 // move the particle using MIC vector intrinsics
 void Particles3D::mover_PC_AoS_vec_intr(const_arr4_double fieldForPcls)
 {
- #ifndef __MIC__
+ //#ifndef __MIC__
   //eprintf("not implemented");
   mover_PC_AoS(fieldForPcls);
- #else
-  convertParticlesToAoS();
+ //#else
+  /*convertParticlesToAoS();
   // Here and below x stands for all 3 physical position coordinates
   // and u stands for all 3 velocity coordinates.
   const F64vec8 dx_inv = make_F64vec8(get_invdx(), get_invdy(), get_invdz());
@@ -751,7 +751,7 @@ void Particles3D::mover_PC_AoS_vec_intr(const_arr4_double fieldForPcls)
   }
   //#pragma omp master
   { timeTasks_end_task(TimeTasks::MOVER_PCL_MOVING); }
- #endif
+ #endif*/
 }
 
 void Particles3D::mover_PC_AoS_vec(const_arr4_double fieldForPcls)

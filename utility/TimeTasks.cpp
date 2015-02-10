@@ -28,12 +28,14 @@ static const char *taskNames[] = // order must agree with Tasks in TimeTasks.h
   "flds_comm",
   "flds_mpi_allreduce",
   "flds_mpi_sendrecv",
+  "FLDS_CLUSTER_BOOSTER_COMM",
   "pcls_comm",
   "pcls_mpi_allreduce",
   "pcls_mpi_sendrecv",
   "moms_comm",
   "moms_mpi_allreduce",
   "moms_mpi_sendrecv",
+  "CLUSTER_BOOSTER_COMM",
   //
   "BEFORE_REPORT_LIST",
   "reduce_fields",
@@ -239,16 +241,20 @@ void TimeTasks::print_cycle_times(int cycle,
     double commun[NUMBER_OF_TASKS];
     double sndrcv[NUMBER_OF_TASKS];
     double allred[NUMBER_OF_TASKS];
+    double cb[NUMBER_OF_TASKS];
     //commun[NUMBER_OF_TASKS];
-    commun[FIELDS] = tskdur[FLDS_COMM];
+    commun[FIELDS] = tskdur[FLDS_COMM]+tskdur[FLDS_CLUSTER_BOOSTER_COMM];
     sndrcv[FIELDS] = tskdur[FLDS_MPI_SENDRECV];
     allred[FIELDS] = tskdur[FLDS_MPI_ALLREDUCE];
+    cb[FIELDS] = tskdur[FLDS_CLUSTER_BOOSTER_COMM];
     commun[PARTICLES] = tskdur[PCLS_COMM];
     sndrcv[PARTICLES] = tskdur[PCLS_MPI_SENDRECV];
     allred[PARTICLES] = tskdur[PCLS_MPI_ALLREDUCE];
-    commun[MOMENTS] = tskdur[MOMS_COMM];
+    cb[PARTICLES] = 0;
+    commun[MOMENTS] = tskdur[MOMS_COMM]+tskdur[MOMS_CLUSTER_BOOSTER_COMM];
     sndrcv[MOMENTS] = tskdur[MOMS_MPI_SENDRECV];
     allred[MOMENTS] = tskdur[MOMS_MPI_ALLREDUCE];
+    cb[MOMENTS] = tskdur[MOMS_CLUSTER_BOOSTER_COMM];
     sndrcv[PARTICLES] +=
       tskdur[PCLS_MPI_Isend]+
       tskdur[PCLS_MPI_Irecv]+
@@ -262,17 +268,20 @@ void TimeTasks::print_cycle_times(int cycle,
     double communtot=0.;
     double allredtot=0.;
     double sndrcvtot=0.;
-    fprintf(file, "%s_|total  comput commun msgpro sndrcv allred task\n", reduce_mode);
+    double cbtot=0;
+    fprintf(file, "%s_|total  comput commun msgpro sndrcv allred cb task\n", reduce_mode);
     assert_eq(FIELDS+2,MOMENTS);
     for(int e=FIELDS; e<=MOMENTS; e++)
     {
+      tskdur[e] += cb[e];
       const double comput = tskdur[e]-commun[e];
       tskdurtot += tskdur[e];
       computtot += comput;
       communtot += commun[e];
       allredtot += allred[e];
       sndrcvtot += sndrcv[e];
-      fprintf(file, "%s_|%6.3f %6.3f %6.3f %6.3f %6.3f %6.3f %s\n",
+      cbtot += cb[e];
+      fprintf(file, "%s_|%6.3f %6.3f %6.3f %6.3f %6.3f %6.3f %6.3f %s\n",
         reduce_mode,
         tskdur[e],
         comput,
@@ -280,12 +289,13 @@ void TimeTasks::print_cycle_times(int cycle,
         commun[e]-sndrcv[e]-allred[e],
         sndrcv[e],
         allred[e],
+        cb[e],
         //loccom[e],
         get_taskname(e));
     }
 
     // report total times
-    fprintf(file, "%s_|%6.3f %6.3f %6.3f %6.3f %6.3f %6.3f %s\n",
+    fprintf(file, "%s_|%6.3f %6.3f %6.3f %6.3f %6.3f %6.3f %6.3f %s\n",
       reduce_mode,
       tskdurtot,
       computtot,
@@ -293,6 +303,7 @@ void TimeTasks::print_cycle_times(int cycle,
       communtot-sndrcvtot-allredtot,
       sndrcvtot,
       allredtot,
+      cbtot,
       //loccomtot,
       "[total times]");
 

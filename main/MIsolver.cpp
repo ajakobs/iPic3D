@@ -141,6 +141,7 @@ void MIsolver::send_moments_to_field_solver(bool sender,MPI_Comm *clustercomm){
 
 void MIsolver::compute_moments_Cluster(){
   //communication between cluster and booster
+  timeTasks_set_task(TimeTasks::MOMS_CLUSTER_BOOSTER_COMM);
   send_moments_to_field_solver(false,NULL);
 }
 
@@ -222,6 +223,7 @@ void MIsolver::advance_Efield_Cluster()
 
 void MIsolver::advance_Efield_Booster(MPI_Comm clustercomm){
   //synch from booster to cluster
+  timeTasks_set_task(TimeTasks::FLDS_CLUSTER_BOOSTER_COMM);
   send_field_to_kinetic_solver(false,&clustercomm);
 }
 
@@ -251,6 +253,7 @@ void MIsolver::advance_Bfield_Cluster()
 void MIsolver::advance_Bfield_Booster(MPI_Comm clustercomm)
 {
 //receive B_smooth from field solver
+    timeTasks_set_task(TimeTasks::FLDS_CLUSTER_BOOSTER_COMM);
     send_Bsmooth_to_kinetic_solver(false, &clustercomm);
 }
 
@@ -1781,8 +1784,10 @@ void MIsolver::run_Cluster(){
 //  for (int i = FirstCycle(); i <= 3; i++){ 
   if (is_rank0())
       printf(" ======= Cycle %d on Cluster ======= \n",i);
+    timeTasks.resetCycle();
     advance_Efield_Cluster();
     advance_Bfield_Cluster();
     compute_moments_Cluster();
+    timeTasks.print_cycle_times(i);
   }
 }

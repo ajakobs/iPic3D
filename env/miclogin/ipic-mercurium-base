@@ -13,7 +13,7 @@ module-whatis "base environment for iPic3D"
 # compiling
 #
 #module load impi
-module load intel
+module load intel/2015.1.133
 module load parastation/psmpi-intel-mt-5.1.1-1_9_gc3ebd7b
 module load parastation/pscom/pscom
 
@@ -36,9 +36,9 @@ prepend-path PATH $env(IPIC_HOME)/scripts
 
 # stuff needed for OmpSs offloading
 #
-module load OmpSs
+module load OmpSs/09022015
 # library needed if you want to use nanox to offload
-prepend-path LD_LIBRARY_PATH /home/fsainz/runtime/nanox-mpi-15122014/lib/performance
-setenv PSI_HOSTFILE $env(IPIC_HOME)/env/miclogin/offload_hosts
+#prepend-path LD_LIBRARY_PATH /home/fsainz/runtime/nanox-mpi-15122014/lib/performance
+#setenv PSI_HOSTFILE $env(IPIC_HOME)/env/miclogin/offload_hosts
 
 setenv IPIC_RUNENV miclogin.xeon

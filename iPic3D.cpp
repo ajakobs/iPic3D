@@ -17,7 +17,7 @@ int main(int argc, const char **argv) {
 //part which runs on Cluster with reverse offload
 
   MPI_Comm clustercomm; //The communicater for the offload to the cluster
-  deep_booster_alloc(MPI_COMM_WORLD, 1, 4, &clustercomm);
+  deep_booster_alloc(MPI_COMM_WORLD, 1, 2, &clustercomm);
 
   /* Serialise argc and argv */
   char *argv_ser = arg_serializer(argc, argv);
@@ -39,6 +39,7 @@ int main(int argc, const char **argv) {
    char **argv;
    int argc = 0;
    arg_deserializer(argv_ser, &argc, &argv);
+   printf("argv: %s %s\n",argv[0],argv[1]);
 
    MPIdata::init(&argc, (const char **)argv);
    Parameters::init_parameters();

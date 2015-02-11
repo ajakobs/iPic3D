@@ -205,7 +205,11 @@ void MIsolver::compute_moments_Booster(MPI_Comm clustercomm)
 //
 void MIsolver::send_field_to_kinetic_solver(bool sender,MPI_Comm *clustercomm)
 {
+#ifdef NB_COMM
+  EMf->set_fieldForPcls(*fieldForPcls,sender,clustercomm,&pending_request);
+#else
   EMf->set_fieldForPcls(*fieldForPcls,sender,clustercomm);
+#endif
 }
 //! MAXWELL SOLVER for Efield
 void MIsolver::advance_Efield_Cluster() 
@@ -1787,6 +1791,11 @@ void MIsolver::run_Cluster(){
     timeTasks.resetCycle();
     advance_Efield_Cluster();
     advance_Bfield_Cluster();
+#ifdef NB_COMM 
+	/* Wait for Efield communication to finish */
+	MPI_Wait(&pending_request,MPI_STATUS_IGNORE);
+#endif
+
     compute_moments_Cluster();
     timeTasks.print_cycle_times(i);
   }

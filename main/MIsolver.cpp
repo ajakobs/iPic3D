@@ -90,6 +90,7 @@ MIsolver::MIsolver(int argc, const char **argv)
   kinetics(0),
   my_clock(0)
 {
+#ifdef SPAWN
   mpi = &MPIdata::instance();
   int nprocs = MPIdata::get_nprocs();
   int myrank = MPIdata::get_rank();
@@ -116,6 +117,7 @@ MIsolver::MIsolver(int argc, const char **argv)
     MPI_Comm_spawn("run_fields.sh", &params[1], nprocs, info, 0, MPI_COMM_WORLD, &clustercomm, MPI_ERRCODES_IGNORE); 
     MPI_Info_free(&info);
   }   
+#endif
   #ifdef BATSRUS
   // set index offset for each processor
   setGlobalStartIndex(vct);
@@ -132,13 +134,14 @@ MIsolver::MIsolver(int argc, const char **argv)
   fieldForPcls = new array4_double(nxn,nyn,nzn,2*DFIELD_3or4);
 
   my_clock = new Timing(vct->get_rank());
-
+#ifdef SPAWN
   if(PARTICLES==solver_type){
     run_Booster(clustercomm);
   }
   else{
     run_Cluster();
   }
+#endif
 }
 
 int MIsolver::FirstCycle() { return col->get_first_cycle(); }
@@ -240,7 +243,11 @@ void MIsolver::compute_moments_Booster(MPI_Comm clustercomm)
 //
 void MIsolver::send_field_to_kinetic_solver(bool sender,MPI_Comm *clustercomm)
 {
-  EMf->set_fieldForPcls(*fieldForPcls,sender,clustercomm);
+  #ifdef NB_COMM
+    EMf->set_fieldForPcls(*fieldForPcls,sender,clustercomm,&pending_request);
+  #else
+    EMf->set_fieldForPcls(*fieldForPcls,sender,clustercomm);
+  #endif
 }
 //! MAXWELL SOLVER for Efield
 void MIsolver::advance_Efield_Cluster() 
@@ -1822,6 +1829,10 @@ void MIsolver::run_Cluster(){
     timeTasks.resetCycle();
     advance_Efield_Cluster();
     advance_Bfield_Cluster();
+  #ifdef NB_COMM
+    /*Wait for Efield communication to finish*/
+    MPI_Wait(&pending_request,MPI_STATUS_IGNORE);
+  #endif
     compute_moments_Cluster();
     timeTasks.print_cycle_times(i);
   }

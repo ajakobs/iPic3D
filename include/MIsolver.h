@@ -49,6 +49,9 @@ namespace iPic3D
     const int nxc;
     const int nyc;
     const int nzc;
+  #ifdef NB_COMM
+    MPI_Request pending_request;
+  #endif
 
   public: // accessors
     OutputWrapperFPP& fetch_outputWrapperFPP(){

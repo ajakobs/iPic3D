@@ -86,7 +86,11 @@ class EMfields3D
       const_vector_arr3_double rhons);
 
     /*! copy the field data to the array used to move the particles */
+#ifdef NB_COMM
+    void set_fieldForPcls(array4_double& fieldForPcls, bool sender, MPI_Comm *clustercomm, MPI_Request *pending_request);
+#else
     void set_fieldForPcls(array4_double& fieldForPcls, bool sender, MPI_Comm *clustercomm);
+#endif
     void set_fieldForMoments(bool sender, MPI_Comm *clustercomm);
     void set_Bsmooth(bool sender, MPI_Comm *clustercomm);
 

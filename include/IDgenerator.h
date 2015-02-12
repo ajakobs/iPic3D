@@ -1,6 +1,6 @@
 #ifndef IDgenerator_h
 #define IDgenerator_h
-
+#include <mpi.h>
 #include "ompdefs.h"
 
 // Class to generate unique double-precision IDs

@@ -4,6 +4,7 @@
 #include "ipic_fwd.h"
 #include "assert.h"
 #include "MIsolver.h"
+#include "SolverType.h"
 
 namespace iPic3D
 {
@@ -20,6 +21,7 @@ namespace iPic3D
     // this class overrides this method
     virtual void set_initial_conditions();
   };
+ 
 }
 
 #endif

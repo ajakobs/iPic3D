@@ -16,6 +16,7 @@ class OutputWrapperFPP;
 #include "Setting.h"
 #include "asserts.h"
 #include "assert.h"
+#include "SolverType.h"
 
 namespace iPic3D
 {
@@ -33,6 +34,7 @@ namespace iPic3D
     array4_double *fieldForPcls;
     Kinetics      *kinetics;
     Timing        *my_clock; // deprecated
+    SolverType solver_type;
     //
     // output
     //

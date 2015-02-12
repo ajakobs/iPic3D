@@ -40,8 +40,12 @@ void MPIdata::init(int *argc, const char **argv) {
   nprocs = 1;
  #else // NO_MPI
   /* Initialize the MPI API */
+ #ifdef SPAWN
+  MPI_Init(argc, (char***)&argv);
+ #else
   nanos_mpi_init(argc, (char***)&argv);
-  //MPI_Init(argc, (char***)&argv);
+ #endif
+
   /* Set rank */
   MPI_Comm_rank(MPI_COMM_WORLD, &rank);
 
@@ -59,8 +63,12 @@ void MPIdata::exit(int code) {
 
 void MPIdata::finalize_mpi() {
  #ifndef NO_MPI
-  nanos_mpi_finalize();
-  //MPI_Finalize();
+  //nanos_mpi_finalize();
+  #ifdef SPAWN
+   MPI_Finalize();
+  #else
+   nanos_mpi_finalize();
+  #endif
  #endif
 }
 

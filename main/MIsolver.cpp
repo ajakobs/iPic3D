@@ -36,9 +36,11 @@
 //
 #include <iostream>
 #include <sstream>
+#include "SolverType.h"
+#include <unistd.h>
 
 using namespace iPic3D;
-
+MPIdata* mpi=0;
 // === Section: MIsolver_routines ===
 
 MIsolver::~MIsolver()
@@ -88,6 +90,32 @@ MIsolver::MIsolver(int argc, const char **argv)
   kinetics(0),
   my_clock(0)
 {
+  mpi = &MPIdata::instance();
+  int nprocs = MPIdata::get_nprocs();
+  int myrank = MPIdata::get_rank();
+  /* Set type of solver */
+  char **params=(char **)argv;
+  char hostname[255];
+  MPI_Comm clustercomm;
+  MPI_Comm_get_parent(&clustercomm);
+  solver_type = (MPI_COMM_NULL == clustercomm) ? PARTICLES : FIELDS;
+  if (PARTICLES == solver_type) {
+    gethostname(hostname,255);
+    printf("Particles solver: %d on %s\n",MPIdata::get_rank(),hostname);
+  }
+  else {
+    gethostname(hostname,255);
+    printf("Fields solver: %d on %s\n",MPIdata::get_rank(),hostname);
+  }
+  /* If I'm particles solver then I spawn fields solver */
+  if (PARTICLES == solver_type)
+  {
+    MPI_Info info;
+    MPI_Info_create(&info);
+    MPI_Info_set(info, "hostfile", "spawnfile");
+    MPI_Comm_spawn("run_fields.sh", &params[1], nprocs, info, 0, MPI_COMM_WORLD, &clustercomm, MPI_ERRCODES_IGNORE); 
+    MPI_Info_free(&info);
+  }   
   #ifdef BATSRUS
   // set index offset for each processor
   setGlobalStartIndex(vct);
@@ -104,6 +132,13 @@ MIsolver::MIsolver(int argc, const char **argv)
   fieldForPcls = new array4_double(nxn,nyn,nzn,2*DFIELD_3or4);
 
   my_clock = new Timing(vct->get_rank());
+
+  if(PARTICLES==solver_type){
+    run_Booster(clustercomm);
+  }
+  else{
+    run_Cluster();
+  }
 }
 
 int MIsolver::FirstCycle() { return col->get_first_cycle(); }
@@ -1782,7 +1817,7 @@ void MIsolver::run_Cluster(){
   initialize(MPI_COMM_NULL);
   for (int i = FirstCycle(); i <= FinalCycle(); i++){
 //  for (int i = FirstCycle(); i <= 3; i++){ 
-  if (is_rank0())
+    if (is_rank0())
       printf(" ======= Cycle %d on Cluster ======= \n",i);
     timeTasks.resetCycle();
     advance_Efield_Cluster();
@@ -1790,4 +1825,5 @@ void MIsolver::run_Cluster(){
     compute_moments_Cluster();
     timeTasks.print_cycle_times(i);
   }
+  Finalize();
 }

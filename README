@@ -89,3 +89,42 @@ And then we can run:
   vim src/inputfiles/GEM.inp
   # run the simulation; rm data/* is needed at start of each new run
   rm data/*; ipic run
+
+
+
+############ Use the reverse offload:
+export IPIC_HOME="$HOME/ipic3d"
+
+module use $IPIC_HOME/env/miclogin
+
+Adapt the hostfile (env/miclogin/offload_hosts), for example:
+knc1-mic0
+knc1-mic0
+knc1-mic0
+knc1-mic0
+knc1
+knc1
+knc1
+knc1
+
+Adapt the spawnfile (scripts/spawnfile), for example:
+knc1
+knc1
+knc1
+knc1
+
+export MPIEXEC_UNIVERSE_SIZE=<number of processes on host + number of offloaded processes>
+
+export PBS_NODEFILE=../env/miclogin/offload_hosts
+
+### OmpSs Offload:
+./create_executables_ompss.sh
+cd build
+module load ipic-mercurium-mic-nohdf5
+mpiexec -np 4 ./iPic3D.mic parameters.inp
+
+### Offload with MPI_Comm_spawn:
+./create_executables_spawn.sh
+cd build.xeonphi
+module load ipic-mic-nohdf5
+mpiexec -np 4 ./iPic3D.mic parameters.inp

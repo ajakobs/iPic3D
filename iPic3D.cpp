@@ -14,7 +14,7 @@ int main(int argc, const char **argv) {
   Parameters::init_parameters();
 #ifndef SPAWN 
   MPI_Comm clustercomm; //The communicater for the offload to the cluster
-  deep_booster_alloc(MPI_COMM_WORLD, 1, 2, &clustercomm);
+  deep_booster_alloc(MPI_COMM_WORLD, 1, 4, &clustercomm);
 
   /* Serialise argc and argv */
   char *argv_ser = arg_serializer(argc, argv);

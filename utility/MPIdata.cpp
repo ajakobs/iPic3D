@@ -39,11 +39,12 @@ void MPIdata::init(int *argc, const char **argv) {
   rank = 0;
   nprocs = 1;
  #else // NO_MPI
-  /* Initialize the MPI API */
- #ifdef SPAWN
-  MPI_Init(argc, (char***)&argv);
- #else
+ #ifdef OMPSS_OFFLOAD
+  /* Initialize the Nanox API */
   nanos_mpi_init(argc, (char***)&argv);
+ #else
+  /* Initialize the MPI API */
+  MPI_Init(argc, (char***)&argv);
  #endif
 
   /* Set rank */
@@ -63,11 +64,10 @@ void MPIdata::exit(int code) {
 
 void MPIdata::finalize_mpi() {
  #ifndef NO_MPI
-  //nanos_mpi_finalize();
-  #ifdef SPAWN
-   MPI_Finalize();
-  #else
+  #ifdef OMPSS_OFFLOAD
    nanos_mpi_finalize();
+  #else
+   MPI_Finalize();
   #endif
  #endif
 }

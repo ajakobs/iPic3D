@@ -62,10 +62,10 @@ int main(int argc, const char **argv) {
     solver.run_Booster(clustercomm);
   }
 
-#pragma omp taskwait 
+//#pragma omp taskwait 
   
   deep_booster_free(&clustercomm);
-
+  MPIdata::instance().finalize_mpi();
 #else // End of OMPSS_OFFLOAD
   iPic3D::c_Solver solver(argc, argv);
   /* Set type of solver */
@@ -89,11 +89,17 @@ int main(int argc, const char **argv) {
     printf("Fields solver: %d on %s\n",MPIdata::get_rank(),hostname);
     solver.run_Cluster();
   }
+  /*Barriers to be sure that both simulation parts (on cluster and booster) have finished*/
+  MPI_Barrier(clustercomm);
+  MPI_Barrier(MPI_COMM_WORLD);
+  //if (solver_type == FIELDS) 
+  if(solver_type == PARTICLES) 
+    MPIdata::finalize_mpi();
 #endif // End of OFFLOAD
 #else
-  // Placeholder for the normal code
+  // Placeholder for the normal codei
 #endif
-  MPIdata::instance().finalize_mpi();
+  //MPIdata::instance().finalize_mpi();
   return 0;
 }
 

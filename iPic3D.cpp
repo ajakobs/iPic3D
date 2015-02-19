@@ -12,7 +12,6 @@ using namespace iPic3D;
 int main(int argc, const char **argv) {
 
   int rank, size;
-  
   MPIdata::init(&argc, argv);
   Parameters::init_parameters();
   MPI_Comm_rank(MPI_COMM_WORLD,&rank);
@@ -97,7 +96,11 @@ int main(int argc, const char **argv) {
     MPIdata::finalize_mpi();
 #endif // End of OFFLOAD
 #else
-  // Placeholder for the normal codei
+  // Placeholder for the normal code
+  printf("test\n");
+  iPic3D::c_Solver solver(argc, argv);
+  solver.run();
+  MPIdata::instance().finalize_mpi();
 #endif
   //MPIdata::instance().finalize_mpi();
   return 0;

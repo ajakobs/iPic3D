@@ -63,6 +63,7 @@ namespace iPic3D
     MIsolver(int argc, const char **argv);
     void run_Booster(MPI_Comm clustercomm);
     void run_Cluster();
+    void run();
   protected:
     // virtual so inheriting application can override
     virtual void set_initial_conditions();

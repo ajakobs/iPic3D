@@ -179,7 +179,9 @@ void MIsolver::compute_moments_Booster(MPI_Comm clustercomm)
       EMf->get_Bz_smooth());
   }
   //communication between cluster and booster
+  #if defined(OFFLOAD) || defined(OMPSS_OFFLOAD)
   send_moments_to_field_solver(true,&clustercomm);
+  #endif
 }
 
 // This method should send or receive field
@@ -221,10 +223,12 @@ void MIsolver::advance_Efield_Cluster()
   //advance the E field
   EMf->calculateE(get_miMoments());
  
+  #if defined(OFFLOAD) || defined(OMPSS_OFFLOAD) 
  // functions expects a MPI_Comm as second parameter, but is not needed on the offload part,
  // it uses MPI_Comm_get_parent, so use NULL here
   send_field_to_kinetic_solver(true,NULL);
   //synch between cluster and booster
+  #endif
 }
 
 void MIsolver::advance_Efield_Booster(MPI_Comm clustercomm){
@@ -248,11 +252,13 @@ void MIsolver::advance_Bfield_Cluster()
   // calculate the B field
   EMf->advanceB();
 
+  #if defined(OFFLOAD) || defined(OMPSS_OFFLOAD) 
   // send B_smooth to kinetic solver
   send_Bsmooth_to_kinetic_solver(true, NULL);
     //  EMf->fetch_Bx_smooth(),
     //  EMf->fetch_By_smooth(),
     //  EMf->fetch_Bz_smooth());
+  #endif
 }
 
 //receive Bfield from Cluster where it was updated
@@ -1798,6 +1804,22 @@ void MIsolver::run_Cluster(){
 	MPI_Wait(&pending_request,MPI_STATUS_IGNORE);
 #endif
     compute_moments_Cluster();
+    timeTasks.print_cycle_times(i);
+  }
+  Finalize();
+}
+
+void MIsolver::run(){
+  initialize(MPI_COMM_WORLD);
+  for (int i = FirstCycle(); i <= FinalCycle(); i++){
+    if (is_rank0())
+      printf(" ======= Cycle %d ======= \n",i);
+    timeTasks.resetCycle();
+    advance_Efield_Cluster();
+    move_particles();
+    advance_Bfield_Cluster();
+    compute_moments_Booster(MPI_COMM_WORLD);
+    WriteOutput(i);
     timeTasks.print_cycle_times(i);
   }
   Finalize();

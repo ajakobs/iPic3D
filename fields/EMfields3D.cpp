@@ -21,6 +21,7 @@
 #include "ipic_math.h" // for roundup_to_multiple
 #include "Alloc.h"
 #include "asserts.h"
+#include <sys/time.h>
 #ifndef NO_HDF5
 #include "Restart3D.h"
 #endif
@@ -872,7 +873,9 @@ void EMfields3D::set_fieldForPcls(array4_double& fieldForPcls, bool sender, MPI_
   int rank;
   MPI_Comm_rank(MPI_COMM_WORLD,&rank);
   int count=0;
+  struct timeval begin, end;
   if(sender){
+    gettimeofday(&begin,(struct timezone *)0);
     for(int i=0;i<nxn;i++)
       for(int j=0;j<nyn;j++)
         for(int k=0;k<nzn;k++)
@@ -902,17 +905,36 @@ void EMfields3D::set_fieldForPcls(array4_double& fieldForPcls, bool sender, MPI_
 	  fieldInfo[count++] = Ey_smooth[i][j][k];
 	  fieldInfo[count++] = Ez_smooth[i][j][k];
         }
+    gettimeofday(&end,(struct timezone *)0);
+#ifdef SHOWT
+    printf("In offload, write BUFFER for particles, time: %f\n",(1000000*(end.tv_sec - begin.tv_sec)+(end.tv_usec - begin.tv_usec))*0.000001);
+#endif
     MPI_Comm parent;
     MPI_Comm_get_parent(&parent);
+ 
 #ifdef NB_COMM
+#ifdef SHOWT
+    printf("In offload, MPI_ISEND particles, no time measured\n");
+#endif
     MPI_Isend(fieldInfo,nxn*nyn*nzn*6, MPI_DOUBLE, rank, 77, parent, pending_request);
 #else
+    gettimeofday(&begin,(struct timezone *)0);
     MPI_Send(fieldInfo,nxn*nyn*nzn*6, MPI_DOUBLE, rank, 77, parent);
+    gettimeofday(&end,(struct timezone *)0);
+#ifdef SHOWT
+    printf("In offload, SEND particles, time: %f\n",(1000000*(end.tv_sec - begin.tv_sec)+(end.tv_usec - begin.tv_usec))*0.000001);
+#endif
 #endif
   }
   else{
     MPI_Status stat;
+    gettimeofday(&begin,(struct timezone *)0);
     MPI_Recv(fieldInfo,nxn*nyn*nzn*6, MPI_DOUBLE, rank, 77, *clustercomm, &stat);
+    gettimeofday(&end,(struct timezone *)0);
+#ifdef SHOWT
+    printf("On host, RECEIVE particles, time: %f\n",(1000000*(end.tv_sec - begin.tv_sec)+(end.tv_usec - begin.tv_usec))*0.000001);
+#endif
+    gettimeofday(&begin,(struct timezone *)0);
     for(int i=0;i<nxn;i++)
       for(int j=0;j<nyn;j++)
         for(int k=0;k<nzn;k++)
@@ -930,6 +952,10 @@ void EMfields3D::set_fieldForPcls(array4_double& fieldForPcls, bool sender, MPI_
 		fieldForPcls[i][j][k][1+DFIELD_3or4] = fieldInfo[count++];
 		fieldForPcls[i][j][k][2+DFIELD_3or4] = fieldInfo[count++];
 	}
+   gettimeofday(&end,(struct timezone *)0);
+#ifdef SHOWT
+   printf("On host, read BUFFER for particles, time: %f\n",(1000000*(end.tv_sec - begin.tv_sec)+(end.tv_usec - begin.tv_usec))*0.000001);
+#endif
   }    
 }
 

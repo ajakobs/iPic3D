@@ -16,6 +16,7 @@
 #include "ompdefs.h"
 #include "asserts.h"
 #include "aligned_vector.h"
+#include <sys/time.h>
 #include <new> // needed for placement new
 
 using namespace iPic3D;
@@ -42,7 +43,9 @@ void MImoments::set_fieldForMoments(bool sender, MPI_Comm *clustercomm){
   int rank;
   MPI_Comm_rank(MPI_COMM_WORLD,&rank);
   int count=0;
+   struct timeval begin, end;
   if(sender){
+    gettimeofday(&begin,(struct timezone *)0);
 	  //for(int l=0;l<ns;l++){
     for(int i=0;i<nxn;i++)
       for(int j=0;j<nyn;j++)
@@ -62,13 +65,28 @@ void MImoments::set_fieldForMoments(bool sender, MPI_Comm *clustercomm){
 		      momentsBuf[count++]=rhons[l][i][j][k];
 		}
         }
+    gettimeofday(&end,(struct timezone *)0);
+#ifdef SHOWT
+    printf("On host, write BUFFER for Moments, time: %f\n",(1000000*(end.tv_sec - begin.tv_sec)+(end.tv_usec - begin.tv_usec))*0.000001);
+#endif
+    gettimeofday(&begin,(struct timezone *)0);
     MPI_Send(momentsBuf,totalsize, MPI_DOUBLE, rank, 77, *clustercomm);
+    gettimeofday(&end,(struct timezone *)0);
+#ifdef SHOWT
+    printf("On host, SEND moments, time: %f\n",(1000000*(end.tv_sec - begin.tv_sec)+(end.tv_usec - begin.tv_usec))*0.000001);
+#endif
   }
   else{
     MPI_Status stat;
     MPI_Comm parent;
     MPI_Comm_get_parent(&parent);
+    gettimeofday(&begin,(struct timezone *)0);
     MPI_Recv(momentsBuf,totalsize, MPI_DOUBLE, rank, 77, parent, &stat);
+    gettimeofday(&end,(struct timezone *)0);
+#ifdef SHOWT
+    printf("In offload, RECEIVE Moments, time: %f\n",(1000000*(end.tv_sec - begin.tv_sec)+(end.tv_usec - begin.tv_usec))*0.000001);
+#endif
+    gettimeofday(&begin,(struct timezone *)0);
     //for(int l=0;l<ns;l++){
     for(int i=0;i<nxn;i++)
       for(int j=0;j<nyn;j++)
@@ -88,6 +106,10 @@ void MImoments::set_fieldForMoments(bool sender, MPI_Comm *clustercomm){
 			rhons[l][i][j][k]=momentsBuf[count++];
 		}
         }
+   gettimeofday(&end,(struct timezone *)0);
+#ifdef SHOWT
+   printf("In offload, read BUFFER for Moments, time: %f\n",(1000000*(end.tv_sec - begin.tv_sec)+(end.tv_usec - begin.tv_usec))*0.000001);
+#endif
   }
 }
 

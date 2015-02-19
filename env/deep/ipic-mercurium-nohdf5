@@ -13,13 +13,16 @@ module-whatis "set environment for iPic3D without parallel IO"
 # definitions used by cmake
 #
 module load cmake/2.8
-#module swap parastation parastation/intel-5.0.27 #otherwise won't find the compiler
-#module switch parastation parastation/intel-5.0.27 #otherwise won't find the compiler
-module load intel
-setenv CXX icpc
-setenv CC icc
-setenv FC ifort
-setenv IPIC_CMAKE_ARGS "-DCMAKE_CXX_FLAGS='-openmp -fno-exceptions -O3 -xHost -vec-report' -DIPIC_HDF5_OUTPUT=OFF"
+
+module load intel/15.0
+module load parastation/intel-mt-5.1.1 
+module load OMPSS
+
+setenv CXX mpimcxx
+setenv CC mpimcc
+setenv FC mpimfc
+
+setenv IPIC_CMAKE_ARGS "-DCMAKE_CXX_FLAGS='-DNB_COMM -DOMPSS_OFFLOAD --ompss -fno-exceptions -O3 -vec-report -ldl -Wl,--export-dynamic -lnsl -lutil -lm' -DIPIC_HDF5_OUTPUT=OFF"
 
 # definitions used to run ipic3d
 #
@@ -27,7 +30,7 @@ setenv IPIC_CMAKE_ARGS "-DCMAKE_CXX_FLAGS='-openmp -fno-exceptions -O3 -xHost -v
 setenv IPIC_MPIRUN mpiexec
 setenv IPIC_ENV deep
 #
-setenv PSP_MALLOC 0
+#setenv PSP_MALLOC 0
 
 # usage: "isession 4 8" starts an interactive session on 4 nodes with 8 processors per node
 #   defaults: isession 1 16

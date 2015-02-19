@@ -66,40 +66,38 @@ int main(int argc, const char **argv) {
   deep_booster_free(&clustercomm);
   MPIdata::instance().finalize_mpi();
 #else // End of OMPSS_OFFLOAD
-  iPic3D::c_Solver solver(argc, argv);
-  /* Set type of solver */
-  char **params=(char **)argv;
-  SolverType solver_type;
-  char hostname[255];
-  MPI_Comm_get_parent(&clustercomm);
-  solver_type = (MPI_COMM_NULL == clustercomm) ? PARTICLES : FIELDS;
-  gethostname(hostname,255);
-  if (solver_type == PARTICLES) {
-    printf("Particles solver: %d on %s\n",MPIdata::get_rank(),hostname);
-    MPI_Info info;
-    MPI_Info_create(&info);
+  {
+    iPic3D::c_Solver solver(argc, argv);
+    /* Set type of solver */
+    char **params=(char **)argv;
+    SolverType solver_type;
+    char hostname[255];
+    MPI_Comm_get_parent(&clustercomm);
+    solver_type = (MPI_COMM_NULL == clustercomm) ? PARTICLES : FIELDS;
+    gethostname(hostname,255);
+    if (solver_type == PARTICLES) {
+      printf("Particles solver: %d on %s\n",MPIdata::get_rank(),hostname);
+      MPI_Info info;
+      MPI_Info_create(&info);
 	/* We should improve this */
-    MPI_Info_set(info, "hostfile", "spawnfile");
-    MPI_Comm_spawn("run_fields.sh", &params[1], size, info, 0, MPI_COMM_WORLD, &clustercomm, MPI_ERRCODES_IGNORE); 
-    MPI_Info_free(&info);
-    solver.run_Booster(clustercomm);
+      MPI_Info_set(info, "hostfile", "spawnfile");
+      MPI_Comm_spawn("run_fields.sh", &params[1], size, info, 0, MPI_COMM_WORLD, &clustercomm, MPI_ERRCODES_IGNORE); 
+      MPI_Info_free(&info);
+      solver.run_Booster(clustercomm);
+    }
+    else {
+      printf("Fields solver: %d on %s\n",MPIdata::get_rank(),hostname);
+      solver.run_Cluster();
+    }
   }
-  else {
-    printf("Fields solver: %d on %s\n",MPIdata::get_rank(),hostname);
-    solver.run_Cluster();
-  }
-  /*Barriers to be sure that both simulation parts (on cluster and booster) have finished*/
-  MPI_Barrier(clustercomm);
-  MPI_Barrier(MPI_COMM_WORLD);
-  //if (solver_type == FIELDS) 
-  if(solver_type == PARTICLES) 
-    MPIdata::finalize_mpi();
+  MPIdata::instance().finalize_mpi();
 #endif // End of OFFLOAD
 #else
   // Placeholder for the normal code
-  printf("test\n");
-  iPic3D::c_Solver solver(argc, argv);
-  solver.run();
+  {
+    iPic3D::c_Solver solver(argc, argv);
+    solver.run();
+  }
   MPIdata::instance().finalize_mpi();
 #endif
   //MPIdata::instance().finalize_mpi();

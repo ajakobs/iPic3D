@@ -91,6 +91,7 @@ class EMfields3D
 #else
     void set_fieldForPcls(array4_double& fieldForPcls, bool sender, MPI_Comm *clustercomm);
 #endif
+    void set_fieldForPcls(array4_double& fieldForPcls);
     void set_fieldForMoments(bool sender, MPI_Comm *clustercomm);
     void set_Bsmooth(bool sender, MPI_Comm *clustercomm);
 

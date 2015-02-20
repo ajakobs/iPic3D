@@ -11,15 +11,14 @@ using namespace iPic3D;
 
 int main(int argc, const char **argv) {
 
-  int rank, size;
   MPIdata::init(&argc, argv);
   Parameters::init_parameters();
-  MPI_Comm_rank(MPI_COMM_WORLD,&rank);
-  MPI_Comm_size(MPI_COMM_WORLD,&size);
 
 #if defined(OFFLOAD) || defined(OMPSS_OFFLOAD)
   MPI_Comm clustercomm; //The communicater for the offload to the cluster
-
+  int rank, size;
+  MPI_Comm_rank(MPI_COMM_WORLD,&rank);
+  MPI_Comm_size(MPI_COMM_WORLD,&size);
 #ifdef OMPSS_OFFLOAD
   deep_booster_alloc(MPI_COMM_WORLD, 1, 4, &clustercomm);
 

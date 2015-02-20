@@ -115,7 +115,7 @@ bool MIsolver::is_rank0() { return vct->is_rank0(); }
 void MIsolver::accumulate_moments()
 {
   timeTasks_set_main_task(TimeTasks::MOMENTS);
-
+  /* Do we need the I_am_kinetic_solver() and I_am_field_solver() functions here? Thi hole accumumulate_moments() function runs only onto the booster...*/
   if(I_am_kinetic_solver())
   {
     //#pragma omp parallel 
@@ -209,10 +209,14 @@ void MIsolver::compute_moments_Booster(MPI_Comm clustercomm)
 //
 void MIsolver::send_field_to_kinetic_solver(bool sender,MPI_Comm *clustercomm)
 {
-#ifdef NB_COMM
-  EMf->set_fieldForPcls(*fieldForPcls,sender,clustercomm,&pending_request);
+#if defined(OFFLOAD) || defined(OMPSS_OFFLOAD)
+  #ifdef NB_COMM
+    EMf->set_fieldForPcls(*fieldForPcls,sender,clustercomm,&pending_request);
+  #else
+    EMf->set_fieldForPcls(*fieldForPcls,sender,clustercomm);
+  #endif
 #else
-  EMf->set_fieldForPcls(*fieldForPcls,sender,clustercomm);
+  EMf->set_fieldForPcls(*fieldForPcls);
 #endif
 }
 //! MAXWELL SOLVER for Efield
@@ -223,12 +227,12 @@ void MIsolver::advance_Efield_Cluster()
   //advance the E field
   EMf->calculateE(get_miMoments());
  
-  #if defined(OFFLOAD) || defined(OMPSS_OFFLOAD) 
+  //#if defined(OFFLOAD) || defined(OMPSS_OFFLOAD) 
  // functions expects a MPI_Comm as second parameter, but is not needed on the offload part,
  // it uses MPI_Comm_get_parent, so use NULL here
   send_field_to_kinetic_solver(true,NULL);
   //synch between cluster and booster
-  #endif
+  //#endif
 }
 
 void MIsolver::advance_Efield_Booster(MPI_Comm clustercomm){

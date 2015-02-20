@@ -860,6 +860,7 @@ void EMfields3D::fixBforcefree()
 }
 
 //the MPI_Comm is needed for the processes on the host to receive the data
+#if defined(OFFLOAD) || defined(OMPSS_OFFLOAD)
 #ifdef NB_COMM
 void EMfields3D::set_fieldForPcls(array4_double& fieldForPcls, bool sender, MPI_Comm *clustercomm, MPI_Request *pending_request)
 #else
@@ -958,7 +959,24 @@ void EMfields3D::set_fieldForPcls(array4_double& fieldForPcls, bool sender, MPI_
 #endif
   }    
 }
-
+#else
+void EMfields3D::set_fieldForPcls(array4_double& fieldForPcls)
+{
+  //EMf->set_fieldForPcls(fetch_fieldForPcls());
+  #pragma omp parallel for collapse(2)
+  for(int i=0;i<nxn;i++)
+  for(int j=0;j<nyn;j++)
+  for(int k=0;k<nzn;k++)
+  {
+    fieldForPcls[i][j][k][0] = Bx_smooth[i][j][k];
+    fieldForPcls[i][j][k][1] = By_smooth[i][j][k];
+    fieldForPcls[i][j][k][2] = Bz_smooth[i][j][k];
+    fieldForPcls[i][j][k][0+DFIELD_3or4] = Ex_smooth[i][j][k];
+    fieldForPcls[i][j][k][1+DFIELD_3or4] = Ey_smooth[i][j][k];
+    fieldForPcls[i][j][k][2+DFIELD_3or4] = Ez_smooth[i][j][k];
+  }
+}
+#endif
 void EMfields3D::set_Bsmooth(bool sender, MPI_Comm *clustercomm)
 {
   double *buffer;

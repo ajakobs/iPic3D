@@ -77,6 +77,7 @@ class TimeTasks
 
   TimeTasks() {
     resetCycle();
+    file=stdout;
   }
 
   // monitoring
@@ -127,8 +128,10 @@ class TimeTasks
   void print_cycle_times(int cycle, const char* reduce_mode);
  public:
   void print_cycle_times(int cycle);
-
- private:
+  bool set_output(char* fname);
+  FILE* get_output(){ return file; }
+ 
+private:
 
   // is task exclusive?
   bool is_exclusive(Tasks taskid) { return (taskid < after_exclusive); }
@@ -147,6 +150,7 @@ class TimeTasks
   const char* get_taskname(int arg);
 
  private:
+  FILE* file;
   int active_task;
   bool active[NUMBER_OF_TASKS];
   //bool communicating;

@@ -71,7 +71,7 @@ void Particles3D::uniform_background(int is, const_arr4_double rhocs)
       _pcls.push_back(SpeciesParticle(u,v,w,q,x,y,z,0));
     }
   }
-  cout << "Velocity Maxwellian Distribution " << endl;
+  fprintf(timeTasks.get_output(),"Velocity Maxwellian Distribution \n");
 }
 /** Initialize particles with a constant velocity in dim direction. Depending on the value of dim:
   <ul>
@@ -353,7 +353,7 @@ void Particles3D::mover_PC(const_arr4_double fieldForPcls) {
   convertParticlesToSoA();
   //#pragma omp master
   if (vct->getCartesian_rank() == 0) {
-    cout << "*** MOVER species " << is << " ***" << NiterMover << " ITERATIONS   ****" << endl;
+    fprintf(timeTasks.get_output(),"*** MOVER species %d ***%d ITERATIONS   ****\n",is, NiterMover);
   }
 
   //#pragma omp master
@@ -508,7 +508,7 @@ void Particles3D::mover_PC_AoS(const_arr4_double fieldForPcls)
   convertParticlesToAoS();
   //#pragma omp master
   if (vct->getCartesian_rank() == 0) {
-    cout << "*** MOVER species " << is << " ***" << NiterMover << " ITERATIONS   ****" << endl;
+    fprintf(timeTasks.get_output(),"*** MOVER species %d ***%d ITERATIONS   ****\n",is, NiterMover);
   }
 
   //#pragma omp master
@@ -660,7 +660,7 @@ void Particles3D::mover_PC_AoS_vec_intr(const_arr4_double fieldForPcls)
   const F64vec8 nXc = make_F64vec8(nxc,nyc,nzc);
   //#pragma omp master
   if (vct->getCartesian_rank() == 0) {
-    cout << "*** MOVER species " << is << " ***" << NiterMover << " ITERATIONS   ****" << endl;
+    fprintf(timeTasks.get_output(),"*** MOVER species %d ***%d ITERATIONS   ****\n",is, NiterMover);
   }
 
   SpeciesParticle * pcls = &_pcls[0];
@@ -759,7 +759,7 @@ void Particles3D::mover_PC_AoS_vec(const_arr4_double fieldForPcls)
   convertParticlesToAoS();
   //#pragma omp master
   if (vct->getCartesian_rank() == 0) {
-    cout << "*** MOVER species " << is << " ***" << NiterMover << " ITERATIONS   ****" << endl;
+    fprintf(timeTasks.get_output(),"*** MOVER species %d ***%d ITERATIONS   ****\n",is, NiterMover);
   }
 
   const int NUM_PCLS_MOVED_AT_A_TIME = 8;
@@ -901,7 +901,7 @@ void Particles3D::mover_PC_AoS_vec(const_arr4_double fieldForPcls)
 //  convertParticlesToAoS();
 //  #pragma omp master
 //  if (vct->getCartesian_rank() == 0) {
-//    cout << "*** MOVER species " << is << " ***" << NiterMover << " ITERATIONS   ****" << endl;
+//    fprintf(timeTasks.get_output(),"*** MOVER species " << is << " ***" << NiterMover << " ITERATIONS   ****" << endl;
 //  }
 //
 //  SpeciesParticle * pcls = fetch_pcls();
@@ -1038,7 +1038,7 @@ void Particles3D::mover_PC_AoS_vec(const_arr4_double fieldForPcls)
 //  assert_eq(nzc,nzn-1);
 //  #pragma omp master
 //  if (vct->getCartesian_rank() == 0) {
-//    cout << "*** MOVER species " << is << " ***" << NiterMover << " ITERATIONS   ****" << endl;
+//    fprintf(timeTasks.get_output(),"*** MOVER species " << is << " ***" << NiterMover << " ITERATIONS   ****" << endl;
 //  }
 //
 //  // initialize average positions
@@ -1298,7 +1298,7 @@ void Particles3D::repopulate_particles()
     return;
 
   if (vct->getCartesian_rank()==0){
-    cout << "*** Repopulator species " << is << " ***" << endl;
+    fprintf(timeTasks.get_output(),"*** Repopulator species %d ***\n");
   }
 
   // if this is not a boundary process then there is nothing to do
@@ -1462,7 +1462,7 @@ void Particles3D::repopulate_particles()
     nop_orig, nop_deleted, nop_created, nop_final);
 
   //if (vct->getCartesian_rank()==0){
-  //  cout << "*** number of particles " << getNOP() << " ***" << endl;
+  //  fprintf(timeTasks.get_output(),"*** number of particles " << getNOP() << " ***" << endl;
   //}
 }
 

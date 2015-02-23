@@ -28,8 +28,6 @@
 
 #include <iostream>
 //#include <sstream>
-using std::cout;
-using std::endl;
 using namespace iPic3D;
 
 // === Section: initialization_and_cleanup ===
@@ -260,7 +258,7 @@ void EMfields3D::calculateE(const MImoments& miMoments)
   const Grid *grid = &get_grid();
 
   if (get_vct().getCartesian_rank() == 0)
-    cout << "*** E CALCULATION ***" << endl;
+	  fprintf(timeTasks.get_output(),"*** E CALCULATION ***\n");
 
   array3_double divE     (nxc, nyc, nzc);
   array3_double tempC    (nxc, nyc, nzc);
@@ -289,7 +287,7 @@ void EMfields3D::calculateE(const MImoments& miMoments)
   // Adjust E calculating laplacian(PHI) = div(E) -4*PI*rho DIVERGENCE CLEANING
   if (PoissonCorrection) {
     if (get_vct().getCartesian_rank() == 0)
-      cout << "*** DIVERGENCE CLEANING ***" << endl;
+	    fprintf(timeTasks.get_output(),"*** DIVERGENCE CLEANING ***\n");
     grid->divN2C(divE, Ex, Ey, Ez);
     scale(tempC, rhoc, -FourPI, nxc, nyc, nzc);
     sum(divE, tempC, nxc, nyc, nzc);
@@ -299,7 +297,7 @@ void EMfields3D::calculateE(const MImoments& miMoments)
     void *registered_data[1] = {this};
     if (!CG(xkrylovPoisson, krylovPoisson_veclen, bkrylovPoisson, 3000, CGtol, &::PoissonImage, registered_data)) {
       if (get_vct().getCartesian_rank() == 0)
-        cout << "CG not Converged. Trying with GMRes. Consider to increase the number of the CG iterations" << endl;
+        fprintf(timeTasks.get_output(),"CG not Converged. Trying with GMRes. Consider to increase the number of the CG iterations\n");
       eqValue(0.0, xkrylovPoisson, krylovPoisson_veclen);
       GMRES(&::PoissonImage, xkrylovPoisson, krylovPoisson_veclen, bkrylovPoisson, 20, 200, GMREStol, registered_data);
     }
@@ -314,7 +312,7 @@ void EMfields3D::calculateE(const MImoments& miMoments)
 
   }                             // end of divergence cleaning 
   if (get_vct().getCartesian_rank() == 0)
-    cout << "*** MAXWELL SOLVER ***" << endl;
+    fprintf(timeTasks.get_output(),"*** MAXWELL SOLVER ***\n");
   // prepare the source 
   MaxwellSource(bkrylov, miMoments);
   phys2solver(xkrylov, Ex, Ey, Ez, nxn, nyn, nzn);
@@ -908,14 +906,14 @@ void EMfields3D::set_fieldForPcls(array4_double& fieldForPcls, bool sender, MPI_
         }
     gettimeofday(&end,(struct timezone *)0);
 #ifdef SHOWT
-    printf("In offload, write BUFFER for particles, time: %f\n",(1000000*(end.tv_sec - begin.tv_sec)+(end.tv_usec - begin.tv_usec))*0.000001);
+    fprintf(timeTasks.get_output(),"In offload, write BUFFER for particles, time: %f\n",(1000000*(end.tv_sec - begin.tv_sec)+(end.tv_usec - begin.tv_usec))*0.000001);
 #endif
     MPI_Comm parent;
     MPI_Comm_get_parent(&parent);
  
 #ifdef NB_COMM
 #ifdef SHOWT
-    printf("In offload, MPI_ISEND particles, no time measured\n");
+    fprintf(timeTasks.get_output(),"In offload, MPI_ISEND particles, no time measured\n");
 #endif
     MPI_Isend(fieldInfo,nxn*nyn*nzn*6, MPI_DOUBLE, rank, 77, parent, pending_request);
 #else
@@ -923,7 +921,7 @@ void EMfields3D::set_fieldForPcls(array4_double& fieldForPcls, bool sender, MPI_
     MPI_Send(fieldInfo,nxn*nyn*nzn*6, MPI_DOUBLE, rank, 77, parent);
     gettimeofday(&end,(struct timezone *)0);
 #ifdef SHOWT
-    printf("In offload, SEND particles, time: %f\n",(1000000*(end.tv_sec - begin.tv_sec)+(end.tv_usec - begin.tv_usec))*0.000001);
+    fprintf(timeTasks.get_output(),"In offload, SEND particles, time: %f\n",(1000000*(end.tv_sec - begin.tv_sec)+(end.tv_usec - begin.tv_usec))*0.000001);
 #endif
 #endif
   }
@@ -933,7 +931,7 @@ void EMfields3D::set_fieldForPcls(array4_double& fieldForPcls, bool sender, MPI_
     MPI_Recv(fieldInfo,nxn*nyn*nzn*6, MPI_DOUBLE, rank, 77, *clustercomm, &stat);
     gettimeofday(&end,(struct timezone *)0);
 #ifdef SHOWT
-    printf("On host, RECEIVE particles, time: %f\n",(1000000*(end.tv_sec - begin.tv_sec)+(end.tv_usec - begin.tv_usec))*0.000001);
+    fprintf(timeTasks.get_output(),"On host, RECEIVE particles, time: %f\n",(1000000*(end.tv_sec - begin.tv_sec)+(end.tv_usec - begin.tv_usec))*0.000001);
 #endif
     gettimeofday(&begin,(struct timezone *)0);
     for(int i=0;i<nxn;i++)
@@ -955,7 +953,7 @@ void EMfields3D::set_fieldForPcls(array4_double& fieldForPcls, bool sender, MPI_
 	}
    gettimeofday(&end,(struct timezone *)0);
 #ifdef SHOWT
-   printf("On host, read BUFFER for particles, time: %f\n",(1000000*(end.tv_sec - begin.tv_sec)+(end.tv_usec - begin.tv_usec))*0.000001);
+   fprintf(timeTasks.get_output(),"On host, read BUFFER for particles, time: %f\n",(1000000*(end.tv_sec - begin.tv_sec)+(end.tv_usec - begin.tv_usec))*0.000001);
 #endif
   }    
 }
@@ -1051,7 +1049,7 @@ void EMfields3D::advanceB()
   const Grid *grid = &get_grid();
 
   if (vct->getCartesian_rank() == 0)
-    cout << "*** B CALCULATION ***" << endl;
+    fprintf(timeTasks.get_output(),"*** B CALCULATION ***\n");
 
   // calculate the curl of Eth
   grid->curlN2C(tempXC, tempYC, tempZC, Exth, Eyth, Ezth);

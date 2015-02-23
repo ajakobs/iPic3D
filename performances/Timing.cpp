@@ -2,6 +2,7 @@
 #include "stdio.h"
 #include "Timing.h"
 #include "ipic_defs.h"
+#include "TimeTasks.h"
 
 /**
  * 
@@ -55,7 +56,7 @@ void Timing::stopTiming() {
   texecution = tend - tstart;
   if (rank_id == 0) {
     // replace %g with %11.3e?
-    printf( "\n\n*** SIMULATION ENDED SUCESSFULLY ***\n"
+    fprintf(timeTasks.get_output(), "\n\n*** SIMULATION ENDED SUCESSFULLY ***\n"
             " PARSEK Simulation Time: %g sec (%g hours)\n***\n\n",
             texecution, texecution / 3600);
     //cout << endl;

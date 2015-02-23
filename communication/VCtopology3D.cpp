@@ -5,6 +5,7 @@
 #include <iostream>
 #include "MPIdata.h"
 #include "debug.h"
+#include "TimeTasks.h"
 
 using std::cout;
 using std::endl;
@@ -150,21 +151,35 @@ VCtopology3D::~VCtopology3D() {
 }
 /** print topology info */
 void VCtopology3D::Print() {
-  cout << endl;
+  /*cout << endl;
   cout << "Virtual Cartesian Processors Topology" << endl;
   cout << "-------------------------------------" << endl;
   cout << "Processors grid: " << XLEN << "x" << YLEN << "x" << ZLEN << endl;
   cout << "Periodicity X: " << periods[0] << endl;
   cout << "Periodicity Y: " << periods[1] << endl;
   cout << "Periodicity Z: " << periods[2] << endl;
-  cout << endl;
+  cout << endl;*/
+  fprintf(timeTasks.get_output(),"Virtual Cartesian Processors Topology\n"
+		  "-------------------------------------\n"
+		  "Processors grid: %dx%dx%d\n"
+		  "Periodicity X: %d\n"
+		  "Periodicity Y: %d\n"
+		  "Periodicity Z: %d\n"
+		  ,XLEN,YLEN,ZLEN,periods[0],periods[1],periods[2]);
+  fflush(timeTasks.get_output());
 }
 /** print cartesian rank of neighbors and coordinate of process */
 void VCtopology3D::PrintMapping() {
-  cout << endl;
+  /*cout << endl;
   cout << "Mapping of process " << cartesian_rank << endl;
   cout << "----------------------" << endl;
   cout << "Coordinates: X = " << coordinates[0] << "; Y = " << coordinates[1] << "; Z = " << coordinates[2] << endl;
   cout << "Neighbors: xLeft = " << xleft_neighbor << "; xRight = " << xright_neighbor << "; yLeft = " << yleft_neighbor << "; yRight = " << yright_neighbor << "; zLeft = " << zleft_neighbor << "; zRight = " << zright_neighbor << endl;
-  cout << endl;
+  cout << endl;*/
+  fprintf(timeTasks.get_output(),"Mapping of process %d\n"
+		  "----------------------\n"
+		  "Coordinates: X = %d; Y = %d; Z = %d\n"
+		  "Neighbors: xLeft = %d; xRight = %d; yLeft = %d; yRight = %d; zLeft = %d; zRight = %d\n",
+		  cartesian_rank, coordinates[0],coordinates[1],coordinates[2],xleft_neighbor,xright_neighbor,yleft_neighbor,yright_neighbor,zleft_neighbor,zright_neighbor);
+		  
 }

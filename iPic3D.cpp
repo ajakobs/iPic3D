@@ -46,8 +46,9 @@ int main(int argc, const char **argv) {
     MPI_Comm parent;
     MPI_Comm_get_parent(&parent);
     MPI_Comm_rank(parent, &parentRank);
-    MPI_Comm_size(parent,&parentSize);     
- 
+    MPI_Comm_size(parent,&parentSize);
+
+    //timeTasks.set_output("output_cluster.out");
     MIsolver::MIsolver solver(argc,(const char **)argv);
     solver.run_Cluster();
     //trying to call finalize_mpi here leads to the application hanging after "simulation ended succesfully"
@@ -56,6 +57,7 @@ int main(int argc, const char **argv) {
 
 //part which runs on Booster
   {
+    //timeTasks.set_output("output_booster.out");
     iPic3D::c_Solver solver(argc, argv);
     solver.run_Booster(clustercomm);
   }
@@ -66,7 +68,6 @@ int main(int argc, const char **argv) {
   MPIdata::instance().finalize_mpi();
 #else // End of OMPSS_OFFLOAD
   {
-    iPic3D::c_Solver solver(argc, argv);
     /* Set type of solver */
     char **params=(char **)argv;
     SolverType solver_type;
@@ -75,6 +76,10 @@ int main(int argc, const char **argv) {
     solver_type = (MPI_COMM_NULL == clustercomm) ? PARTICLES : FIELDS;
     gethostname(hostname,255);
     if (solver_type == PARTICLES) {
+      //set output from stdout to file
+      timeTasks.set_output("output_booster.out");
+      //solver has to be created here to be able to set different output files beforehand
+      iPic3D::c_Solver solver(argc, argv);
       printf("Particles solver: %d on %s\n",MPIdata::get_rank(),hostname);
       MPI_Info info;
       MPI_Info_create(&info);
@@ -85,6 +90,10 @@ int main(int argc, const char **argv) {
       solver.run_Booster(clustercomm);
     }
     else {
+      //set output from stdout to file
+      timeTasks.set_output("output_cluster.out");
+      //solver has to be created here to be able to set different output files beforehand
+      iPic3D::c_Solver solver(argc, argv);
       printf("Fields solver: %d on %s\n",MPIdata::get_rank(),hostname);
       solver.run_Cluster();
     }
@@ -94,6 +103,7 @@ int main(int argc, const char **argv) {
 #else
   // Placeholder for the normal code
   {
+    //timeTasks.set_output("output.out");
     iPic3D::c_Solver solver(argc, argv);
     solver.run();
   }

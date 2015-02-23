@@ -14,6 +14,7 @@
 #include "errors.h"
 #include "asserts.h" // for assert_ge
 #include "string.h"
+#include "TimeTasks.h"
 
 // order must agree with Enum in Collective.h
 static const char *enumNames[] =
@@ -70,7 +71,7 @@ void Collective::ReadInput(string inputfile) {
 #ifdef BATSRUS
     if(RESTART1)
     {
-      cout<<" The fluid interface can not handle RESTART yet, aborting!\n"<<flush;
+      " The fluid interface can not handle RESTART yet, aborting!\n"<<flush;
       abort();
     }
 #endif
@@ -396,7 +397,7 @@ int Collective::ReadRestart(string inputfile) {
   // Open the setting file for the restart.
   file_id = H5Fopen((inputfile + "/settings.hdf").c_str(), H5F_ACC_RDWR, H5P_DEFAULT);
   if (file_id < 0) {
-    cout << "couldn't open file: " << inputfile << endl;
+    cerr << "couldn't open file: " << inputfile << endl;
     return -1;
   }
 
@@ -610,7 +611,7 @@ int Collective::ReadRestart(string inputfile) {
 
   file_id = H5Fopen((inputfile + "/restart0.hdf").c_str(), H5F_ACC_RDWR, H5P_DEFAULT);
   if (file_id < 0) {
-    cout << "couldn't open file: " << inputfile << endl;
+    cerr << "couldn't open file: " << inputfile << endl;
     return -1;
   }
 
@@ -646,7 +647,7 @@ Collective::Collective(int argc, const char **argv) {
       RESTART1 = true;
     }
     else {
-      cout << "Error: syntax error in mpirun arguments. Did you mean to 'restart' ?" << endl;
+      cerr << "Error: syntax error in mpirun arguments. Did you mean to 'restart' ?" << endl;
       return;
     }
   }
@@ -743,54 +744,53 @@ Collective::~Collective() {
 }
 /*! Print Simulation Parameters */
 void Collective::Print() {
-  cout << endl;
-  cout << "Simulation Parameters" << endl;
-  cout << "---------------------" << endl;
-  cout << "Number of species    = " << ns << endl;
+  fprintf(timeTasks.get_output(),
+		  "Simulation Parameters\n"
+		  "---------------------\n"
+		  "Number of species    = %d\n", ns);
   for (int i = 0; i < ns; i++)
-    cout << "qom[" << i << "] = " << qom[i] << endl;
-  cout << "x-Length                 = " << Lx << endl;
-  cout << "y-Length                 = " << Ly << endl;
-  cout << "z-Length                 = " << Lz << endl;
-  cout << "Number of cells (x)      = " << nxc << endl;
-  cout << "Number of cells (y)      = " << nyc << endl;
-  cout << "Number of cells (z)      = " << nzc << endl;
-  cout << "Time step                = " << dt << endl;
-  cout << "Number of cycles         = " << ncycles << endl;
-  cout << "Results saved in  : " << SaveDirName << endl;
-  cout << "Case type         : " << Case << endl;
-  cout << "Simulation name   : " << SimName << endl;
-  cout << "Poisson correction: " << PoissonCorrection << endl;
-  cout << "---------------------" << endl;
-  cout << "Check Simulation Constraints" << endl;
-  cout << "---------------------" << endl;
-  cout << "Accuracy Constraint:  " << endl;
+    fprintf(timeTasks.get_output(), "qom[%d] = %f\n",i,qom[i]);
+  fprintf(timeTasks.get_output(),
+		  "x-Length                 = %f\n"
+		    "y-Length                 = %f\n"
+		    "z-Length                 = %f\n"
+		    "Number of cells (x)      = %d\n"
+		    "Number of cells (y)      = %d\n"
+		    "Number of cells (z)      = %d\n" 
+		    "Time step                = %f\n" 
+		    "Number of cycles         = %d\n"
+		    "Results saved in  : %s\n"
+		    "Case type         : %s\n"
+		    "Simulation name   : %s\n"
+		    "Poisson correction: %s\n"
+		    "---------------------\n"
+		    "Check Simulation Constraints\n" 
+		    "---------------------\n" 
+		    "Accuracy Constraint:  \n",Lx,Ly,Lz,nxc,nyc,nzc,dt,ncycles,SaveDirName.c_str(),Case.c_str(),SimName.c_str(),PoissonCorrection.c_str());
   for (int i = 0; i < ns; i++) {
-    cout << "u_th < dx/dt species " << i << ".....";
+    fprintf(timeTasks.get_output(),"u_th < dx/dt species %d.....",i);
     if (uth[i] < (dx / dt))
-      cout << "OK" << endl;
+      fprintf(timeTasks.get_output(),"OK\n");
     else
-      cout << "NOT SATISFIED. STOP THE SIMULATION." << endl;
+      fprintf(timeTasks.get_output(),"NOT SATISFIED. STOP THE SIMULATION.\n");
 
-    cout << "v_th < dy/dt species " << i << "......";
+    fprintf(timeTasks.get_output(), "v_th < dy/dt species %d......",i);
     if (vth[i] < (dy / dt))
-      cout << "OK" << endl;
+      fprintf(timeTasks.get_output(),"OK\n");
     else
-      cout << "NOT SATISFIED. STOP THE SIMULATION." << endl;
+      fprintf(timeTasks.get_output(),"NOT SATISFIED. STOP THE SIMULATION.\n");
   }
-  cout << endl;
-  cout << "Finite Grid Stability Constraint:  ";
-  cout << endl;
+  fprintf(timeTasks.get_output(),"\nFinite Grid Stability Constraint:  \n");
   for (int is = 0; is < ns; is++) {
     if (uth[is] * dt / dx > .1)
-      cout << "OK u_th*dt/dx (species " << is << ") = " << uth[is] * dt / dx << " > .1" << endl;
+      fprintf(timeTasks.get_output(), "OK u_th*dt/dx (species %d) = %f > .1\n",is,uth[is] * dt / dx);
     else
-      cout << "WARNING. u_th*dt/dx (species " << is << ") = " << uth[is] * dt / dx << " < .1" << endl;
+      fprintf(timeTasks.get_output(), "WARNING. u_th*dt/dx (species %d) = %f < .1\n",is,uth[is] * dt / dx);
 
     if (vth[is] * dt / dy > .1)
-      cout << "OK v_th*dt/dy (species " << is << ") = " << vth[is] * dt / dy << " > .1" << endl;
+      fprintf(timeTasks.get_output(), "OK v_th*dt/dy (species %d) = %f > .1\n",is, vth[is] * dt / dy);
     else
-      cout << "WARNING. v_th*dt/dy (species " << is << ") = " << vth[is] * dt / dy << " < .1"  << endl;
+      fprintf(timeTasks.get_output(), "WARNING. v_th*dt/dy (species %d) = %f < .1\n",is, vth[is] * dt / dy);
 
   }
 

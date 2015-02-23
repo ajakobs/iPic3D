@@ -440,9 +440,10 @@ void MIsolver::init_from_restart()
 /*! initiliaze EM for GEM challange */
 void MIsolver::initBATSRUS()
 {
-  cout << "------------------------------------------" << endl;
-  cout << "         Initialize from BATSRUS          " << endl;
-  cout << "------------------------------------------" << endl;
+  fprintf(timeTasks.get_output(),
+		  "------------------------------------------\n"
+		  "         Initialize from BATSRUS          \n"
+		  "------------------------------------------\n");
 
   // populating these does nothing so has been removed.
   //
@@ -542,21 +543,22 @@ void MIsolver::initGEM()
   {
     // initialize
     if (vct->getCartesian_rank() == 0) {
-      cout << "------------------------------------------" << endl;
-      cout << "Initialize GEM Challenge with Pertubation" << endl;
-      cout << "------------------------------------------" << endl;
-      cout << "B0x                              = " << B0x << endl;
-      cout << "B0y                              = " << B0y << endl;
-      cout << "B0z                              = " << B0z << endl;
-      cout << "Delta (current sheet thickness) = " << delta << endl;
+      fprintf(timeTasks.get_output(),
+		      "------------------------------------------\n" 
+		      "Initialize GEM Challenge with Pertubation\n"
+		      "------------------------------------------\n"
+		      "B0x                              = %f\n"
+		      "B0y                              = %f\n"
+		      "B0z                              = %f\n"
+		      "Delta (current sheet thickness) = %f\n", B0x,B0y,B0z,delta);
       for (int i = 0; i < ns; i++) {
-        cout << "rho species " << i << " = " << rhoINIT[i];
+        fprintf(timeTasks.get_output(),"rho species %d = %f", i, rhoINIT[i]);
         if (EMf->get_DriftSpecies(i))
-          cout << " DRIFTING " << endl;
+          fprintf(timeTasks.get_output(), " DRIFTING \n");
         else
-          cout << " BACKGROUND " << endl;
+          fprintf(timeTasks.get_output()," BACKGROUND \n");
       }
-      cout << "-------------------------" << endl;
+      fprintf(timeTasks.get_output(), "-------------------------\n");
     }
     for (int i = 0; i < nxn; i++)
       for (int j = 0; j < nyn; j++)
@@ -641,21 +643,22 @@ void MIsolver::initOriginalGEM()
   // initialize using perturbation localized in X
   {
     if (vct->getCartesian_rank() == 0) {
-      cout << "------------------------------------------" << endl;
-      cout << "Initialize GEM Challenge with Pertubation" << endl;
-      cout << "------------------------------------------" << endl;
-      cout << "B0x                              = " << B0x << endl;
-      cout << "B0y                              = " << B0y << endl;
-      cout << "B0z                              = " << B0z << endl;
-      cout << "Delta (current sheet thickness) = " << delta << endl;
+      fprintf(timeTasks.get_output(),
+		      "------------------------------------------\n" 
+		      "Initialize GEM Challenge with Pertubation\n"
+		      "------------------------------------------\n"
+		      "B0x                              = %f\n"
+		      "B0y                              = %f\n"
+		      "B0z                              = %f\n"
+		      "Delta (current sheet thickness) = %f\n", B0x,B0y,B0z,delta);
       for (int i = 0; i < ns; i++) {
-        cout << "rho species " << i << " = " << rhoINIT[i];
+        fprintf(timeTasks.get_output(),"rho species %d = %f", i, rhoINIT[i]);
         if (EMf->get_DriftSpecies(i))
-          cout << " DRIFTING " << endl;
+          fprintf(timeTasks.get_output(), " DRIFTING \n");
         else
-          cout << " BACKGROUND " << endl;
+          fprintf(timeTasks.get_output()," BACKGROUND \n");
       }
-      cout << "-------------------------" << endl;
+      fprintf(timeTasks.get_output(),"-------------------------\n");
     }
     for (int i = 0; i < nxn; i++)
       for (int j = 0; j < nyn; j++)
@@ -998,21 +1001,22 @@ void MIsolver::initDoublePeriodicHarrisWithGaussianHumpPerturbation()
   // initialize
   {
     if (vct->getCartesian_rank() == 0) {
-      cout << "------------------------------------------" << endl;
-      cout << "Initialize GEM Challenge with Pertubation" << endl;
-      cout << "------------------------------------------" << endl;
-      cout << "B0x                              = " << B0x << endl;
-      cout << "B0y                              = " << B0y << endl;
-      cout << "B0z                              = " << B0z << endl;
-      cout << "Delta (current sheet thickness) = " << delta << endl;
+      fprintf(timeTasks.get_output(),
+		      "------------------------------------------\n" 
+		      "Initialize GEM Challenge with Pertubation\n"
+		      "------------------------------------------\n"
+		      "B0x                              = %f\n"
+		      "B0y                              = %f\n"
+		      "B0z                              = %f\n"
+		      "Delta (current sheet thickness) = %f\n", B0x,B0y,B0z,delta);
       for (int i = 0; i < ns; i++) {
-        cout << "rho species " << i << " = " << rhoINIT[i];
+        fprintf(timeTasks.get_output(),"rho species %d = %f", i, rhoINIT[i]);
         if (EMf->get_DriftSpecies(i))
-          cout << " DRIFTING " << endl;
+          fprintf(timeTasks.get_output(), " DRIFTING \n");
         else
-          cout << " BACKGROUND " << endl;
+          fprintf(timeTasks.get_output()," BACKGROUND \n");
       }
-      cout << "-------------------------" << endl;
+      fprintf(timeTasks.get_output(), "-------------------------\n");
     }
     for (int i = 0; i < nxn; i++)
       for (int j = 0; j < nyn; j++)
@@ -1141,21 +1145,22 @@ void MIsolver::initGEMDipoleLikeTailNoPert()
   // initialize
   {
     if (vct->getCartesian_rank() == 0) {
-      cout << "----------------------------------------------" << endl;
-      cout << "Initialize GEM Challenge without Perturbation" << endl;
-      cout << "----------------------------------------------" << endl;
-      cout << "B0x                              = " << B0x << endl;
-      cout << "B0y                              = " << B0y << endl;
-      cout << "B0z                              = " << B0z << endl;
-      cout << "Delta (current sheet thickness) = " << delta << endl;
+      fprintf(timeTasks.get_output(),
+		      "------------------------------------------\n" 
+		      "Initialize GEM Challenge without Pertubation\n"
+		      "------------------------------------------\n"
+		      "B0x                              = %f\n"
+		      "B0y                              = %f\n"
+		      "B0z                              = %f\n"
+		      "Delta (current sheet thickness) = %f\n", B0x,B0y,B0z,delta);
       for (int i = 0; i < ns; i++) {
-        cout << "rho species " << i << " = " << rhoINIT[i];
+        fprintf(timeTasks.get_output(),"rho species %d = %f", i, rhoINIT[i]);
         if (EMf->get_DriftSpecies(i))
-          cout << " DRIFTING " << endl;
+          fprintf(timeTasks.get_output(), " DRIFTING \n");
         else
-          cout << " BACKGROUND " << endl;
+          fprintf(timeTasks.get_output()," BACKGROUND \n");
       }
-      cout << "-------------------------" << endl;
+      fprintf(timeTasks.get_output(), "-------------------------\n");
     }
 
     for (int i = 0; i < nxn; i++)
@@ -1242,21 +1247,22 @@ void MIsolver::initGEMnoPert()
   // initialize
   {
     if (vct->getCartesian_rank() == 0) {
-      cout << "----------------------------------------------" << endl;
-      cout << "Initialize GEM Challenge without Perturbation" << endl;
-      cout << "----------------------------------------------" << endl;
-      cout << "B0x                              = " << B0x << endl;
-      cout << "B0y                              = " << B0y << endl;
-      cout << "B0z                              = " << B0z << endl;
-      cout << "Delta (current sheet thickness) = " << delta << endl;
+      fprintf(timeTasks.get_output(),
+		      "------------------------------------------\n" 
+		      "Initialize GEM Challenge without Pertubation\n"
+		      "------------------------------------------\n"
+		      "B0x                              = %f\n"
+		      "B0y                              = %f\n"
+		      "B0z                              = %f\n"
+		      "Delta (current sheet thickness) = %f\n", B0x,B0y,B0z,delta);
       for (int i = 0; i < ns; i++) {
-        cout << "rho species " << i << " = " << rhoINIT[i];
+        fprintf(timeTasks.get_output(),"rho species %d = %f", i, rhoINIT[i]);
         if (EMf->get_DriftSpecies(i))
-          cout << " DRIFTING " << endl;
+          fprintf(timeTasks.get_output(), " DRIFTING \n");
         else
-          cout << " BACKGROUND " << endl;
+          fprintf(timeTasks.get_output()," BACKGROUND \n");
       }
-      cout << "-------------------------" << endl;
+      fprintf(timeTasks.get_output(), "-------------------------\n");
     }
     for (int i = 0; i < nxn; i++)
       for (int j = 0; j < nyn; j++)
@@ -1327,21 +1333,22 @@ void MIsolver::initRandomField()
   // initialize
   {
     if (vct->getCartesian_rank() ==0){
-      cout << "------------------------------------------" << endl;
-      cout << "Initialize GEM Challenge with Pertubation" << endl;
-      cout << "------------------------------------------" << endl;
-      cout << "B0x                              = " << B0x << endl;
-      cout << "B0y                              = " << B0y << endl;
-      cout << "B0z                              = " << B0z << endl;
-      cout << "Delta (current sheet thickness) = " << delta << endl;
-      for (int i=0; i < ns; i++){
-	cout << "rho species " << i <<" = " << rhoINIT[i];
-	if (EMf->get_DriftSpecies(i))
-	  cout << " DRIFTING " << endl;
-	else
-	  cout << " BACKGROUND " << endl;
+      fprintf(timeTasks.get_output(),
+		      "------------------------------------------\n" 
+		      "Initialize GEM Challenge with Pertubation\n"
+		      "------------------------------------------\n"
+		      "B0x                              = %f\n"
+		      "B0y                              = %f\n"
+		      "B0z                              = %f\n"
+		      "Delta (current sheet thickness) = %f\n", B0x,B0y,B0z,delta);
+      for (int i = 0; i < ns; i++) {
+        fprintf(timeTasks.get_output(),"rho species %d = %f", i, rhoINIT[i]);
+        if (EMf->get_DriftSpecies(i))
+          fprintf(timeTasks.get_output(), " DRIFTING \n");
+        else
+          fprintf(timeTasks.get_output()," BACKGROUND \n");
       }
-      cout << "-------------------------" << endl;
+      fprintf(timeTasks.get_output(), "-------------------------\n");
     }
     double kx;
     double ky;
@@ -1480,17 +1487,18 @@ void MIsolver::initForceFree()
   // initialize
   {
     if (vct->getCartesian_rank() == 0) {
-      cout << "----------------------------------------" << endl;
-      cout << "Initialize Force Free with Perturbation" << endl;
-      cout << "----------------------------------------" << endl;
-      cout << "B0x                              = " << B0x << endl;
-      cout << "B0y                              = " << B0y << endl;
-      cout << "B0z                              = " << B0z << endl;
-      cout << "Delta (current sheet thickness) = " << delta << endl;
+      fprintf(timeTasks.get_output(),
+		      "------------------------------------------\n" 
+		      "Initialize Force Free with Pertubation\n"
+		      "------------------------------------------\n"
+		      "B0x                              = %f\n"
+		      "B0y                              = %f\n"
+		      "B0z                              = %f\n"
+		      "Delta (current sheet thickness) = %f\n", B0x,B0y,B0z,delta);
       for (int i = 0; i < ns; i++) {
-        cout << "rho species " << i << " = " << rhoINIT[i];
+        fprintf(timeTasks.get_output(),"rho species %d = %f", i, rhoINIT[i]);
       }
-      cout << "-------------------------" << endl;
+      fprintf(timeTasks.get_output(), "-------------------------\n");
     }
     for (int i = 0; i < nxn; i++)
       for (int j = 0; j < nyn; j++)
@@ -1772,15 +1780,14 @@ void MIsolver::Finalize() {
 //
 void MIsolver::run_Booster(MPI_Comm clustercomm)
 {
+  //timeTasks.set_output("booster.out");
   initialize(clustercomm);
   // shouldn't we call this?
   //WriteOutput(FirstCycle()-1);
-
   for (int i = FirstCycle(); i <= FinalCycle(); i++)
-//  for (int i = FirstCycle(); i <= 3; i++)
   {
     if (is_rank0())
-      printf(" ======= Cycle %d on Booster ======= \n",i);
+      fprintf(timeTasks.get_output()," ======= Cycle %d on Booster ======= \n",i);
 
     timeTasks.resetCycle();
     advance_Efield_Booster(clustercomm);
@@ -1789,6 +1796,7 @@ void MIsolver::run_Booster(MPI_Comm clustercomm)
     compute_moments_Booster(clustercomm);
     WriteOutput(i);
     // print out total time for all tasks
+    fflush(timeTasks.get_output());
     timeTasks.print_cycle_times(i);
   }
   Finalize();
@@ -1797,9 +1805,8 @@ void MIsolver::run_Booster(MPI_Comm clustercomm)
 void MIsolver::run_Cluster(){
   initialize(MPI_COMM_NULL);
   for (int i = FirstCycle(); i <= FinalCycle(); i++){
-//  for (int i = FirstCycle(); i <= 3; i++){ 
     if (is_rank0())
-      printf(" ======= Cycle %d on Cluster ======= \n",i);
+      fprintf(timeTasks.get_output()," ======= Cycle %d on Cluster ======= \n",i);
     timeTasks.resetCycle();
     advance_Efield_Cluster();
     advance_Bfield_Cluster();
@@ -1808,6 +1815,7 @@ void MIsolver::run_Cluster(){
 	MPI_Wait(&pending_request,MPI_STATUS_IGNORE);
 #endif
     compute_moments_Cluster();
+    fflush(timeTasks.get_output());
     timeTasks.print_cycle_times(i);
   }
   Finalize();
@@ -1817,13 +1825,14 @@ void MIsolver::run(){
   initialize(MPI_COMM_WORLD);
   for (int i = FirstCycle(); i <= FinalCycle(); i++){
     if (is_rank0())
-      printf(" ======= Cycle %d ======= \n",i);
+      fprintf(timeTasks.get_output()," ======= Cycle %d ======= \n",i);
     timeTasks.resetCycle();
     advance_Efield_Cluster();
     move_particles();
     advance_Bfield_Cluster();
     compute_moments_Booster(MPI_COMM_WORLD);
     WriteOutput(i);
+    fflush(timeTasks.get_output());
     timeTasks.print_cycle_times(i);
   }
   Finalize();

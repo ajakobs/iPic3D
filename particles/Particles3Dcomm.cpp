@@ -293,7 +293,7 @@ Particles3Dcomm::Particles3Dcomm(
   // show velocity cap that will be applied
   if(false && is_output_thread())
   {
-    printf("species %d velocity cap: umax=%g,vmax=%g,wmax=%g\n",
+    fprintf(timeTasks.get_output(),"species %d velocity cap: umax=%g,vmax=%g,wmax=%g\n",
       get_species_num(), umax,vmax,wmax);
   }
 }
@@ -1468,34 +1468,29 @@ long long *Particles3Dcomm::getVelocityDistribution(int nBins, double maxVel)con
 /** print particles info */
 void Particles3Dcomm::Print() const
 {
-  cout << endl;
-  cout << "Number of Particles: " << _pcls.size() << endl;
-  cout << "Subgrid (" << vct->getCoordinates(0) << "," << vct->getCoordinates(1) << "," << vct->getCoordinates(2) << ")" << endl;
-  cout << "Xin = " << xstart << "; Xfin = " << xend << endl;
-  cout << "Yin = " << ystart << "; Yfin = " << yend << endl;
-  cout << "Zin = " << zstart << "; Zfin = " << zend << endl;
-  cout << "Number of species = " << get_species_num() << endl;
+  fprintf(timeTasks.get_output(),
+		  "Number of Particles: %d\n"
+		  "Subgrid (%d,%d,%d)\n"
+		  "Xin = %d; Xfin = %d\n"
+		  "Yin = %d; Yfin = %d\n"
+		  "Zin = %d; Zfin = %d\n"
+		  "Number of species = %d\n",
+	       	  _pcls.size(),vct->getCoordinates(0),vct->getCoordinates(1),vct->getCoordinates(2),xstart,xend,ystart,yend,zstart,zend,get_species_num());
   for (int i = 0; i < _pcls.size(); i++)
   {
     const SpeciesParticle& pcl = _pcls[i];
-    cout << "Particle #" << i << ":"
-      << " x=" << pcl.get_x()
-      << " y=" << pcl.get_y()
-      << " z=" << pcl.get_z()
-      << " u=" << pcl.get_u()
-      << " v=" << pcl.get_v()
-      << " w=" << pcl.get_w()
-      << endl;
+    fprintf(timeTasks.get_output(),"Particle #%d: x=%d y=%d z=%d u=%d v=%d w=%d\n",
+		    i,pcl.get_x(),pcl.get_y(),pcl.get_z(),pcl.get_u(),pcl.get_v(),pcl.get_w());
   }
-  cout << endl;
+  fprintf(timeTasks.get_output(),"\n");
 }
 /** print just the number of particles */
 void Particles3Dcomm::PrintNp()  const
 {
-  cout << endl;
-  cout << "Number of Particles of species " << get_species_num() << ": " << getNOP() << endl;
-  cout << "Subgrid (" << vct->getCoordinates(0) << "," << vct->getCoordinates(1) << "," << vct->getCoordinates(2) << ")" << endl;
-  cout << endl;
+  fprintf(timeTasks.get_output(),"\nNumber of Particles of species %d: %d\n"
+		  "Subgrid (%d,%d,%d)\n\n",
+		  get_species_num(),getNOP(),vct->getCoordinates(0),vct->getCoordinates(1),vct->getCoordinates(2));
+
 }
 
 /***** particle sorting routines *****/

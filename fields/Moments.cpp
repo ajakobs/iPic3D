@@ -67,13 +67,13 @@ void MImoments::set_fieldForMoments(bool sender, MPI_Comm *clustercomm){
         }
     gettimeofday(&end,(struct timezone *)0);
 #ifdef SHOWT
-    printf("On host, write BUFFER for Moments, time: %f\n",(1000000*(end.tv_sec - begin.tv_sec)+(end.tv_usec - begin.tv_usec))*0.000001);
+    fprintf(timeTasks.get_output(),"On host, write BUFFER for Moments, time: %f\n",(1000000*(end.tv_sec - begin.tv_sec)+(end.tv_usec - begin.tv_usec))*0.000001);
 #endif
     gettimeofday(&begin,(struct timezone *)0);
     MPI_Send(momentsBuf,totalsize, MPI_DOUBLE, rank, 77, *clustercomm);
     gettimeofday(&end,(struct timezone *)0);
 #ifdef SHOWT
-    printf("On host, SEND moments, time: %f\n",(1000000*(end.tv_sec - begin.tv_sec)+(end.tv_usec - begin.tv_usec))*0.000001);
+    fprintf(timeTasks.get_output(),"On host, SEND moments, time: %f\n",(1000000*(end.tv_sec - begin.tv_sec)+(end.tv_usec - begin.tv_usec))*0.000001);
 #endif
   }
   else{
@@ -84,7 +84,7 @@ void MImoments::set_fieldForMoments(bool sender, MPI_Comm *clustercomm){
     MPI_Recv(momentsBuf,totalsize, MPI_DOUBLE, rank, 77, parent, &stat);
     gettimeofday(&end,(struct timezone *)0);
 #ifdef SHOWT
-    printf("In offload, RECEIVE Moments, time: %f\n",(1000000*(end.tv_sec - begin.tv_sec)+(end.tv_usec - begin.tv_usec))*0.000001);
+    fprintf(timeTasks.get_output(),"In offload, RECEIVE Moments, time: %f\n",(1000000*(end.tv_sec - begin.tv_sec)+(end.tv_usec - begin.tv_usec))*0.000001);
 #endif
     gettimeofday(&begin,(struct timezone *)0);
     //for(int l=0;l<ns;l++){
@@ -108,7 +108,7 @@ void MImoments::set_fieldForMoments(bool sender, MPI_Comm *clustercomm){
         }
    gettimeofday(&end,(struct timezone *)0);
 #ifdef SHOWT
-   printf("In offload, read BUFFER for Moments, time: %f\n",(1000000*(end.tv_sec - begin.tv_sec)+(end.tv_usec - begin.tv_usec))*0.000001);
+   fprintf(timeTasks.get_output(),"In offload, read BUFFER for Moments, time: %f\n",(1000000*(end.tv_sec - begin.tv_sec)+(end.tv_usec - begin.tv_usec))*0.000001);
 #endif
   }
 }

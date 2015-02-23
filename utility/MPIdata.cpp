@@ -8,6 +8,7 @@
 #include <mpi.h>
 #endif
 #include "ompdefs.h" // for omp_get_max_threads
+#include "TimeTasks.h"
 
 // code to check that init() is called before instance()
 //
@@ -73,7 +74,7 @@ void MPIdata::finalize_mpi() {
 }
 
 void MPIdata::Print(void) {
-  printf("\n"
+  fprintf(timeTasks.get_output(),"\n"
     "Number of processes = %d\n"
     "-------------------------\n"
     "Number of threads = %d\n"

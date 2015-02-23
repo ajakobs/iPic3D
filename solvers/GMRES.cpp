@@ -56,9 +56,10 @@ void GMRES(GMRES_CALLBACK function_image, double *xkrylov, int xkrylovlen,
 
 
   if (GMRESVERBOSE && is_output_thread()) {
-    printf( "------------------------------------\n"
-            "-             GMRES                -\n"
-            "------------------------------------\n\n");
+    fprintf(timeTasks.get_output(),
+		    "------------------------------------\n"
+		    "-             GMRES                -\n"
+		    "------------------------------------\n\n");
   }
 
   double normb = normP(b, xkrylovlen);
@@ -75,14 +76,14 @@ void GMRES(GMRES_CALLBACK function_image, double *xkrylov, int xkrylovlen,
 
     if (itr == 0) {
       if (is_output_thread())
-        printf("Initial residual: %g norm b vector (source) = %g\n",
+        fprintf(timeTasks.get_output(),"Initial residual: %g norm b vector (source) = %g\n",
           initial_error, normb);
         //cout << "Initial residual: " << initial_error << " norm b vector (source) = " << normb << endl;
       rho_tol = initial_error * tol;
 
       if ((initial_error / normb) <= tol) {
         if (is_output_thread())
-          printf("GMRES converged without iterations: initial error < tolerance\n");
+          fprintf(timeTasks.get_output(),"GMRES converged without iterations: initial error < tolerance\n");
           //cout << "GMRES converged without iterations: initial error < tolerance" << endl;
         break;
       }
@@ -189,7 +190,7 @@ void GMRES(GMRES_CALLBACK function_image, double *xkrylov, int xkrylovlen,
     if (initial_error <= rho_tol) {
       if (is_output_thread())
       {
-        printf("GMRES converged at restart # %d; iteration #%d with error: %g\n",
+        fprintf(timeTasks.get_output(),"GMRES converged at restart # %d; iteration #%d with error: %g\n",
           itr, k,  initial_error / rho_tol * tol);
         //cout << "GMRES converged at restart # " << itr << "; iteration #" << k << " with error: " << initial_error / rho_tol * tol << endl;
       }
@@ -197,17 +198,18 @@ void GMRES(GMRES_CALLBACK function_image, double *xkrylov, int xkrylovlen,
     }
     if (is_output_thread() && GMRESVERBOSE)
     {
-      printf("Restart: %d error: %g\n", itr,  initial_error / rho_tol * tol);
+      fprintf(timeTasks.get_output(),"Restart: %d error: %g\n", itr,  initial_error / rho_tol * tol);
       //cout << "Restart: " << itr << " error: " << initial_error / rho_tol * tol << endl;
     }
 
   }
   if(itr==max_iter && is_output_thread())
   {
-    printf("GMRES not converged !! Final error: %g\n",
+    fprintf(timeTasks.get_output(),"GMRES not converged !! Final error: %g\n",
       initial_error / rho_tol * tol);
     //cout << "GMRES not converged !! Final error: " << initial_error / rho_tol * tol << endl;
   }
+  fflush(timeTasks.get_output());
 
   delete[]r;
   delete[]im;

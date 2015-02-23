@@ -228,6 +228,17 @@ void TimeTasks::end_allreduce(double start_time)
   task_duration[FLDS_MPI_ALLREDUCE] += additional_communication_time;
 }
 
+bool TimeTasks::set_output(char* fname)
+{
+   file = fopen(fname,"w");
+   if(file==NULL){
+	file=stdout;
+	return false;
+   }
+   else 
+	return true;
+}
+
 void TimeTasks::print_cycle_times(int cycle,
   double* tskdur,
   const char* reduce_mode)
@@ -235,7 +246,6 @@ void TimeTasks::print_cycle_times(int cycle,
   // restrict output to master process
   //
   if(MPIdata::get_rank()) return;
-  FILE* file = stdout;
   {
     fflush(file);
     double commun[NUMBER_OF_TASKS];
@@ -363,16 +373,16 @@ void TimeTasks::print_cycle_times(int cycle)
 {
   assert(!omp_get_thread_num());
 
-  if(!MPIdata::get_rank()) fflush(stdout);
+  if(!MPIdata::get_rank()) fflush(file);
   //printf0("=== times for cycle %d (main process) ===\n", cycle);
   //print_cycle_times(cycle, task_duration, "main");
   //printf0("=== times for cycle %d (maximum over all processes) ===\n", cycle);
   //print_cycle_times(cycle, task_duration, "max");
-  printf0("=== times for cycle %d (averaged over all processes) ===\n", cycle);
+  if(!MPIdata::get_rank()) fprintf(file,"=== times for cycle %d (averaged over all processes) ===\n", cycle);
   print_cycle_times(cycle, task_duration, "avg");
   //printf0("=== times for cycle %d (minimum over all processes) ===\n", cycle);
   //print_cycle_times(cycle, task_duration, "min");
-  if(!MPIdata::get_rank()) fflush(stdout);
+  if(!MPIdata::get_rank()) fflush(file);
 }
 
 // The following three methods provide for a hack by which

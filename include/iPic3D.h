@@ -8,6 +8,9 @@
 
 namespace iPic3D
 {
+
+  extern MIsolver solver;
+
   // solver that chooses initial and boundary
   // conditions based on configuration
   // (move this into apps directory).

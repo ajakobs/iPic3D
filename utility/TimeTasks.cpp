@@ -239,6 +239,15 @@ bool TimeTasks::set_output(char* fname)
 	return true;
 }
 
+void TimeTasks::close_output()
+{
+	if(file!=stdout)
+	{
+		fflush(file);
+		fclose(file);
+	}
+}
+
 void TimeTasks::print_cycle_times(int cycle,
   double* tskdur,
   const char* reduce_mode)

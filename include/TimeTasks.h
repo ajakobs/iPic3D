@@ -130,6 +130,7 @@ class TimeTasks
   void print_cycle_times(int cycle);
   bool set_output(char* fname);
   FILE* get_output(){ return file; }
+  void close_output();
  
 private:
 

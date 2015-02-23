@@ -922,6 +922,7 @@ void EMfields3D::set_fieldForPcls(array4_double& fieldForPcls, bool sender, MPI_
     gettimeofday(&end,(struct timezone *)0);
 #ifdef SHOWT
     fprintf(timeTasks.get_output(),"In offload, SEND particles, time: %f\n",(1000000*(end.tv_sec - begin.tv_sec)+(end.tv_usec - begin.tv_usec))*0.000001);
+    fflush(timeTasks.get_output());
 #endif
 #endif
   }
@@ -954,6 +955,7 @@ void EMfields3D::set_fieldForPcls(array4_double& fieldForPcls, bool sender, MPI_
    gettimeofday(&end,(struct timezone *)0);
 #ifdef SHOWT
    fprintf(timeTasks.get_output(),"On host, read BUFFER for particles, time: %f\n",(1000000*(end.tv_sec - begin.tv_sec)+(end.tv_usec - begin.tv_usec))*0.000001);
+   fflush(timeTasks.get_output());
 #endif
   }    
 }

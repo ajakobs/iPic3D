@@ -20,7 +20,7 @@ int main(int argc, const char **argv) {
   MPI_Comm_rank(MPI_COMM_WORLD,&rank);
   MPI_Comm_size(MPI_COMM_WORLD,&size);
 #ifdef OMPSS_OFFLOAD
-  deep_booster_alloc(MPI_COMM_WORLD, 1, 4, &clustercomm);
+  deep_booster_alloc(MPI_COMM_WORLD, 1, size, &clustercomm);
 
   /* Serialise argc and argv */
   char *argv_ser = arg_serializer(argc, argv);
@@ -38,11 +38,11 @@ int main(int argc, const char **argv) {
    char **argv;
    int argc = 0;
    arg_deserializer(argv_ser, &argc, &argv);
-   printf("argv: %s %s\n",argv[0],argv[1]);
+   //printf("argv: %s %s\n",argv[0],argv[1]);
 
     MPIdata::init(&argc, (const char **)argv);
     Parameters::init_parameters();
-    int parentSize, parentRank, test=5;
+    int parentSize, parentRank;
     MPI_Comm parent;
     MPI_Comm_get_parent(&parent);
     MPI_Comm_rank(parent, &parentRank);

@@ -1298,7 +1298,7 @@ void Particles3D::repopulate_particles()
     return;
 
   if (vct->getCartesian_rank()==0){
-    fprintf(timeTasks.get_output(),"*** Repopulator species %d ***\n");
+    fprintf(timeTasks.get_output(),"*** Repopulator species %d ***\n",is);
   }
 
   // if this is not a boundary process then there is nothing to do

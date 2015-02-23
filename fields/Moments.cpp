@@ -85,6 +85,7 @@ void MImoments::set_fieldForMoments(bool sender, MPI_Comm *clustercomm){
     gettimeofday(&end,(struct timezone *)0);
 #ifdef SHOWT
     fprintf(timeTasks.get_output(),"In offload, RECEIVE Moments, time: %f\n",(1000000*(end.tv_sec - begin.tv_sec)+(end.tv_usec - begin.tv_usec))*0.000001);
+    fflush(timeTasks.get_output());
 #endif
     gettimeofday(&begin,(struct timezone *)0);
     //for(int l=0;l<ns;l++){
@@ -109,6 +110,7 @@ void MImoments::set_fieldForMoments(bool sender, MPI_Comm *clustercomm){
    gettimeofday(&end,(struct timezone *)0);
 #ifdef SHOWT
    fprintf(timeTasks.get_output(),"In offload, read BUFFER for Moments, time: %f\n",(1000000*(end.tv_sec - begin.tv_sec)+(end.tv_usec - begin.tv_usec))*0.000001);
+   fflush(timeTasks.get_output());
 #endif
   }
 }

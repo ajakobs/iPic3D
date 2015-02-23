@@ -1740,6 +1740,8 @@ void MIsolver::Finalize() {
 
   // stop profiling
   my_clock->stopTiming();
+ //if file is used for output it is closed here
+  timeTasks.close_output();
 }
 
 // Flow structure of application (pseudocode).

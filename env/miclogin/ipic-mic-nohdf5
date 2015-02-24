@@ -11,6 +11,8 @@ proc ModulesHelp { } {
 ## Create a whatis file.  Not necessary but cool.
 module-whatis   "set environment to run iPic3D on MIC"
 
-module load ipic-mic-base
+module load ipic-base
+module load parastation/psmpi-intel-mic-mt-5.1.1-1_9_gc3ebd7b
 
 setenv IPIC_CMAKE_ARGS "-DCMAKE_CXX_FLAGS='-DNB_COMM -DOFFLOAD -O3 -openmp -fno-exceptions -fp-model fast=2 -vec-report -mmic' -DIPIC_HDF5_OUTPUT=OFF"
+setenv IPIC_RUNENV miclogin.mic

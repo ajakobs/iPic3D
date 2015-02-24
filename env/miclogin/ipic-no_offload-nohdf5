@@ -11,6 +11,7 @@ puts stderr "***************************************************************"
 module-whatis "set environment for iPic3D"
 
 module load ipic-no_offload-base
+module load parastation/psmpi-intel-mt-5.1.1-1_9_gc3ebd7b
 
 setenv IPIC_RUNENV miclogin.xeon
 setenv I_MPI_FABRICS shm:tcp

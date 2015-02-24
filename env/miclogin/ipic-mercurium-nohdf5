@@ -11,6 +11,7 @@ puts stderr "***************************************************************"
 module-whatis "set environment for iPic3D"
 
 module load ipic-mercurium-base
+module load parastation/psmpi-intel-mt-5.1.1-1_9_gc3ebd7b
 
 setenv I_MPI_FABRICS shm:tcp
 setenv IPIC_CMAKE_ARGS "-DCMAKE_CXX_FLAGS='-DNB_COMM -DOMPSS_OFFLOAD -DSHOWT --ompss -fno-exceptions -O3 -vec-report -ldl -Wl,--export-dynamic -lnsl -lutil -lm' -DIPIC_HDF5_OUTPUT=OFF "

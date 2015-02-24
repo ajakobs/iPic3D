@@ -14,7 +14,6 @@ module-whatis "base environment for iPic3D"
 #
 #module load impi
 module load intel/2015.1.133
-module load parastation/psmpi-intel-mt-5.1.1-1_9_gc3ebd7b
 module load parastation/pscom/pscom
 
 # prefixing with mpi results in link error:

@@ -7,4 +7,8 @@ ipic cmake
 make
 export PBS_NODEFILE=../env/miclogin/no_offload_hosts
 export MPIEXEC_UNIVERSE_SIZE=4
-mpiexec -np 4 ./iPic3D parameters.inp
+
+cd ..
+echo "... created executable for no_offload version on xeon in build.no_offload "
+## for execution use
+## mpiexec -np 4 ./iPic3D parameters.inp

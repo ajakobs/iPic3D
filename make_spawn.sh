@@ -22,3 +22,5 @@ ipic cmake
 make
 mv iPic3D iPic3D.mic
 
+cd ..
+echo "... created executables for spawn offload version in build.xeon and build.xeonphi "

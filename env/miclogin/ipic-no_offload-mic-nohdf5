@@ -12,6 +12,6 @@ module-whatis "set environment for iPic3D"
 
 module load ipic-no_offload-base
 
-setenv IPIC_RUNENV miclogin.xeon
-setenv I_MPI_FABRICS shm:tcp
-setenv IPIC_CMAKE_ARGS "-DCMAKE_CXX_FLAGS='-openmp -fno-exceptions -O3 -xHost -vec-report' -DIPIC_HDF5_OUTPUT=OFF"
+setenv IPIC_RUNENV miclogin.mic
+#setenv I_MPI_FABRICS shm:tcp
+setenv IPIC_CMAKE_ARGS "-DCMAKE_CXX_FLAGS='-O3 -openmp -fno-exceptions -fp-model fast=2 -vec-report -mmic' -DIPIC_HDF5_OUTPUT=OFF"

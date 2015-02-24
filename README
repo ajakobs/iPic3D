@@ -1,57 +1,95 @@
 
 To install and run iPic3D, you need to do the following:
 
-  # make sure that you have installed MPI and HDF5
+ Make sure that you have installed MPI
 
-  # get the code:
-  git clone https://github.com/ajakobs/iPic3D.git ipic3d
-  # or
-  git clone git@github.com:ajakobs/iPic3D.git ipic3d
+ Get the code:
+   git clone https://github.com/ajakobs/iPic3D.git ipic3d
+ or
+   git clone git@github.com:ajakobs/iPic3D.git ipic3d
+ Checkout the correct branch
+   git checkout origin/develop  
 
-  # set the following bootstrapping environment variable
-  # (e.g. in ~/.profile):
-  export IPIC_HOME="$HOME/ipic3d"
+ Set the following bootstrapping environment variable (e.g. in ~/.profile)
+ to the path where created the git repository, for example:
+   export IPIC_HOME="$HOME/ipic3d"
 
-  # if running on a system for which ipic3d/env/system_name
-  # exists, you just need to load the appropriate module, e.g.:
-  #
-  module use $IPIC_HOME/env/judge
-  module load ipic
+ For some systems like the knc cluster in Juelich or the DEEP
+ cluster use the existing module files:
+ 
+   module use $IPIC_HOME/env/miclogin
+   module load ipic-nohdf5
+  
+ If porting to system_name, you can create a module for your
+ system, e.g. by copying modules in env/miclogin and modifying
+ as appropriate; when you succeed, please contribute your
+ modules so that others can benefit from your work!
+ 
+ If you do not have the module command (e.g. if you are
+ running on your own laptop) then you need to define some
+ environment variables by hand, e.g.:
+ 
+ on a system with modules the appropriate directory
+ would be revealed with e.g. "module show hdf5-par":
+   export HDF5_ROOT="/usr/local/hdf5-par"
+ 
+ Give access to the ipic script
+   export PATH=$IPIC_HOME/scripts:$PATH
+ This is used by the scripts in $IPIC_HOME/scripts
+   export IPIC_MPIRUN="mpiexec"
 
-  # when using the miclogin use
-  #
-  module use $IPIC_HOME/env/miclogin
-  module load ipic-nohdf5
-  #
-  # if porting to system_name, you can create a module for your
-  # system, e.g. by copying modules in env/judge and modifying
-  # as appropriate; when you succeed, please contribute your
-  # modules so that others can benefit from your work!
-  #
-  # if you do not have the module command (e.g. if you are
-  # running on your own laptop) then you need to define some
-  # environment variables by hand, e.g.:
-  #
-  # on a system with modules the appropriate directory
-  # would be revealed with e.g. "module show hdf5-par":
-  export HDF5_ROOT="/usr/local/hdf5-par"
-  # give access to the ipic script
-  export PATH=$IPIC_HOME/scripts:$PATH
-  # this is used by the scripts in $IPIC_HOME/scripts
-  export IPIC_MPIRUN="mpiexec"
+ For the miclogin system scripts for compiling the application are provided.
+ They will load the modules needed and create the build folders. 
+ Four different versions of the application can be generated:
+ 
+ no offload either for xeon
+	. make_no_offload.sh
+ or xeon phi
+  	. make_no_offload_mic.sh
+ offload with OmpSs or 
+	. make_ompss.sh
+ offload with MPI_Comm_spawn
+	. make_spawn.sh
 
-  # create a build directory
-  mkdir build
-  cd build
-  # configure
-  ipic cmake
-  # compile
-  make
-  # run
-  ipic run
+ If you want to run one of the offload versions you can adapt the 
+ file that lists the nodes where to start all processes;
+ for OmpSs it's env/miclogin/offload_hosts
+   knc1-mic0
+   knc1-mic0
+   knc1-mic0
+   knc1-mic0
+   knc1
+   knc1
+   knc1
+   knc1
 
-  # get help
-  ipic help
+ for the spawn version use scripts/spawnfile to specify where to  
+ start the offloaded processes
+   knc1
+   knc1
+   knc1
+   knc1
+
+ If you want to use more than 4 host processes / 8 in total you have to set
+   export MPIEXEC_UNIVERSE_SIZE=<number of processes on host + number of offloaded processes>
+
+ and you need to change the number of subdomains in the input file (parameters.inp in 
+ your build folder) so that XLENxYLENxZLEN = # host processes
+
+   # number of MPI subdomains in each direction
+   XLEN = 2
+   YLEN = 2
+   ZLEN = 1
+
+ For executing the program change to the build folder (for spawn the .xeonphi one
+ if you want to do reverse offload) and use the command
+ 
+   mpiexec -np 4 ./iPic3D.mic parameters.inp
+
+  For problems with the ipic command try
+    ipic help
+
+
 
 If you want to use the new output format, you need to obtain
 the H5hut code from Jorge Amaya.  To compile and install it:
@@ -91,40 +129,3 @@ And then we can run:
   rm data/*; ipic run
 
 
-
-############ Use the reverse offload:
-export IPIC_HOME="$HOME/ipic3d"
-
-module use $IPIC_HOME/env/miclogin
-
-Adapt the hostfile (env/miclogin/offload_hosts), for example:
-knc1-mic0
-knc1-mic0
-knc1-mic0
-knc1-mic0
-knc1
-knc1
-knc1
-knc1
-
-Adapt the spawnfile (scripts/spawnfile), for example:
-knc1
-knc1
-knc1
-knc1
-
-export MPIEXEC_UNIVERSE_SIZE=<number of processes on host + number of offloaded processes>
-
-export PBS_NODEFILE=../env/miclogin/offload_hosts
-
-### OmpSs Offload:
-./create_executables_ompss.sh
-cd build
-module load ipic-mercurium-mic-nohdf5
-mpiexec -np 4 ./iPic3D.mic parameters.inp
-
-### Offload with MPI_Comm_spawn:
-./create_executables_spawn.sh
-cd build.xeonphi
-module load ipic-mic-nohdf5
-mpiexec -np 4 ./iPic3D.mic parameters.inp

@@ -13,8 +13,9 @@ module-whatis "base environment for iPic3D"
 # compiling
 #
 #module load impi
-module load intel
-module load parastation
+module load intel/2015.1.133
+module load parastation/psmpi-intel-mic-mt-5.1.1-1_9_gc3ebd7b
+module load parastation/pscom/pscom
 # prefixing with mpi results in link error:
 # ld: MPIR_Thread: TLS definition in /opt/intel/impi/4.1.2.040/intel64/lib/libmpi_mt.so section .tbss mismatches non-TLS definition in /opt/intel/impi/4.1.2.040/        +intel64/lib/libmpi.so section .bss
 # /opt/intel/impi/4.1.2.040/intel64/lib/libmpi_mt.so: could not read symbols: Bad value
@@ -38,5 +39,5 @@ prepend-path PATH $env(IPIC_HOME)/scripts
 # library needed if you want to use nanox to offload
 prepend-path LD_LIBRARY_PATH /home/fsainz/runtime/nanox-mpi-15122014/lib/performance
 #setenv PSI_HOSTFILE $env(IPIC_HOME)/env/miclogin/offload_hosts
+#
 
-setenv IPIC_RUNENV miclogin.xeon

@@ -51,7 +51,9 @@ bool Kinetics::moveParticles(const_arr4_double fieldForPcls)
     timeTasks_set_main_task(TimeTasks::PARTICLES);
     for (int is = 0; is < ns; is++)
       speciesPcls[is].pad_capacities();
-    //#pragma omp parallel
+    #ifdef OPENMP
+    #pragma omp parallel
+    #endif
     {
     for (int is = 0; is < ns; is++)  // move each species
     {
@@ -82,7 +84,9 @@ bool Kinetics::moveParticles(const_arr4_double fieldForPcls)
           unsupported_value_error(Parameters::get_MOVER_TYPE());
       }
       // overlap initial communication of electrons with moving of ions
-      //#pragma omp master
+      #ifdef OPENMP
+      #pragma omp master
+      #endif
       speciesPcls[is].separate_and_send_particles();
     }
     }

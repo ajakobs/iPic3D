@@ -118,7 +118,9 @@ void MIsolver::accumulate_moments()
   /* Do we need the I_am_kinetic_solver() and I_am_field_solver() functions here? Thi hole accumumulate_moments() function runs only onto the booster...*/
   if(I_am_kinetic_solver())
   {
-    //#pragma omp parallel 
+    #ifdef OPENMP
+    #pragma omp parallel
+    #endif 
     for (int is = 0; is < ns; is++)
     {
       Particles3Dcomm& pcls = kinetics->fetch_pcls(is);

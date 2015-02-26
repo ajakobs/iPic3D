@@ -866,7 +866,6 @@ void EMfields3D::set_fieldForPcls(array4_double& fieldForPcls, bool sender, MPI_
 #endif
 {
   //EMf->set_fieldForPcls(fetch_fieldForPcls());
-  //#pragma omp parallel for collapse(1)
   double *fieldInfo;
   fieldInfo=(double*)malloc(sizeof(double)*nxn*nyn*nzn*6);
   int rank;
@@ -875,6 +874,9 @@ void EMfields3D::set_fieldForPcls(array4_double& fieldForPcls, bool sender, MPI_
   struct timeval begin, end;
   if(sender){
     gettimeofday(&begin,(struct timezone *)0);
+    #ifdef OPENMP
+    #pragma omp parallel for collapse(2)
+    #endif
     for(int i=0;i<nxn;i++)
       for(int j=0;j<nyn;j++)
         for(int k=0;k<nzn;k++)
@@ -935,6 +937,9 @@ void EMfields3D::set_fieldForPcls(array4_double& fieldForPcls, bool sender, MPI_
     fprintf(timeTasks.get_output(),"On host, RECEIVE particles, time: %f\n",(1000000*(end.tv_sec - begin.tv_sec)+(end.tv_usec - begin.tv_usec))*0.000001);
 #endif
     gettimeofday(&begin,(struct timezone *)0);
+    #ifdef OPENMP
+    #pragma omp parallel for collapse(2)
+    #endif
     for(int i=0;i<nxn;i++)
       for(int j=0;j<nyn;j++)
         for(int k=0;k<nzn;k++)
@@ -963,7 +968,9 @@ void EMfields3D::set_fieldForPcls(array4_double& fieldForPcls, bool sender, MPI_
 void EMfields3D::set_fieldForPcls(array4_double& fieldForPcls)
 {
   //EMf->set_fieldForPcls(fetch_fieldForPcls());
+  #ifdef OPENMP
   #pragma omp parallel for collapse(2)
+  #endif
   for(int i=0;i<nxn;i++)
   for(int j=0;j<nyn;j++)
   for(int k=0;k<nzn;k++)

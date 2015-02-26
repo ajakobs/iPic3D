@@ -2,3 +2,4 @@ build
 build.xeon
 build.xeonphi
 build.no_offload
+build.ompss

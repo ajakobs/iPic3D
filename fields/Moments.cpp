@@ -47,6 +47,11 @@ void MImoments::set_fieldForMoments(bool sender, MPI_Comm *clustercomm){
   if(sender){
     gettimeofday(&begin,(struct timezone *)0);
 	  //for(int l=0;l<ns;l++){
+    #ifdef OPENMP
+    #pragma omp parallel for collapse(2)
+    //#else
+    //#pragma omp for
+    #endif
     for(int i=0;i<nxn;i++)
       for(int j=0;j<nyn;j++)
         for(int k=0;k<nzn;k++){
@@ -89,6 +94,11 @@ void MImoments::set_fieldForMoments(bool sender, MPI_Comm *clustercomm){
 #endif
     gettimeofday(&begin,(struct timezone *)0);
     //for(int l=0;l<ns;l++){
+    #ifdef OPENMP
+    #pragma omp parallel for collapse(2)
+    #else
+    #pragma omp for
+    #endif
     for(int i=0;i<nxn;i++)
       for(int j=0;j<nyn;j++)
         for(int k=0;k<nzn;k++){

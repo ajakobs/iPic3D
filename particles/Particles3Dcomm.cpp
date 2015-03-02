@@ -1746,6 +1746,8 @@ void Particles3Dcomm::copyParticlesToSoA()
  #ifndef __MIC__
   #ifdef OPENMP
   #pragma omp for
+  #else 
+  #pragma omp for
   #endif
   for(int pidx=0; pidx<nop; pidx++)
   {
@@ -1764,6 +1766,8 @@ void Particles3Dcomm::copyParticlesToSoA()
   // copy and transpose data 8 particles at a time
   assert_divides(8,u.capacity());
   #ifdef OPENMP
+  #pragma omp for
+  #else
   #pragma omp for
   #endif
   for(int pidx=0; pidx<nop; pidx+=8)
@@ -1806,6 +1810,8 @@ void Particles3Dcomm::copyParticlesToAoS()
   // use a simple stride-8 gather
   #ifdef OPENMP
   #pragma omp for
+  #else
+  #pragma omp for
   #endif
   for(int pidx=0; pidx<nop; pidx++)
   {
@@ -1818,6 +1824,8 @@ void Particles3Dcomm::copyParticlesToAoS()
   // transposing each block of particles
   assert_divides(8,_pcls.capacity());
   #ifdef OPENMP
+  #pragma omp for
+  #else
   #pragma omp for
   #endif
   for(int pidx=0; pidx<nop; pidx+=8)

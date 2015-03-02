@@ -365,6 +365,8 @@ void Particles3D::mover_PC(const_arr4_double fieldForPcls) {
   const double dto2 = .5 * dt, qdto2mc = qom * dto2 / c;
   #ifdef OPENMP
   #pragma omp for schedule(static)
+  #else
+  #pragma omp for
   #endif
   // why does single precision make no difference in execution speed?
   //#pragma simd vectorlength(VECTOR_WIDTH)
@@ -528,6 +530,8 @@ void Particles3D::mover_PC_AoS(const_arr4_double fieldForPcls)
   const double dto2 = .5 * dt, qdto2mc = qom * dto2 / c;
   #ifdef OPENMP
   #pragma omp for schedule(static)
+  #else
+  #pragma omp for
   #endif
   for (int pidx = 0; pidx < getNOP(); pidx++) {
     // copy the particle
@@ -693,6 +697,8 @@ void Particles3D::mover_PC_AoS_vec_intr(const_arr4_double fieldForPcls)
   const F64vec8 qdto2mc = F64vec8(qdto2mc_d);
   #ifdef OPENMP
   #pragma omp for schedule(static)
+  //#else
+  //#pragma omp for
   #endif
   for (int pidx = 0; pidx < getNOP(); pidx+=2)
   {
@@ -800,6 +806,8 @@ void Particles3D::mover_PC_AoS_vec(const_arr4_double fieldForPcls)
   const double dto2 = .5 * dt, qdto2mc = qom * dto2 / c;
   #ifdef OPENMP
   #pragma omp for schedule(static)
+  #else
+  #pragma omp for
   #endif
   for (int pidx = 0; pidx < getNOP(); pidx+=NUM_PCLS_MOVED_AT_A_TIME)
   {

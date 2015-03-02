@@ -603,6 +603,8 @@ void SpeciesMoms::setZeroSpeciesMoms(int is)
   //
   #ifdef OPENMP
   #pragma omp for collapse(2)
+  //#else
+  //#pragma omp for
   #endif
   for (register int i = 0; i < nxn; i++)
   for (register int j = 0; j < nyn; j++)
@@ -666,6 +668,8 @@ void SpeciesMoms::sumMomentsOld(const Particles3Dcomm& pcls)
     // compiler is stupid.  Therefore we should on the one hand
     // expand things out and on the other hand avoid repeating computations.
     #ifdef OPENMP
+    #pragma omp for
+    #else
     #pragma omp for
     #endif
     for (int i = 0; i < nop; i++)
@@ -928,6 +932,8 @@ void SpeciesMoms::sumMoments_vec(const Particles3Dcomm& pcls)
       }
       #ifdef OPENMP
       #pragma omp for
+      #else
+      #pragma omp for
       #endif
       for (int p0 = 0; p0 < nop; p0+=Np)
       {
@@ -1087,6 +1093,8 @@ void SpeciesMoms::sumMoments_vec(const Particles3Dcomm& pcls)
 	//
         #ifdef OPENMP
         #pragma omp for
+        #else
+        #pragma omp for
         #endif
         for(int it=0;it<num_threads;it++)
         for(int im=0;im<10;im++)
@@ -1118,6 +1126,8 @@ void SpeciesMoms::sumMoments_vec(const Particles3Dcomm& pcls)
         //
           for(int it=0;it<num_threads;it++)
           #ifdef OPENMP
+          #pragma omp for
+          #else
           #pragma omp for
           #endif
           for(int im=0;im<10;im++)
@@ -1211,6 +1221,8 @@ void SpeciesMoms::sumMoments(const Particles3Dcomm& pcls)
     // expand things out and on the other hand avoid repeating computations.
     #ifdef OPENMP
     #pragma omp for // used nowait with the old way
+    #else
+    #pragma omp for
     #endif
     for (int i = 0; i < nop; i++)
     {
@@ -1316,6 +1328,8 @@ void SpeciesMoms::sumMoments(const Particles3Dcomm& pcls)
       arr4_double moments = fetch_moments10Array(thread_num).fetch_arr();
       #ifdef OPENMP
       #pragma omp for collapse(2)
+      #else
+      #pragma omp for
       #endif
       for(int i=0;i<nxn;i++)
       for(int j=0;j<nyn;j++)
@@ -1414,6 +1428,8 @@ void SpeciesMoms::sumMoments_AoS(const Particles3Dcomm& pcls)
     #ifdef OPENMP
     #pragma omp barrier
     #pragma omp for
+    //#else
+    //#pragma omp for
     #endif
     for (int pidx = 0; pidx < nop; pidx++)
     {
@@ -1514,6 +1530,8 @@ void SpeciesMoms::sumMoments_AoS(const Particles3Dcomm& pcls)
       arr4_double moments = fetch_moments10Array(thread_num).fetch_arr();
       #ifdef OPENMP
       #pragma omp for collapse(2)
+      //#else
+      //#pragma omp for
       #endif
       for(int i=0;i<nxn;i++)
       for(int j=0;j<nyn;j++)
@@ -1745,6 +1763,8 @@ void SpeciesMoms::sumMoments_AoS_intr(const Particles3Dcomm& pcls)
       }
       #ifdef OPENMP
       #pragma omp for
+      #else
+      #pragma omp for
       #endif
       for (int pidx = 0; pidx < nop; pidx+=2)
       {
@@ -1813,6 +1833,8 @@ void SpeciesMoms::sumMoments_AoS_intr(const Particles3Dcomm& pcls)
         //
         #ifdef OPENMP
         #pragma omp for collapse(2)
+        #else
+        #pragma omp for
         #endif
         for(int cx=1;cx<nxc;cx++)
         for(int cy=1;cy<nyc;cy++)
@@ -1912,6 +1934,8 @@ void SpeciesMoms::sumMoments_AoS_intr(const Particles3Dcomm& pcls)
         //
         #ifdef OPENMP
         #pragma omp for collapse(2)
+        #else
+        #pragma omp for
         #endif
         for(int nx=1;nx<nxn;nx++)
         for(int ny=1;ny<nyn;ny++)
@@ -1939,6 +1963,8 @@ void SpeciesMoms::sumMoments_AoS_intr(const Particles3Dcomm& pcls)
         //
         #ifdef OPENMP
         #pragma omp for collapse(2)
+        #else
+        #pragma omp for
         #endif
         for(int nx=1;nx<nxn;nx++)
         for(int ny=1;ny<nyn;ny++)

@@ -120,6 +120,8 @@ void MIsolver::accumulate_moments()
   {
     #ifdef OPENMP
     #pragma omp parallel
+    //#else
+    //#pragma omp for
     #endif 
     for (int is = 0; is < ns; is++)
     {

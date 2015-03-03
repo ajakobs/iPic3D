@@ -889,24 +889,12 @@ void EMfields3D::set_fieldForPcls(array4_double& fieldForPcls, bool sender, MPI_
           fieldForPcls[i][j][k][0+DFIELD_3or4] = Ex_smooth[i][j][k];
           fieldForPcls[i][j][k][1+DFIELD_3or4] = Ey_smooth[i][j][k];
           fieldForPcls[i][j][k][2+DFIELD_3or4] = Ez_smooth[i][j][k];*/
-/*          fieldInfo[i*nyn+j*nzn+k*6+0] = fieldForPcls[i][j][k][0];
-          fieldInfo[i*nyn+j*nzn+k*6+1] = fieldForPcls[i][j][k][1];
-          fieldInfo[i*nyn+j*nzn+k*6+2] = fieldForPcls[i][j][k][2];
-          fieldInfo[i*nyn+j*nzn+k*6+3] = fieldForPcls[i][j][k][0+DFIELD_3or4];
-          fieldInfo[i*nyn+j*nzn+k*6+4] = fieldForPcls[i][j][k][1+DFIELD_3or4];
-          fieldInfo[i*nyn+j*nzn+k*6+5] = fieldForPcls[i][j][k][2+DFIELD_3or4];*/
-/*	  fieldInfo[count++] = fieldForPcls[i][j][k][0];
-	  fieldInfo[count++] = fieldForPcls[i][j][k][1];
-	  fieldInfo[count++] = fieldForPcls[i][j][k][2];
-	  fieldInfo[count++] = fieldForPcls[i][j][k][0+DFIELD_3or4];
-	  fieldInfo[count++] = fieldForPcls[i][j][k][1+DFIELD_3or4];
-	  fieldInfo[count++] = fieldForPcls[i][j][k][2+DFIELD_3or4];*/
-	  fieldInfo[count++] = Bx_smooth[i][j][k];
-	  fieldInfo[count++] = By_smooth[i][j][k];
-	  fieldInfo[count++] = Bz_smooth[i][j][k];
-	  fieldInfo[count++] = Ex_smooth[i][j][k];
-	  fieldInfo[count++] = Ey_smooth[i][j][k];
-	  fieldInfo[count++] = Ez_smooth[i][j][k];
+	  fieldInfo[i*nyn*nzn*6+j*nzn*6+k*6+0] = Bx_smooth[i][j][k];
+	  fieldInfo[i*nyn*nzn*6+j*nzn*6+k*6+1] = By_smooth[i][j][k];
+	  fieldInfo[i*nyn*nzn*6+j*nzn*6+k*6+2] = Bz_smooth[i][j][k];
+	  fieldInfo[i*nyn*nzn*6+j*nzn*6+k*6+3] = Ex_smooth[i][j][k];
+	  fieldInfo[i*nyn*nzn*6+j*nzn*6+k*6+4] = Ey_smooth[i][j][k];
+	  fieldInfo[i*nyn*nzn*6+j*nzn*6+k*6+5] = Ez_smooth[i][j][k];
         }
     gettimeofday(&end,(struct timezone *)0);
 #ifdef SHOWT
@@ -948,18 +936,12 @@ void EMfields3D::set_fieldForPcls(array4_double& fieldForPcls, bool sender, MPI_
       for(int j=0;j<nyn;j++)
         for(int k=0;k<nzn;k++)
         {
-/*		fieldForPcls[i][j][k][0] = fieldInfo[i*nyn+j*nzn+k*6+0];
-		fieldForPcls[i][j][k][1] = fieldInfo[i*nyn+j*nzn+k*6+1];
-		fieldForPcls[i][j][k][2] = fieldInfo[i*nyn+j*nzn+k*6+2];
-		fieldForPcls[i][j][k][0+DFIELD_3or4] = fieldInfo[i*nyn+j*nzn+k*6+3];
-		fieldForPcls[i][j][k][1+DFIELD_3or4] = fieldInfo[i*nyn+j*nzn+k*6+4];
-		fieldForPcls[i][j][k][2+DFIELD_3or4] = fieldInfo[i*nyn+j*nzn+k*6+5];*/
-		fieldForPcls[i][j][k][0] = fieldInfo[count++];
-		fieldForPcls[i][j][k][1] = fieldInfo[count++];
-		fieldForPcls[i][j][k][2] = fieldInfo[count++];
-		fieldForPcls[i][j][k][0+DFIELD_3or4] = fieldInfo[count++];
-		fieldForPcls[i][j][k][1+DFIELD_3or4] = fieldInfo[count++];
-		fieldForPcls[i][j][k][2+DFIELD_3or4] = fieldInfo[count++];
+		fieldForPcls[i][j][k][0] = fieldInfo[i*nyn*nzn*6+j*nzn*6+k*6+0];
+		fieldForPcls[i][j][k][1] = fieldInfo[i*nyn*nzn*6+j*nzn*6+k*6+1];
+		fieldForPcls[i][j][k][2] = fieldInfo[i*nyn*nzn*6+j*nzn*6+k*6+2];
+		fieldForPcls[i][j][k][0+DFIELD_3or4] = fieldInfo[i*nyn*nzn*6+j*nzn*6+k*6+3];
+		fieldForPcls[i][j][k][1+DFIELD_3or4] = fieldInfo[i*nyn*nzn*6+j*nzn*6+k*6+4];
+		fieldForPcls[i][j][k][2+DFIELD_3or4] = fieldInfo[i*nyn*nzn*6+j*nzn*6+k*6+5];
 	}
    gettimeofday(&end,(struct timezone *)0);
 #ifdef SHOWT

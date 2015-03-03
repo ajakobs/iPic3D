@@ -46,7 +46,6 @@ void MImoments::set_fieldForMoments(bool sender, MPI_Comm *clustercomm){
    struct timeval begin, end;
   if(sender){
     gettimeofday(&begin,(struct timezone *)0);
-	  //for(int l=0;l<ns;l++){
     #ifdef OPENMP
     #pragma omp parallel for collapse(2)
     //#else
@@ -55,20 +54,12 @@ void MImoments::set_fieldForMoments(bool sender, MPI_Comm *clustercomm){
     for(int i=0;i<nxn;i++)
       for(int j=0;j<nyn;j++)
         for(int k=0;k<nzn;k++){
-        /*  momentsBuf[i*nyn+j*nzn+k*(3+ns)+0]=Jxh[i][j][k];
-          momentsBuf[i*nyn+j*nzn+k*(3+ns)+1]=Jyh[i][j][k];
-          momentsBuf[i*nyn+j*nzn+k*(3+ns)+2]=Jzh[i][j][k];
+          momentsBuf[i*nyn*nzn*(3+ns)+j*nzn*(3+ns)+k*(3+ns)+0]=Jxh[i][j][k];
+          momentsBuf[i*nyn*nzn*(3+ns)+j*nzn*(3+ns)+k*(3+ns)+1]=Jyh[i][j][k];
+          momentsBuf[i*nyn*nzn*(3+ns)+j*nzn*(3+ns)+k*(3+ns)+2]=Jzh[i][j][k];
           for(int l=0;l<ns;l++){
-            momentsBuf[i*nyn+j*nzn+k*(3+ns)+3+l]=rhons[l][i][j][k];
-          }*/
-	//	if(l==0){
-		momentsBuf[count++]=Jxh[i][j][k];
-		momentsBuf[count++]=Jyh[i][j][k];
-		momentsBuf[count++]=Jzh[i][j][k];
-	//	}
-		for(int l=0;l<ns;l++){
-		      momentsBuf[count++]=rhons[l][i][j][k];
-		}
+            momentsBuf[i*nyn*nzn*(3+ns)+j*nzn*(3+ns)+k*(3+ns)+3+l]=rhons[l][i][j][k];
+          }
         }
     gettimeofday(&end,(struct timezone *)0);
 #ifdef SHOWT
@@ -93,7 +84,6 @@ void MImoments::set_fieldForMoments(bool sender, MPI_Comm *clustercomm){
     fflush(timeTasks.get_output());
 #endif
     gettimeofday(&begin,(struct timezone *)0);
-    //for(int l=0;l<ns;l++){
     #ifdef OPENMP
     #pragma omp parallel for collapse(2)
     #else
@@ -102,19 +92,11 @@ void MImoments::set_fieldForMoments(bool sender, MPI_Comm *clustercomm){
     for(int i=0;i<nxn;i++)
       for(int j=0;j<nyn;j++)
         for(int k=0;k<nzn;k++){
-          /*Jxh[i][j][k]=momentsBuf[i*nyn+j*nzn+k*(3+ns)+0];
-          Jyh[i][j][k]=momentsBuf[i*nyn+j*nzn+k*(3+ns)+1];
-          Jzh[i][j][k]=momentsBuf[i*nyn+j*nzn+k*(3+ns)+2];
-          for(int l=0;l<ns;l++){
-            rhons[l][i][j][k]=momentsBuf[i*nyn+j*nzn+k*(3+ns)+3+l];
-          }*/
-		//if(l==0){
-		Jxh[i][j][k]=momentsBuf[count++];
-		Jyh[i][j][k]=momentsBuf[count++];
-		Jzh[i][j][k]=momentsBuf[count++];
-		//}
+		Jxh[i][j][k]=momentsBuf[i*nyn*nzn*(3+ns)+j*nzn*(3+ns)+k*(3+ns)+0];
+		Jyh[i][j][k]=momentsBuf[i*nyn*nzn*(3+ns)+j*nzn*(3+ns)+k*(3+ns)+1];
+		Jzh[i][j][k]=momentsBuf[i*nyn*nzn*(3+ns)+j*nzn*(3+ns)+k*(3+ns)+2];
 		for(int l=0;l<ns;l++){
-			rhons[l][i][j][k]=momentsBuf[count++];
+			rhons[l][i][j][k]=momentsBuf[i*nyn*nzn*(3+ns)+j*nzn*(3+ns)+k*(3+ns)+3+l];
 		}
         }
    gettimeofday(&end,(struct timezone *)0);

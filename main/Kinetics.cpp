@@ -53,8 +53,6 @@ bool Kinetics::moveParticles(const_arr4_double fieldForPcls)
       speciesPcls[is].pad_capacities();
     #ifdef OPENMP
     #pragma omp parallel
-    //#else
-    //#pragma omp for
     #endif
     //{
     for (int is = 0; is < ns; is++)  // move each species

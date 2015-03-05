@@ -4,7 +4,8 @@ cp ../scripts/cmake-clean .
 ./cmake-clean
 ### make version for host
 module purge
-module load ipic-nohdf5
+#module load ipic-nohdf5
+module load ipic-mercurium-spawn-nohdf5
 ipic cmake
 make
 mv iPic3D iPic3D.intel64
@@ -17,7 +18,8 @@ cp ../scripts/run_fields.sh .
 cp ../scripts/spawnfile .
 ./cmake-clean
 module purge
-module load ipic-mic-nohdf5
+#module load ipic-mic-nohdf5
+module load ipic-mercurium-mic-spawn-nohdf5
 ipic cmake
 make
 mv iPic3D iPic3D.mic

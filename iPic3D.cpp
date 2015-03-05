@@ -7,6 +7,7 @@
 #include "SolverType.h"
 #include <stdio.h>
 #include <unistd.h>
+#include <omp.h>
 using namespace iPic3D;
 
 int main(int argc, const char **argv) {

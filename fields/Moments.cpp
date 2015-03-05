@@ -48,8 +48,8 @@ void MImoments::set_fieldForMoments(bool sender, MPI_Comm *clustercomm){
     gettimeofday(&begin,(struct timezone *)0);
     #ifdef OPENMP
     #pragma omp parallel for collapse(2)
-    //#else
-    //#pragma omp for
+    #else
+    #pragma omp for
     #endif
     for(int i=0;i<nxn;i++)
       for(int j=0;j<nyn;j++)
@@ -595,8 +595,8 @@ void SpeciesMoms::setZeroSpeciesMoms(int is)
   //
   #ifdef OPENMP
   #pragma omp for collapse(2)
-  //#else
-  //#pragma omp for
+  #else
+  #pragma omp for
   #endif
   for (register int i = 0; i < nxn; i++)
   for (register int j = 0; j < nyn; j++)
@@ -1420,8 +1420,8 @@ void SpeciesMoms::sumMoments_AoS(const Particles3Dcomm& pcls)
     #ifdef OPENMP
     #pragma omp barrier
     #pragma omp for
-    //#else
-    //#pragma omp for
+    #else
+    #pragma omp for
     #endif
     for (int pidx = 0; pidx < nop; pidx++)
     {
@@ -1522,8 +1522,8 @@ void SpeciesMoms::sumMoments_AoS(const Particles3Dcomm& pcls)
       arr4_double moments = fetch_moments10Array(thread_num).fetch_arr();
       #ifdef OPENMP
       #pragma omp for collapse(2)
-      //#else
-      //#pragma omp for
+      #else
+      #pragma omp for
       #endif
       for(int i=0;i<nxn;i++)
       for(int j=0;j<nyn;j++)

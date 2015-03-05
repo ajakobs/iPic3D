@@ -697,8 +697,8 @@ void Particles3D::mover_PC_AoS_vec_intr(const_arr4_double fieldForPcls)
   const F64vec8 qdto2mc = F64vec8(qdto2mc_d);
   #ifdef OPENMP
   #pragma omp for schedule(static)
-  //#else
-  //#pragma omp for
+  #else
+  #pragma omp for
   #endif
   for (int pidx = 0; pidx < getNOP(); pidx+=2)
   {

@@ -929,8 +929,8 @@ void EMfields3D::set_fieldForPcls(array4_double& fieldForPcls, bool sender, MPI_
     gettimeofday(&begin,(struct timezone *)0);
     #ifdef OPENMP
     #pragma omp parallel for collapse(2)
-    //#else
-    //#pragma omp for
+    #else
+    #pragma omp for
     #endif
     for(int i=0;i<nxn;i++)
       for(int j=0;j<nyn;j++)

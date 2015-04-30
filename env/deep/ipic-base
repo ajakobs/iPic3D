@@ -1,0 +1,30 @@
+#%Module1.0
+
+proc ModulesHelp { } {
+global version
+
+puts stderr "**************************************************"
+puts stderr " environment to compile and run iPic3D without IO "
+puts stderr "**************************************************"
+}
+
+module-whatis "base environment for iPic3D with MPI_Comm_spawn"
+
+# compiling
+#
+
+#module load intel/2015.1.133
+#module load parastation/pscom/pscom
+module load intel/15.0
+module load parastation/intel-mt-5.1.1
+
+setenv CXX mpicxx
+setenv CC mpicc
+setenv FC mpif90
+
+# running
+#
+setenv IPIC_MPIRUN mpiexec
+
+prepend-path PATH $env(IPIC_HOME)/scripts
+

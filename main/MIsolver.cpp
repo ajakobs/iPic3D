@@ -1827,6 +1827,13 @@ void MIsolver::run_Cluster(){
 
 void MIsolver::run(){
   initialize(MPI_COMM_WORLD);
+  //printf("nxn: %d\n",nxn);
+  //printf("nyn: %d\n",nyn);
+  //printf("nzn: %d\n",nzn);
+  //printf("XLEN: %d\n",col->getXLEN());
+  //printf("YLEN: %d\n",col->getYLEN());
+  //printf("ZLEN: %d\n",col->getZLEN());
+  //printf("nop: %d\n",(col->getNpcelx(0)*col->getNpcely(0)*col->getNpcelz(0))*4*(nxn/col->getXLEN())*(nyn/col->getYLEN())*(nzn/col->getZLEN()));
   for (int i = FirstCycle(); i <= FinalCycle(); i++){
     if (is_rank0())
       fprintf(timeTasks.get_output()," ======= Cycle %d ======= \n",i);

@@ -49,7 +49,7 @@ void MImoments::set_fieldForMoments(bool sender, MPI_Comm *clustercomm){
     #ifdef OPENMP
     #pragma omp parallel for collapse(2)
     #else
-    #pragma omp for
+    //#pragma omp for
     #endif
     for(int i=0;i<nxn;i++)
       for(int j=0;j<nyn;j++)
@@ -105,6 +105,7 @@ void MImoments::set_fieldForMoments(bool sender, MPI_Comm *clustercomm){
    fflush(timeTasks.get_output());
 #endif
   }
+  //free(momentsBuf);
 }
 
 void MImoments::compute_from_speciesMoms(const SpeciesMoms& speciesMoms,
@@ -596,7 +597,7 @@ void SpeciesMoms::setZeroSpeciesMoms(int is)
   #ifdef OPENMP
   #pragma omp for collapse(2)
   #else
-  #pragma omp for
+  //#pragma omp for
   #endif
   for (register int i = 0; i < nxn; i++)
   for (register int j = 0; j < nyn; j++)
@@ -1421,7 +1422,7 @@ void SpeciesMoms::sumMoments_AoS(const Particles3Dcomm& pcls)
     #pragma omp barrier
     #pragma omp for
     #else
-    #pragma omp for
+    //#pragma omp for
     #endif
     for (int pidx = 0; pidx < nop; pidx++)
     {
@@ -1523,7 +1524,7 @@ void SpeciesMoms::sumMoments_AoS(const Particles3Dcomm& pcls)
       #ifdef OPENMP
       #pragma omp for collapse(2)
       #else
-      #pragma omp for
+      //#pragma omp for
       #endif
       for(int i=0;i<nxn;i++)
       for(int j=0;j<nyn;j++)

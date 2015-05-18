@@ -13,12 +13,8 @@ module-whatis "base environment for iPic3D with MPI_Comm_spawn"
 # compiling
 #
 
-#module load intel/2015.1.133
-#module load parastation/pscom/pscom
-module load intel/15.0
-module load parastation/intel-mt-5.1.1
-
-setenv CXX mpicxx
+#setenv I_MPI_CXX icpc
+setenv CXX mpicxx 
 setenv CC mpicc
 setenv FC mpif90
 

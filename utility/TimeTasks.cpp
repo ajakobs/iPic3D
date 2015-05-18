@@ -1,5 +1,6 @@
 
 #include <mpi.h>
+#include <stdio.h>
 #include <stdarg.h>
 #include "TimeTasks.h"
 #include "asserts.h"
@@ -13,7 +14,7 @@
 /** implementation of declarations in utility/TimeTasks.h **/
 
 TimeTasks timeTasks;
-
+double cyc=0.0, comp=0.0, comm=0.0;
 static const char *taskNames[] = // order must agree with Tasks in TimeTasks.h
 {
   "none = 0",
@@ -246,6 +247,7 @@ void TimeTasks::close_output()
 		fflush(file);
 		fclose(file);
 	}
+        //printf("total cycle time: %f\ntotal comput time of the cycles: %f\ntotal commun time of the cycles:%f\n",cyc,comp,comm);
 }
 
 void TimeTasks::print_cycle_times(int cycle,
@@ -341,6 +343,9 @@ void TimeTasks::print_cycle_times(int cycle,
       get_taskname(e));
     }
     fflush(file);
+    cyc += tskdurtot;
+    comp += computtot;
+    comm += communtot;
   }
 }
 

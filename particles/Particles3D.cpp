@@ -531,7 +531,7 @@ void Particles3D::mover_PC_AoS(const_arr4_double fieldForPcls)
   #ifdef OPENMP
   #pragma omp for schedule(static)
   #else
-  #pragma omp for
+  //#pragma omp for
   #endif
   for (int pidx = 0; pidx < getNOP(); pidx++) {
     // copy the particle
@@ -698,7 +698,7 @@ void Particles3D::mover_PC_AoS_vec_intr(const_arr4_double fieldForPcls)
   #ifdef OPENMP
   #pragma omp for schedule(static)
   #else
-  #pragma omp for
+  //#pragma omp for
   #endif
   for (int pidx = 0; pidx < getNOP(); pidx+=2)
   {

@@ -14,11 +14,12 @@ module-whatis "set environment for iPic3D without parallel IO"
 #
 module load cmake/2.8
 module load intel/15.0
+#module load impi/5.0.1
 module load parastation/intel-mt-5.1.1
 setenv CXX icpc
 setenv CC icc
 setenv FC ifort
-setenv IPIC_CMAKE_ARGS "-DCMAKE_CXX_FLAGS='-openmp -fno-exceptions -O3 -xHost -vec-report' -DIPIC_HDF5_OUTPUT=OFF"
+setenv IPIC_CMAKE_ARGS "-DCMAKE_CXX_FLAGS='-DOPENMP -openmp -fno-exceptions -O3 -xHost -vec-report' -DIPIC_HDF5_OUTPUT=OFF"
 
 # definitions used to run ipic3d
 #

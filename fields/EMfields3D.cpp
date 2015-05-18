@@ -930,7 +930,7 @@ void EMfields3D::set_fieldForPcls(array4_double& fieldForPcls, bool sender, MPI_
     #ifdef OPENMP
     #pragma omp parallel for collapse(2)
     #else
-    #pragma omp for
+    //#pragma omp for
     #endif
     for(int i=0;i<nxn;i++)
       for(int j=0;j<nyn;j++)
@@ -948,7 +948,8 @@ void EMfields3D::set_fieldForPcls(array4_double& fieldForPcls, bool sender, MPI_
    fprintf(timeTasks.get_output(),"On host, read BUFFER for particles, time: %f\n",(1000000*(end.tv_sec - begin.tv_sec)+(end.tv_usec - begin.tv_usec))*0.000001);
    fflush(timeTasks.get_output());
 #endif
-  }    
+  }
+  //free(fieldInfo);    
 }
 #else
 void EMfields3D::set_fieldForPcls(array4_double& fieldForPcls)
@@ -1003,6 +1004,7 @@ void EMfields3D::set_Bsmooth(bool sender, MPI_Comm *clustercomm)
          Bz_smooth[i][j][k] = buffer[count++];
          }    
   }
+  //free(buffer);
 }     
 
 // update B_tot and B_smooth based on Bn and B_ext

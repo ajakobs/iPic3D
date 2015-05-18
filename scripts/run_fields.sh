@@ -4,3 +4,4 @@
 #export NX_ARGS="--smp-workers=2"
 export OMP_NUM_THREADS=1
 exec ../build.xeon/iPic3D.intel64 $1
+

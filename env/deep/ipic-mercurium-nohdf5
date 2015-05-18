@@ -12,10 +12,14 @@ module-whatis "set environment for iPic3D without parallel IO"
 
 # definitions used by cmake
 #
-module load cmake/2.8
-module load intel/15.0
-module load parastation/intel-mt-5.1.1 
-module load OMPSS
+#module purge
+#module load cmake/2.8
+#module load gcc
+#module load intel/15.0
+#module load parastation/intel-mt-5.1.1 
+#module load impi/5.0.1
+#module use /homec/deep/deep59/privatemodules 
+#module load offload/ompss 
 
 setenv CXX mpimcxx
 setenv CC mpimcc

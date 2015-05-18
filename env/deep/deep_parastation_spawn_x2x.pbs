@@ -1,0 +1,25 @@
+#!/bin/bash
+#PBS -l "walltime=00:10:00"
+#PBS -N "test.intel64"
+#PBS -o output.out
+#PBS -e output.err
+#PBS -n
+## ppn: processors per node -> $PBS_NUM_PPN
+#PBS -l "nodes=2:ppn=16"
+#PBS -d /homec/deep/deep57/ipic3d/build.xeon
+
+# Resource requirements
+export CN=1
+export PPN_CN=4
+export BN=1
+export PPN_BN=4
+
+export OMP_NUM_THREADS=$(( $PBS_NUM_PPN / $PPN_CN ))
+export OFFL_OMP_NUM_THREADS=$(( $PBS_NUM_PPN / PPN_BN ))
+module use $IPIC_HOME/env/deep
+module purge
+module load ipic-nohdf5
+
+# Parastation + Torque does not like --hostfile option
+mpiexec --envall -np $(( $CN * $PPN_CN )) ./$IPIC_HOME/build.xeon/iPic3D.intel64 parameters.inp
+

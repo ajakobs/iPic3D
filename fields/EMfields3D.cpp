@@ -973,7 +973,11 @@ void EMfields3D::set_fieldForPcls(array4_double& fieldForPcls)
   }
 }
 #endif
+#ifdef NB_COMM
+void EMfields3D::set_Bsmooth(bool sender, MPI_Comm *clustercomm, MPI_Request *pending_request2)
+#else
 void EMfields3D::set_Bsmooth(bool sender, MPI_Comm *clustercomm)
+#endif
 {
   double *buffer;
   buffer=(double*)malloc(sizeof(double)*nxn*nyn*nzn*3);
@@ -991,7 +995,11 @@ void EMfields3D::set_Bsmooth(bool sender, MPI_Comm *clustercomm)
 	}
      MPI_Comm parent;
      MPI_Comm_get_parent(&parent);
+     #ifdef NB_COMM
+     MPI_Isend(buffer,nxn*nyn*nzn*3, MPI_DOUBLE, rank, 77, parent, pending_request2);
+     #else
      MPI_Send(buffer,nxn*nyn*nzn*3, MPI_DOUBLE, rank, 77, parent);
+     #endif
   }
   else{
      MPI_Status stat;

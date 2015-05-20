@@ -16,5 +16,5 @@ module load ipic-base
 
 setenv I_MPI_FABRICS shm:tcp
 #setenv IPIC_CMAKE_ARGS "-DCMAKE_CXX_FLAGS='-openmp -fno-exceptions -O3 -xHost -vec-report' -DIPIC_HDF5_OUTPUT=OFF"
-setenv IPIC_CMAKE_ARGS "-DCMAKE_CXX_FLAGS='-DNB_COMM -DOFFLOAD -fno-exceptions -O3 -openmp -xHost -vec-report' -DIPIC_HDF5_OUTPUT=OFF"
+setenv IPIC_CMAKE_ARGS "-DCMAKE_CXX_FLAGS='-DNB_COMM -DOFFLOAD -DOPENMP -fno-exceptions -O3 -openmp -xHost -vec-report' -DIPIC_HDF5_OUTPUT=OFF"
 setenv IPIC_RUNENV miclogin.xeon

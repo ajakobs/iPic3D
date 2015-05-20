@@ -38,9 +38,11 @@
 #include <sstream>
 #include "SolverType.h"
 #include <unistd.h>
-
+#include <sys/time.h>
+double efield_time=0.0, bfield_time=0.0, particle_mover_time=0.0, moments_time=0.0;
 using namespace iPic3D;
 MPIdata* mpi=0;
+
 // === Section: MIsolver_routines ===
 
 MIsolver::~MIsolver()
@@ -246,7 +248,11 @@ void MIsolver::advance_Efield_Booster(MPI_Comm clustercomm){
 
 
 void MIsolver::send_Bsmooth_to_kinetic_solver(bool sender, MPI_Comm *clustercomm){
-   EMf->set_Bsmooth(sender, clustercomm);     
+#ifdef NB_COMM
+  EMf->set_Bsmooth(sender, clustercomm, &pending_request2);
+#else   
+  EMf->set_Bsmooth(sender, clustercomm);
+#endif     
 }
 
 //! update Bfield (assuming Eth has already been calculated)
@@ -1788,40 +1794,66 @@ void MIsolver::run_Booster(MPI_Comm clustercomm)
   initialize(clustercomm);
   // shouldn't we call this?
   //WriteOutput(FirstCycle()-1);
+  struct timeval begin, end;
   for (int i = FirstCycle(); i <= FinalCycle(); i++)
   {
     if (is_rank0())
       fprintf(timeTasks.get_output()," ======= Cycle %d on Booster ======= \n",i);
 
     timeTasks.resetCycle();
+    gettimeofday(&begin,(struct timezone *)0);
     advance_Efield_Booster(clustercomm);
+    gettimeofday(&end,(struct timezone *)0);
+    efield_time+=(1000000*(end.tv_sec - begin.tv_sec)+(end.tv_usec - begin.tv_usec))*0.000001;
+    gettimeofday(&begin,(struct timezone *)0);
     move_particles();
+    gettimeofday(&end,(struct timezone *)0);
+    particle_mover_time+=(1000000*(end.tv_sec - begin.tv_sec)+(end.tv_usec - begin.tv_usec))*0.000001;
+    gettimeofday(&begin,(struct timezone *)0);
     advance_Bfield_Booster(clustercomm);
+    gettimeofday(&end,(struct timezone *)0);
+    bfield_time+=(1000000*(end.tv_sec - begin.tv_sec)+(end.tv_usec - begin.tv_usec))*0.000001;
+    gettimeofday(&begin,(struct timezone *)0);
     compute_moments_Booster(clustercomm);
+    gettimeofday(&end,(struct timezone *)0);
+    moments_time+=(1000000*(end.tv_sec - begin.tv_sec)+(end.tv_usec - begin.tv_usec))*0.000001;
     WriteOutput(i);
     // print out total time for all tasks
     fflush(timeTasks.get_output());
     timeTasks.print_cycle_times(i);
-  }
+  } 
+  printf("########################################################################\n# Time efield: %f\n# Time parti     cle mover: %f\n# Time bfield: %f\n# Time moments: %f\n#############################################################     ###########",efield_time,particle_mover_time,bfield_time,moments_time);
   Finalize();
 }
 
 void MIsolver::run_Cluster(){
   initialize(MPI_COMM_NULL);
+  struct timeval begin, end;
   for (int i = FirstCycle(); i <= FinalCycle(); i++){
     if (is_rank0())
       fprintf(timeTasks.get_output()," ======= Cycle %d on Cluster ======= \n",i);
     timeTasks.resetCycle();
+    gettimeofday(&begin,(struct timezone *)0);
     advance_Efield_Cluster();
+    gettimeofday(&end,(struct timezone *)0);
+    efield_time+=(1000000*(end.tv_sec - begin.tv_sec)+(end.tv_usec - begin.tv_usec))*0.000001;
+    gettimeofday(&begin,(struct timezone *)0);
     advance_Bfield_Cluster();
+    gettimeofday(&end,(struct timezone *)0);
+    bfield_time+=(1000000*(end.tv_sec - begin.tv_sec)+(end.tv_usec - begin.tv_usec))*0.000001;
 #ifdef NB_COMM 
 	/* Wait for Efield communication to finish */
 	MPI_Wait(&pending_request,MPI_STATUS_IGNORE);
+        MPI_Wait(&pending_request2,MPI_STATUS_IGNORE);
 #endif
+    gettimeofday(&begin,(struct timezone *)0);
     compute_moments_Cluster();
+    gettimeofday(&end,(struct timezone *)0);
+    moments_time+=(1000000*(end.tv_sec - begin.tv_sec)+(end.tv_usec - begin.tv_usec))*0.000001;
     fflush(timeTasks.get_output());
     timeTasks.print_cycle_times(i);
   }
+  printf("########################################################################\n# Time efield: %f\n# Time parti     cle mover: %f\n# Time bfield: %f\n# Time moments: %f\n#############################################################     ###########",efield_time,particle_mover_time,bfield_time,moments_time);
   Finalize();
 }
 
@@ -1834,17 +1866,31 @@ void MIsolver::run(){
   //printf("YLEN: %d\n",col->getYLEN());
   //printf("ZLEN: %d\n",col->getZLEN());
   //printf("nop: %d\n",(col->getNpcelx(0)*col->getNpcely(0)*col->getNpcelz(0))*4*(nxn/col->getXLEN())*(nyn/col->getYLEN())*(nzn/col->getZLEN()));
+  struct timeval begin, end;
   for (int i = FirstCycle(); i <= FinalCycle(); i++){
     if (is_rank0())
       fprintf(timeTasks.get_output()," ======= Cycle %d ======= \n",i);
     timeTasks.resetCycle();
+    gettimeofday(&begin,(struct timezone *)0);
     advance_Efield_Cluster();
+    gettimeofday(&end,(struct timezone *)0);
+    efield_time+=(1000000*(end.tv_sec - begin.tv_sec)+(end.tv_usec - begin.tv_usec))*0.000001;
+    gettimeofday(&begin,(struct timezone *)0);
     move_particles();
+    gettimeofday(&end,(struct timezone *)0);
+    particle_mover_time+=(1000000*(end.tv_sec - begin.tv_sec)+(end.tv_usec - begin.tv_usec))*0.000001;
+    gettimeofday(&begin,(struct timezone *)0);
     advance_Bfield_Cluster();
+    gettimeofday(&end,(struct timezone *)0);
+    bfield_time+=(1000000*(end.tv_sec - begin.tv_sec)+(end.tv_usec - begin.tv_usec))*0.000001;
+    gettimeofday(&begin,(struct timezone *)0);
     compute_moments_Booster(MPI_COMM_WORLD);
+    gettimeofday(&end,(struct timezone *)0);
+    moments_time+=(1000000*(end.tv_sec - begin.tv_sec)+(end.tv_usec - begin.tv_usec))*0.000001;
     WriteOutput(i);
     fflush(timeTasks.get_output());
     timeTasks.print_cycle_times(i);
   }
+  printf("########################################################################\n# Time efield: %f\n# Time particle mover: %f\n# Time bfield: %f\n# Time moments: %f\n########################################################################",efield_time,particle_mover_time,bfield_time,moments_time);
   Finalize();
 }

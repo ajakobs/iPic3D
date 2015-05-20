@@ -51,6 +51,7 @@ namespace iPic3D
     const int nzc;
 #ifdef NB_COMM
 	MPI_Request pending_request;
+        MPI_Request pending_request2;
 #endif
 
   public: // accessors

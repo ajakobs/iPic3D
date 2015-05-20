@@ -93,8 +93,11 @@ class EMfields3D
 #endif
     void set_fieldForPcls(array4_double& fieldForPcls);
     void set_fieldForMoments(bool sender, MPI_Comm *clustercomm);
+#ifdef NB_COMM
+    void set_Bsmooth(bool sender, MPI_Comm *clustercomm, MPI_Request *pending_request2);
+#else
     void set_Bsmooth(bool sender, MPI_Comm *clustercomm);
-
+#endif
     /*! Perfect conductor boundary conditions LEFT wall */
     void perfectConductorLeft(
       arr3_double imageX,

@@ -8,11 +8,13 @@
 #include <stdio.h>
 #include <unistd.h>
 #include <omp.h>
+
 using namespace iPic3D;
 
 int main(int argc, const char **argv) {
 
   MPIdata::init(&argc, argv);
+
   Parameters::init_parameters();
 
 #if defined(OFFLOAD) || defined(OMPSS_OFFLOAD)
@@ -37,7 +39,7 @@ int main(int argc, const char **argv) {
   {
    char hostname[255];
    gethostname(hostname,255);
-   printf("Fields solver on %s\n",hostname);
+   printf("OmpSs Version. Fields solver on %s\n",hostname);
    /* Deserialize argc and argv */
    char **argv;
    int argc = 0;
@@ -64,7 +66,7 @@ int main(int argc, const char **argv) {
     //timeTasks.set_output("output_booster.out");
     char hostname[255];
     gethostname(hostname,255);
-    printf("Particle solver on %s\n",hostname);
+    printf("OmpSs Version. Particle solver on %s\n",hostname);
     iPic3D::c_Solver solver(argc, argv);
     solver.run_Booster(clustercomm);
   }
@@ -84,10 +86,10 @@ int main(int argc, const char **argv) {
     gethostname(hostname,255);
     if (solver_type == PARTICLES) {
       //set output from stdout to file
-      //timeTasks.set_output("output_booster.out");
+      timeTasks.set_output("output_booster.out");
       //solver has to be created here to be able to set different output files beforehand
       iPic3D::c_Solver solver(argc, argv);
-      printf("Particles solver: %d on %s\n",MPIdata::get_rank(),hostname);
+      printf("Native Version. Particle solver: %d on %s\n",MPIdata::get_rank(),hostname);
       MPI_Info info;
       MPI_Info_create(&info);
 	/* We should improve this */
@@ -98,10 +100,10 @@ int main(int argc, const char **argv) {
     }
     else {
       //set output from stdout to file
-      //timeTasks.set_output("output_cluster.out");
+      timeTasks.set_output("output_cluster.out");
       //solver has to be created here to be able to set different output files beforehand
       iPic3D::c_Solver solver(argc, argv);
-      printf("Fields solver: %d on %s\n",MPIdata::get_rank(),hostname);
+      printf("Native Version. Fields solver: %d on %s\n",MPIdata::get_rank(),hostname);
       solver.run_Cluster();
     }
   }
@@ -113,7 +115,7 @@ int main(int argc, const char **argv) {
     //timeTasks.set_output("output.out");
     char hostname[255];
     gethostname(hostname,255);
-    printf("Application on %s\n",hostname);
+    printf("No Offload Version. Application on %s\n",hostname);
     #ifdef OPENMP
     printf("OpenMP wird genutzt!\n");
     #else

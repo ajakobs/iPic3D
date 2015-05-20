@@ -9,7 +9,7 @@ project(iPic3D)
 #
 # Compilation options
 #
-option(IPIC_HDF5_OUTPUT "write output" ON)
+option(IPIC_HDF5_OUTPUT "write output" OFF)
 if(NOT IPIC_HDF5_OUTPUT)
   add_definitions(-DNO_HDF5)
 endif()

@@ -1,0 +1,23 @@
+#%Module1.0
+
+proc ModulesHelp { } {
+global version
+
+puts stderr "***************************************************************"
+puts stderr " set environment to compile and run iPic3D without parallel IO "
+puts stderr "***************************************************************"
+}
+
+module-whatis "set environment for iPic3D"
+
+module load CMAKE
+
+#setenv CXX "mpimcxx -DOFFLOAD --ompss"
+setenv CXX "mpimcxx -DOMPSS_OFFLOAD --ompss"
+setenv CC mpimcc
+setenv FC mpimfc
+
+setenv I_MPI_FABRICS shm:tcp
+prepend-path PATH $env(IPIC_HOME)/scripts
+
+setenv IPIC_CMAKE_ARGS "-DIPIC_HDF5_OUTPUT=OFF "

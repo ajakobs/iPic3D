@@ -46,6 +46,9 @@ void MPIdata::init(int *argc, const char **argv) {
  #else
   /* Initialize the MPI API */
   MPI_Init(argc, (char***)&argv);
+  //int provided;
+  //MPI_Init_thread(argc, (char***)&argv, MPI_THREAD_MULTIPLE, &provided);
+  //assert(provided==MPI_THREAD_MULTIPLE);
  #endif
 
   /* Set rank */

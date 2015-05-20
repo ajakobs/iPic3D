@@ -39,7 +39,7 @@
 #include "SolverType.h"
 #include <unistd.h>
 #include <sys/time.h>
-double efield_time=0.0, bfield_time=0.0, particle_mover_time=0.0, moments_time=0.0;
+double efield_time=0.0, bfield_time=0.0, particle_mover_time=0.0, moments_time=0.0, acc_mom_time=0.0, comp_mom_time=0.0;
 using namespace iPic3D;
 MPIdata* mpi=0;
 
@@ -151,10 +151,14 @@ void MIsolver::compute_moments_Cluster(){
   send_moments_to_field_solver(false,NULL);
 }
 
-void MIsolver::compute_moments_Booster(MPI_Comm clustercomm)
+double* MIsolver::compute_moments_Booster(MPI_Comm clustercomm)
 {
+  double *ret=(double*)malloc(sizeof(double)*2);
+  struct timeval begin, end;
+  gettimeofday(&begin,(struct timezone *)0);
   accumulate_moments();
-
+  gettimeofday(&end,(struct timezone *)0);
+  ret[0]=(1000000*(end.tv_sec - begin.tv_sec)+(end.tv_usec - begin.tv_usec))*0.000001;
   // miMoments are the moments needed to drive the implicit field
   // solver, which are separated out from EMfields3D in case
   // we someday wish to communicate these 3+num_species
@@ -167,6 +171,7 @@ void MIsolver::compute_moments_Booster(MPI_Comm clustercomm)
   // all exchange of boundary data on the booster.
   //
   // smooth before applying magnetic field
+  gettimeofday(&begin,(struct timezone *)0);
   if(Parameters::use_perfect_smoothing())
   {
     miMoments->compute_from_speciesMoms(*speciesMoms,
@@ -182,10 +187,13 @@ void MIsolver::compute_moments_Booster(MPI_Comm clustercomm)
       EMf->get_By_smooth(),
       EMf->get_Bz_smooth());
   }
+  gettimeofday(&end,(struct timezone *)0);
+  ret[1]=(1000000*(end.tv_sec - begin.tv_sec)+(end.tv_usec - begin.tv_usec))*0.000001;
   //communication between cluster and booster
   #if defined(OFFLOAD) || defined(OMPSS_OFFLOAD)
   send_moments_to_field_solver(true,&clustercomm);
   #endif
+  return ret;
 }
 
 // This method should send or receive field
@@ -1795,6 +1803,7 @@ void MIsolver::run_Booster(MPI_Comm clustercomm)
   // shouldn't we call this?
   //WriteOutput(FirstCycle()-1);
   struct timeval begin, end;
+  double* mom=(double*)malloc(sizeof(double)*2);
   for (int i = FirstCycle(); i <= FinalCycle(); i++)
   {
     if (is_rank0())
@@ -1814,15 +1823,17 @@ void MIsolver::run_Booster(MPI_Comm clustercomm)
     gettimeofday(&end,(struct timezone *)0);
     bfield_time+=(1000000*(end.tv_sec - begin.tv_sec)+(end.tv_usec - begin.tv_usec))*0.000001;
     gettimeofday(&begin,(struct timezone *)0);
-    compute_moments_Booster(clustercomm);
+    mom=compute_moments_Booster(clustercomm);
     gettimeofday(&end,(struct timezone *)0);
     moments_time+=(1000000*(end.tv_sec - begin.tv_sec)+(end.tv_usec - begin.tv_usec))*0.000001;
+    acc_mom_time+=mom[0];
+    comp_mom_time+=mom[1];
     WriteOutput(i);
     // print out total time for all tasks
     fflush(timeTasks.get_output());
     timeTasks.print_cycle_times(i);
   } 
-  printf("########################################################################\n# Time efield: %f\n# Time parti     cle mover: %f\n# Time bfield: %f\n# Time moments: %f\n#############################################################     ###########",efield_time,particle_mover_time,bfield_time,moments_time);
+  printf("########################################################################\n# Time efield: %f\n# Time parti     cle mover: %f\n# Time bfield: %f\n# Time moments: %f\n#\t Time accumulate moments: %f\n#\t Time compute moments from species: %f\n#############################################################     ###########",efield_time,particle_mover_time,bfield_time,moments_time,acc_mom_time,comp_mom_time);
   Finalize();
 }
 

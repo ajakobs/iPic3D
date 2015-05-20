@@ -85,7 +85,7 @@ namespace iPic3D
     void initForceFree();
   protected:
     void accumulate_moments();
-    void compute_moments_Booster(MPI_Comm clustercomm);
+    double* compute_moments_Booster(MPI_Comm clustercomm);
     void compute_moments_Cluster();
     void advance_Efield_Cluster();
     void advance_Efield_Booster(MPI_Comm clustercomm);

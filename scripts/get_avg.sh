@@ -26,7 +26,7 @@ do
         then
                 FILES="$FILES `find $file -name "*_parsed"`"
         else
-                FILES="$FILES file"
+                FILES="$FILES $file"
         fi
 done
 

@@ -31,7 +31,7 @@ do
 	then
 		FILES="$FILES `find $file -name "*.out"`"
 	else
-		FILES="$FILES file"
+		FILES="$FILES $file"
 	fi
 done
 

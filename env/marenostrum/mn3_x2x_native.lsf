@@ -1,7 +1,7 @@
 #!/bin/bash
 #BSUB -a intelmpi
 #BSUB -W "0:20"
-#BSUB -J "test.intel64"
+#BSUB -J "iPiC3D.intel64"
 #BSUB -o "%J.out"
 #BSUB -e "%J.err"
 #BSUB -q mic
@@ -11,9 +11,11 @@
 
 # Resource requirements
 export CN=1
-export PPN_CN=4
+export PPN_CN=8
 export BN=1
-export PPN_BN=4
+export PPN_BN=8
+
+#export OMP_NUM_THREADS=4
 #export NX_ARGS=--summary
 
 source $IPIC_HOME/env/marenostrum/set_environment_x2x_native.sh
@@ -26,5 +28,5 @@ $( echo $LSB_MCPU_HOSTS | xargs -n 2 | awk '{print $1}' > $NX_OFFL_HOSTFILE )
 $( head -n $CN $NX_OFFL_HOSTFILE > $NX_HOSTFILE )
 $( sed -i "1,${CN}d" "$NX_OFFL_HOSTFILE" )
 
-mpiexec.hydra -hostfile $NX_HOSTFILE -ppn $PPN_CN ./$IPIC_HOME/build.xeon/iPic3D.intel64 parameters.inp
+mpiexec.hydra -hostfile $NX_HOSTFILE -ppn $PPN_CN $IPIC_HOME/build.xeon/iPic3D.intel64 parameters.inp
 

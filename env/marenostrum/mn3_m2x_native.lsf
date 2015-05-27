@@ -1,6 +1,6 @@
 #!/bin/bash
 #BSUB -a intelmpi
-#BSUB -W "0:50"
+#BSUB -W "0:10"
 #BSUB -J "test.mic"
 #BSUB -o "%J.out"
 #BSUB -e "%J.err"
@@ -14,7 +14,7 @@ export CN=1
 export PPN_CN=1 # this number has to match the one given in '-R span[ptile=X]' option
 export BN=1 # only 2 mic cards for each node on marenostrum
 export PPN_BN=1 # only works with 1 MPI process per mic
-export OMP_NUM_THREADS=60
+#export OMP_NUM_THREADS=60
 
 # Set environment variables
 source $IPIC_HOME/env/marenostrum/set_environment_x2m_native.sh
@@ -24,7 +24,6 @@ mkdir -p $IPIC_HOME/build.xeonphi/.tmpdir
 
 export NX_HOSTFILE="$IPIC_HOME/build.xeonphi/.tmpdir/cn.hosts.$LSB_JOBID"
 export NX_OFFL_HOSTFILE="$IPIC_HOME/build.xeonphi/spawnfile"
-#export OMP_NUM_THREADS=240
 
 # Clear and create a new hostfile for mics
 #$( ../mn3/create_mic_nx_hostlist $BN $PPN_BN > $NX_OFFL_HOSTFILE )
@@ -50,8 +49,6 @@ export I_MPI_HYDRA_BOOTSTRAP=ssh # si no, da error: Validation failed due to bad
 export I_MPI_DEVICE=ssm #necesario
 export I_MPI_FABRICS=shm:tcp #necesario
 
-cat $NX_HOSTFILE
- 
 # Workaround for multiple processes to mic: duplicate entries in hostfile and set binding manually
-mpiexec.hydra -machinefile $NX_HOSTFILE -np 1 ./$IPIC_HOME/build.xeonphi/iPic3D.mic parameters.inp #$(( $BN * $PPN_BN )) 1 TASKSET
+mpiexec.hydra -machinefile $NX_HOSTFILE -np 8 $IPIC_HOME/build.xeonphi/iPic3D.mic parameters.inp #$(( $BN * $PPN_BN )) 1 TASKSET
 

@@ -1504,8 +1504,9 @@ void SpeciesMoms::sumMoments_AoS(const Particles3Dcomm& pcls)
         momentsArray[6] = moments11[iz  ]; // moments110 
         momentsArray[7] = moments11[iz-1]; // moments111 
 
-        for(int m=0; m<10; m++)
+//#pragma unroll
         for(int c=0; c<8; c++)
+        for(int m=0; m<10; m++)
         {
           momentsArray[c][m] += velmoments[m]*weights[c];
         }

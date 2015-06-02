@@ -11,7 +11,7 @@ cp $IPIC_HOME/scripts/cmake-clean .
 make clean
 ./cmake-clean
 ### workaround, CMAKE doesn't set them correctly. Additionally, change link.txt_intel64
-export IPIC_CMAKE_ARGS="-DCMAKE_CXX_FLAGS='-DOFFLOAD -DOPENMP -openmp -fno-exceptions  -fp-model fast=2 ' -DIPIC_HDF5_OUTPUT=OFF"
+export IPIC_CMAKE_ARGS="-DCMAKE_CXX_FLAGS='-DOFFLOAD -DOPENMP -openmp -fno-exceptions -O3 -fp-model fast=2 ' -DIPIC_HDF5_OUTPUT=OFF"
 ipic cmake
 cp $IPIC_HOME/env/marenostrum/link.txt_intel64 CMakeFiles/iPic3D.dir/link.txt
 make
@@ -34,7 +34,7 @@ cp $IPIC_HOME/scripts/run_fields.sh .
 cp $IPIC_HOME/scripts/spawnfile .
 ./cmake-clean
 ### workaround, CMAKE doesn't set them correctly. Additionally, change link.txt_mic
-export IPIC_CMAKE_ARGS="-DCMAKE_CXX_FLAGS='-DOFFLOAD -DOPENMP -openmp -fno-exceptions  -fp-model fast=2 -mmic -I/gpfs/apps/MN3/INTEL/impi/4.1.3.049/mic/include' -DIPIC_HDF5_OUTPUT=OFF"
+export IPIC_CMAKE_ARGS="-DCMAKE_CXX_FLAGS='-DOFFLOAD -DOPENMP -openmp -fno-exceptions -O3 -fp-model fast=2 -mmic -I/gpfs/apps/MN3/INTEL/impi/4.1.3.049/mic/include' -DIPIC_HDF5_OUTPUT=OFF"
 ipic cmake
 cp $IPIC_HOME/env/marenostrum/link.txt_mic CMakeFiles/iPic3D.dir/link.txt
 make 

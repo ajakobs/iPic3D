@@ -18,7 +18,6 @@
 // 1-dimensional index, I resort to declaration macros.
 // 
 #if defined(FLAT_ARRAYS)
-
   //#define const_arr3(type) iPic3D::const_array_ref3<type>
   //#define const_arr2(type) iPic3D::const_array_ref2<type>
   //#define const_arr1(type) iPic3D::const_array_ref1<type>

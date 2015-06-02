@@ -108,7 +108,7 @@
     fast particles properly. -eaj
 
 */
-#define ALIGNMENT (64)
+#define ALIGNMENT 64
 #ifdef __INTEL_COMPILER
     #define ALLOC_ALIGNED __attribute__((aligned(ALIGNMENT)))
     #define ASSUME_ALIGNED(X) __assume_aligned((void *)X, ALIGNMENT)
@@ -117,6 +117,7 @@
         (T *const __restrict__)(_mm_malloc(sizeof(T)*NUM, ALIGNMENT))
     #define AlignedFree(S) (_mm_free(S))
 #else
+    #warning "Alignment not enforced"
     #define ALLOC_ALIGNED
     #define ASSUME_ALIGNED(X)
     #define ALIGNED(X)

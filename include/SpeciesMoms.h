@@ -31,6 +31,15 @@ class Moments10
       arr (nxn, nyn, nzn,10)
     {
     };
+ 
+    Moments10(int nxn, int nyn, int nzn, int ns) :
+      nx(nxn),
+      ny(nyn),
+      nz(nzn),
+      arr (nxn, nyn, nzn, ns)
+    {
+    };
+ 
     ~Moments10(){};
 };
 

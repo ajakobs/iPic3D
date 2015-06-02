@@ -17,6 +17,7 @@
 #include "asserts.h"
 #include "aligned_vector.h"
 #include <sys/time.h>
+#include <unistd.h>
 #include <new> // needed for placement new
 
 using namespace iPic3D;
@@ -402,9 +403,20 @@ SpeciesMoms::SpeciesMoms(const Setting& setting_) :
     sizeMomentsArray = omp_get_max_threads();
   }
   moments10Array = new Moments10*[sizeMomentsArray];
+
+  // Calculate padding. Ideally, this should be done in the constructor of the arrays
+  // However, to avoid conflicts at this point, we can calculate it here.
+  // 64 bytes alignment. The padding is calculated in double elements.
+  // This is pointless without accounting the padding for accessing the arrays.
+
+  int padx = ((nxn*sizeof(double)) % 64)/sizeof(double);
+  int pady = ((nyn*sizeof(double)) % 64)/sizeof(double);
+  int padz = ((nzn*sizeof(double)) % 64)/sizeof(double);
+  int pad10 = ((10*sizeof(double)) % 64)/sizeof(double);
+
   for(int i=0;i<sizeMomentsArray;i++)
   {
-    moments10Array[i] = new Moments10(nxn,nyn,nzn);
+    moments10Array[i] = new Moments10(nxn+padx,nyn+pady,nzn+padz,10+pad10);
   }
 }
 
@@ -1438,7 +1450,11 @@ void SpeciesMoms::sumMoments_AoS(const Particles3Dcomm& pcls)
       const double vvi=vi*vi;
       const double vwi=vi*wi;
       const double wwi=wi*wi;
+#ifdef __INTEL_COMPILER
+      __declspec(align(64)) double velmoments[10];
+#else
       double velmoments[10];
+#endif
       velmoments[0] = 1.;
       velmoments[1] = ui;
       velmoments[2] = vi;
@@ -1470,7 +1486,11 @@ void SpeciesMoms::sumMoments_AoS(const Particles3Dcomm& pcls)
       const double weight01 = weight0*eta1;
       const double weight10 = weight1*eta0;
       const double weight11 = weight1*eta1;
+#ifdef __INTEL_COMPILER
+      __declspec(align(64)) double weights[8];
+#else
       double weights[8];
+#endif
       weights[0] = weight00*zeta0; // weight000
       weights[1] = weight00*zeta1; // weight001
       weights[2] = weight01*zeta0; // weight010
@@ -1490,11 +1510,13 @@ void SpeciesMoms::sumMoments_AoS(const Particles3Dcomm& pcls)
 
       // add particle to moments
       {
+
         arr1_double_fetch momentsArray[8];
         arr2_double_fetch moments00 = moments[ix  ][iy  ];
         arr2_double_fetch moments01 = moments[ix  ][iy-1];
         arr2_double_fetch moments10 = moments[ix-1][iy  ];
         arr2_double_fetch moments11 = moments[ix-1][iy-1];
+
         momentsArray[0] = moments00[iz  ]; // moments000 
         momentsArray[1] = moments00[iz-1]; // moments001 
         momentsArray[2] = moments01[iz  ]; // moments010 
@@ -1503,12 +1525,13 @@ void SpeciesMoms::sumMoments_AoS(const Particles3Dcomm& pcls)
         momentsArray[5] = moments10[iz-1]; // moments101 
         momentsArray[6] = moments11[iz  ]; // moments110 
         momentsArray[7] = moments11[iz-1]; // moments111 
-
-//#pragma unroll
-        for(int c=0; c<8; c++)
-        for(int m=0; m<10; m++)
-        {
-          momentsArray[c][m] += velmoments[m]*weights[c];
+       
+	for(int c=0; c<8; c++){
+	  #pragma ivdep
+          for(int m=0; m<10; m++)
+          {
+            momentsArray[c][m] += velmoments[m]*weights[c];
+          }
         }
       }
     }
@@ -1527,20 +1550,69 @@ void SpeciesMoms::sumMoments_AoS(const Particles3Dcomm& pcls)
       #else
       //#pragma omp for
       #endif
-      for(int i=0;i<nxn;i++)
-      for(int j=0;j<nyn;j++)
+      for(int i=0;i<nxn;i++){
+      for(int j=0;j<nyn;j++){
+      #pragma ivdep
+      #pragma vector aligned
       for(int k=0;k<nzn;k++)
       {
         rhons[is][i][j][k] += invVOL*moments[i][j][k][0];
+      }
+      #pragma ivdep
+      #pragma vector aligned
+      for(int k=0;k<nzn;k++)
+      {
         Jxs  [is][i][j][k] += invVOL*moments[i][j][k][1];
+      }
+      #pragma ivdep
+      #pragma vector aligned
+      for(int k=0;k<nzn;k++)
+      {
         Jys  [is][i][j][k] += invVOL*moments[i][j][k][2];
+      }
+      #pragma ivdep
+      #pragma vector aligned
+      for(int k=0;k<nzn;k++)
+      {
         Jzs  [is][i][j][k] += invVOL*moments[i][j][k][3];
+      }
+      #pragma ivdep
+      #pragma vector aligned
+      for(int k=0;k<nzn;k++)
+      {
         pXXsn[is][i][j][k] += invVOL*moments[i][j][k][4];
+      }
+      #pragma ivdep
+      #pragma vector aligned
+      for(int k=0;k<nzn;k++)
+      {
         pXYsn[is][i][j][k] += invVOL*moments[i][j][k][5];
+      }
+      #pragma ivdep
+      #pragma vector aligned
+      for(int k=0;k<nzn;k++)
+      {
         pXZsn[is][i][j][k] += invVOL*moments[i][j][k][6];
+      }
+      #pragma ivdep
+      #pragma vector aligned
+      for(int k=0;k<nzn;k++)
+      {
         pYYsn[is][i][j][k] += invVOL*moments[i][j][k][7];
+      }
+      #pragma ivdep
+      #pragma vector aligned
+      for(int k=0;k<nzn;k++)
+      {
         pYZsn[is][i][j][k] += invVOL*moments[i][j][k][8];
+      }
+      #pragma ivdep
+      #pragma vector aligned
+      for(int k=0;k<nzn;k++)
+      {
         pZZsn[is][i][j][k] += invVOL*moments[i][j][k][9];
+      }
+      }
       }
     }
     if(!thread_num) timeTasks_end_task(TimeTasks::MOMENT_REDUCTION);

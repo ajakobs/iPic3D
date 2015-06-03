@@ -57,6 +57,7 @@ bool Kinetics::moveParticles(const_arr4_double fieldForPcls)
     //{
     for (int is = 0; is < ns; is++)  // move each species
     {
+      {
       // #pragma omp task inout(speciesPcls[is]) in(grid) target_device(booster)
       //
       // use the Predictor Corrector scheme to move particles
@@ -85,11 +86,13 @@ bool Kinetics::moveParticles(const_arr4_double fieldForPcls)
       }
       // overlap initial communication of electrons with moving of ions
       #ifdef OPENMP
-      #pragma omp master
+      #pragma omp barrier
+//      #pragma omp master
       //#else
       //#pragma omp master
       #endif
       speciesPcls[is].separate_and_send_particles();
+      }
     }
     //}
     for (int is = 0; is < ns; is++)  // communicate each species

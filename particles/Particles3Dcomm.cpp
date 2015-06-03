@@ -29,7 +29,7 @@ developers: Stefano Markidis, Giovanni Lapenta.
 
 #include "ipic_hdf5.h"
 #include "Restart3D.h"
-//#include <vector>
+#include <vector>
 //#include <complex>
 #include "debug.h"
 #include "TimeTasks.h"
@@ -378,33 +378,115 @@ inline bool Particles3Dcomm::send_pcl_to_appropriate_buffer(
   // put particle in appropriate communication buffer if exiting
   if(pcl.get_x() < xstart)
   {
-    sendXleft.send(pcl);
-    count[0]++;
+    {
+      sendXleft.send(pcl);
+      count[0]++;
+    }
   }
   else if(pcl.get_x() > xend)
   {
-    sendXrght.send(pcl);
-    count[1]++;
+    {
+      sendXrght.send(pcl);
+      count[1]++;
+    }
   }
   else if(pcl.get_y() < ystart)
   {
-    sendYleft.send(pcl);
-    count[2]++;
+    {
+      sendYleft.send(pcl);
+      count[2]++;
+    }
   }
   else if(pcl.get_y() > yend)
   {
-    sendYrght.send(pcl);
-    count[3]++;
+    {
+      sendYrght.send(pcl);
+      count[3]++;
+    }
   }
   else if(pcl.get_z() < zstart)
   {
-    sendZleft.send(pcl);
-    count[4]++;
+    {
+      sendZleft.send(pcl);
+      count[4]++;
+    }
   }
   else if(pcl.get_z() > zend)
   {
-    sendZrght.send(pcl);
-    count[5]++;
+    {
+      sendZrght.send(pcl);
+      count[5]++;
+    }
+  }
+  else was_sent = false;
+
+  return was_sent;
+}
+
+inline bool Particles3Dcomm::send_pcl_to_appropriate_buffer_par(
+  SpeciesParticle& pcl, int count[6])
+{
+  int was_sent = true;
+  // put particle in appropriate communication buffer if exiting
+  if(pcl.get_x() < xstart)
+  {
+    #ifdef OPENMP
+    #pragma omp critical (XL)
+    #endif
+    {
+      sendXleft.send(pcl);
+      count[0]++;
+    }
+  }
+  else if(pcl.get_x() > xend)
+  {
+    #ifdef OPENMP
+    #pragma omp critical (XR)
+    #endif
+    {
+      sendXrght.send(pcl);
+      count[1]++;
+    }
+  }
+  else if(pcl.get_y() < ystart)
+  {
+    #ifdef OPENMP
+    #pragma omp critical (YL)
+    #endif
+    {
+      sendYleft.send(pcl);
+      count[2]++;
+    }
+  }
+  else if(pcl.get_y() > yend)
+  {
+    #ifdef OPENMP
+    #pragma omp critical (YR)
+    #endif
+    {
+      sendYrght.send(pcl);
+      count[3]++;
+    }
+  }
+  else if(pcl.get_z() < zstart)
+  {
+    #ifdef OPENMP
+    #pragma omp critical (ZL)
+    #endif
+    {
+      sendZleft.send(pcl);
+      count[4]++;
+    }
+  }
+  else if(pcl.get_z() > zend)
+  {
+    #ifdef OPENMP
+    #pragma omp critical (ZR)
+    #endif
+    {
+      sendZrght.send(pcl);
+      count[5]++;
+    }
   }
   else was_sent = false;
 
@@ -1182,33 +1264,48 @@ int Particles3Dcomm::separate_and_send_particles()
   const int num_ids = 1;
   longid id_list[num_ids] = {0};
   //print_pcls(_pcls,get_species_num(),id_list, num_ids);
-  timeTasks_set_communicating(); // communicating until end of scope
+  #ifdef OPENMP
+  #pragma omp master // Probably we can change most master by single
+  #endif
+  {
+    timeTasks_set_communicating(); // communicating until end of scope
 
-  convertParticlesToAoS();
+    convertParticlesToAoS();
 
-  // activate receiving
-  //
-  recvXleft.recv_start(); recvXrght.recv_start();
-  recvYleft.recv_start(); recvYrght.recv_start();
-  recvZleft.recv_start(); recvZrght.recv_start();
+    // activate receiving
+    //
+    recvXleft.recv_start(); recvXrght.recv_start();
+    recvYleft.recv_start(); recvYrght.recv_start();
+    recvZleft.recv_start(); recvZrght.recv_start();
 
-  // make sure that current block in each sender is ready for sending
-  //
-  sendXleft.send_start(); sendXrght.send_start();
-  sendYleft.send_start(); sendYrght.send_start();
-  sendZleft.send_start(); sendZrght.send_start();
+    // make sure that current block in each sender is ready for sending
+    //
+    sendXleft.send_start(); sendXrght.send_start();
+    sendYleft.send_start(); sendYrght.send_start();
+    sendZleft.send_start(); sendZrght.send_start();
+  }
 
   int send_count[6]={0,0,0,0,0,0};
   const int num_pcls_initially = _pcls.size();
   int np_current = 0;
-  while(np_current < _pcls.size())
+
+  std::vector<int> deleted_pcls;
+  deleted_pcls.reserve(64);
+
+//  #pragma omp barrier
+
+//  #ifdef OPENMP
+//  #endif
+  //while(np_current < _pcls.size())
+  #pragma omp for schedule(dynamic)
+  for(np_current = 0; np_current< num_pcls_initially; np_current++)
   {
     SpeciesParticle& pcl = _pcls[np_current];
     // if the particle is exiting, put it in the appropriate send bin;
     // this could be done at conclusion of push after particles are
     // converted to AoS format in order to overlap communication
     // with computation.
-    bool was_sent = send_pcl_to_appropriate_buffer(pcl,send_count);
+    bool was_sent = send_pcl_to_appropriate_buffer_par(pcl,send_count);
 
     // fill in hole; for the sake of data pipelining could change
     // this to make a list of holes and then go back and fill
@@ -1218,24 +1315,48 @@ int Particles3Dcomm::separate_and_send_particles()
     // accumulated statistical branching behavior?
     //
     // optimizer should assume that most particles are not sent
+    
     if(__builtin_expect(was_sent,false))
     {
-      //dprintf("sent particle %d", np_current);
-      delete_particle(np_current);
+      deleted_pcls.push_back(np_current);
     }
-    else
-    {
-      np_current++;
-    }
+
+//    if(__builtin_expect(was_sent,false))
+//    {
+//      //dprintf("sent particle %d", np_current);
+//      delete_particle(np_current);
+//    }
+//    else
+//    {
+//      np_current++;
+//    }
   }
-  assert_eq(_pcls.size(),np_current);
+
+  #ifdef OPENMP
+  #pragma omp critical (delete_pcls)
+  #endif
+  {
+     for(int i = 0; i<deleted_pcls.size(); i++){
+       delete_particle(deleted_pcls[i]);
+     }
+  }
+  
+  #ifdef OPENMP
+  #pragma omp barrier
+  #endif
+  //assert_eq(_pcls.size(),np_current);
   const int num_pcls_unsent = getNOP();
   const int num_pcls_sent = num_pcls_initially - num_pcls_unsent;
-  if(print_pcl_comm_counts)
+  #ifdef OPENMP
+  #pragma omp master
+  #endif
   {
-    dprintf("spec %d send_count: %d+%d+%d+%d+%d+%d=%d",get_species_num(),
-      send_count[0], send_count[1], send_count[2],
-      send_count[3], send_count[4], send_count[5],num_pcls_sent);
+    if(print_pcl_comm_counts)
+    {
+      dprintf("spec %d send_count: %d+%d+%d+%d+%d+%d=%d",get_species_num(),
+        send_count[0], send_count[1], send_count[2],
+        send_count[3], send_count[4], send_count[5],num_pcls_sent);
+    }
   }
   return num_pcls_sent;
 }

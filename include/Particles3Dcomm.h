@@ -70,6 +70,7 @@ public:
  private: // communicate particles between processes
   void flush_send();
   bool send_pcl_to_appropriate_buffer(SpeciesParticle& pcl, int count[6]);
+  bool send_pcl_to_appropriate_buffer_par(SpeciesParticle& pcl, int count[6]);
   int handle_received_particles(int pclCommMode=0);
  public:
   int separate_and_send_particles();

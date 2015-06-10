@@ -6,14 +6,14 @@
 #BSUB -e "%J.err"
 #BSUB -q mic
 #BUSB -x
-#BSUB -n "2"
+#BSUB -n "8"
 #BSUB -R "span[ptile=8]"
 
 # Resource requirements
-export CN=2
+export CN=1
 export PPN_CN=8 # this number has to match the one given in '-R span[ptile=X]' option
-export BN=2 # only 2 mic cards for each node on marenostrum
-export PPN_BN=8 # only works with 1 MPI process per mic
+export BN=1 # only 2 mic cards for each node on marenostrum
+export PPN_BN=8
 export OMP_NUM_THREADS=28
 export MIC_ENV_PREFIX=MICPRE
 export MICPRE_KMP_AFFINITY=balanced
@@ -38,10 +38,8 @@ export NX_OFFL_HOSTFILE="$IPIC_HOME/build.xeonphi/spawnfile"
 > $NX_OFFL_HOSTFILE
 
 for i in $( cat $LSB_DJOB_HOSTFILE ); do
-        for j in `seq 1 $PPN_CN`; do
-                sed 's/$/-host/' <<< $i >> $NX_OFFL_HOSTFILE
-                sed 's/$/-mic0/' <<< $i >> $NX_HOSTFILE
-        done
+        sed 's/$/-host/' <<< $i >> $NX_OFFL_HOSTFILE
+        sed 's/$/-mic0/' <<< $i >> $NX_HOSTFILE
 done
 
 export I_MPI_MIC=1
@@ -49,11 +47,11 @@ export I_MPI_DEBUG=5
 export I_MPI_WAIT_MODE=1
 export I_MPI_HYDRA_BOOTSTRAP=ssh # si no, da error: Validation failed due to bad host name <s18r3b18-mic0>
 #export I_MPI_DEVICE=ssm #necesario
-export I_MPI_FABRICS=shm:dapl #necesario
+export I_MPI_FABRICS=shm:tcp #necesario
 
-source /apps/INTEL/vtune/vtune_amplifier_xe_2013/amplxe-vars.sh intel64
+#source /apps/INTEL/vtune/vtune_amplifier_xe_2013/amplxe-vars.sh intel64
 
 # Workaround for multiple processes to mic: duplicate entries in hostfile and set binding manually
-mpiexec.hydra -machinefile $NX_HOSTFILE -np 16 $IPIC_HOME/build.xeonphi/iPic3D.mic parameters.inp #$(( $BN * $PPN_BN )) 1 TASKSET
+mpiexec.hydra -hostfile $NX_HOSTFILE -np 8 -ppn 1 $IPIC_HOME/build.xeonphi/iPic3D.mic parameters.inp #$(( $BN * $PPN_BN )) 1 TASKSET
 #/apps/INTEL/vtune/vtune_amplifier_xe_2013/bin64/amplxe-cl --collect knc-general-exploration -knob target-cards=0 -- mpiexec.hydra -machinefile $NX_HOSTFILE -np 8 $IPIC_HOME/build.xeonphi/iPic3D.mic parameters.inp #$(( $BN * $PPN_BN )) 1 TASKSET
 

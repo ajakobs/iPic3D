@@ -32,6 +32,8 @@ public:
   /** destructor */
   ~Particles3Dcomm();
 
+  std::vector<int> gathered_deleted_pcls;
+
  public: // handle boundary conditions
   // apply boundary conditions to all particles at the
   // end of a list of particles starting with index start

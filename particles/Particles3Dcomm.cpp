@@ -1263,12 +1263,22 @@ int Particles3Dcomm::separate_and_send_particles()
   // why does it happen that multiple particles have an ID of 0?
   const int num_ids = 1;
   longid id_list[num_ids] = {0};
+  double start_time = 0;
+
   //print_pcls(_pcls,get_species_num(),id_list, num_ids);
+  
   #ifdef OPENMP
   #pragma omp master // Probably we can change most master by single
   #endif
   {
     timeTasks_set_communicating(); // communicating until end of scope
+    //bool already_active = timeTasks.is_active(TimeTasks::COMMUNICATING);
+    // if the task is already active then
+    // we cannot tell timeTasks to start it.
+    //if(!already_active){
+    //  start_time = MPI_Wtime();
+    //  timeTasks.start_task(TimeTasks::COMMUNICATING);
+    //}
 
     convertParticlesToAoS();
 
@@ -1290,7 +1300,8 @@ int Particles3Dcomm::separate_and_send_particles()
   int np_current = 0;
 
   std::vector<int> deleted_pcls;
-  deleted_pcls.reserve(64);
+  deleted_pcls.reserve(64);  
+  gathered_deleted_pcls.reserve(64);
 
 //  #pragma omp barrier
 
@@ -1336,11 +1347,22 @@ int Particles3Dcomm::separate_and_send_particles()
   #pragma omp critical (delete_pcls)
   #endif
   {
-     for(int i = 0; i<deleted_pcls.size(); i++){
-       delete_particle(deleted_pcls[i]);
-     }
+    gathered_deleted_pcls.insert(gathered_deleted_pcls.end(), deleted_pcls.begin(), deleted_pcls.end());
   }
-  
+
+// sort indices of particles to be deleted and then delete them in serial from the highest to the lowest index to avoid problems when repositioning the particles
+
+  #ifdef OPENMP
+  #pragma omp barrier
+  #pragma omp master
+  #endif
+  {
+    sort(gathered_deleted_pcls.begin(),gathered_deleted_pcls.end());
+      for(int i = gathered_deleted_pcls.size()-1; i>=0; i--){
+        delete_particle(gathered_deleted_pcls[i]);
+      }
+  }
+
   #ifdef OPENMP
   #pragma omp barrier
   #endif
@@ -1357,6 +1379,15 @@ int Particles3Dcomm::separate_and_send_particles()
         send_count[0], send_count[1], send_count[2],
         send_count[3], send_count[4], send_count[5],num_pcls_sent);
     }
+//if(already_active)
+//  {
+//    assert(timeTasks.is_active(task));
+//    return;
+//  }
+//  //#pragma omp barrier
+//  timeTasks.end_task(task, start_time);
+//
+
   }
   return num_pcls_sent;
 }

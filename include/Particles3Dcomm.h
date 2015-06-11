@@ -16,6 +16,7 @@ developers: Stefano Markidis, Giovanni Lapenta
 #include "Larray.h"
 #include "IDgenerator.h"
 #include "Setting.h"
+#include <vector>
 /**
  * 
  * class for particles of the same species with communications methods

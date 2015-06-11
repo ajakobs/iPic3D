@@ -296,6 +296,7 @@ Particles3Dcomm::Particles3Dcomm(
     fprintf(timeTasks.get_output(),"species %d velocity cap: umax=%g,vmax=%g,wmax=%g\n",
       get_species_num(), umax,vmax,wmax);
   }
+  gathered_deleted_pcls.reserve(512);
 }
 
 // pad capacities so that aligned vectorization
@@ -1300,8 +1301,9 @@ int Particles3Dcomm::separate_and_send_particles()
   int np_current = 0;
 
   std::vector<int> deleted_pcls;
+  //std::vector<int> gathered_deleted_pcls;
   deleted_pcls.reserve(64);  
-  gathered_deleted_pcls.reserve(64);
+  //gathered_deleted_pcls.reserve(64);
 
 //  #pragma omp barrier
 
@@ -1379,6 +1381,7 @@ int Particles3Dcomm::separate_and_send_particles()
         send_count[0], send_count[1], send_count[2],
         send_count[3], send_count[4], send_count[5],num_pcls_sent);
     }
+    gathered_deleted_pcls.clear();
 //if(already_active)
 //  {
 //    assert(timeTasks.is_active(task));

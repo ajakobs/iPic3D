@@ -29,7 +29,7 @@ delta = 0.5
 
 #  %%%%%%%%%%%%%%%%%%% TIME %%%%%%%%%%%%%%%%%%
 dt =   0.25                  # dt = time step  
-ncycles = 5 		     # cycles
+ncycles = 30 		     # cycles
 th = 1.0                     # th =   decentering parameter
 c = 1.0                      # c = light speed 
 
@@ -54,7 +54,7 @@ nzc = 1                    # nzc = number of cells - z direction
 # %%%%%%%%%%%%%% MPI TOPOLOGY %%%%%%%%%%%%%%
 # number of MPI subdomains in each direction
 XLEN = 4
-YLEN = 2
+YLEN = 4
 ZLEN = 1
 # topology of subdomains in each dimension (1=true, 0=false)
 PERIODICX = 1
@@ -74,9 +74,9 @@ rhoINJECT =  1.0   1.0
 # TrackParticleID[species] = 1=true, 0=false --> Assign ID to particles 
 TrackParticleID = 0	0
 # npcelx = number of particles per cell - Direction X 
-npcelx =   14	14
+npcelx =   22	22
 # npcely = number of particles per cell - Direction Y 
-npcely =   14	14
+npcely =   22	22
 # npcelz = number of particles per cell - Direction Z 
 npcelz =   1	1
 # qom = charge to mass ratio for different species 

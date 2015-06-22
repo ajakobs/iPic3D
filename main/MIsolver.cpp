@@ -148,6 +148,7 @@ void MIsolver::send_moments_to_field_solver(bool sender,MPI_Comm *clustercomm){
 void MIsolver::compute_moments_Cluster(){
   //communication between cluster and booster
   timeTasks_set_task(TimeTasks::MOMS_CLUSTER_BOOSTER_COMM);
+  double time=MPI_Wtime();
   send_moments_to_field_solver(false,NULL);
 }
 
@@ -191,6 +192,7 @@ double* MIsolver::compute_moments_Booster(MPI_Comm clustercomm)
   ret[1]=(1000000*(end.tv_sec - begin.tv_sec)+(end.tv_usec - begin.tv_usec))*0.000001;
   //communication between cluster and booster
   #if defined(OFFLOAD) || defined(OMPSS_OFFLOAD)
+  timeTasks_set_task(TimeTasks::MOMS_CLUSTER_BOOSTER_COMM);
   send_moments_to_field_solver(true,&clustercomm);
   #endif
   return ret;
@@ -242,6 +244,7 @@ void MIsolver::advance_Efield_Cluster()
   //#if defined(OFFLOAD) || defined(OMPSS_OFFLOAD) 
  // functions expects a MPI_Comm as second parameter, but is not needed on the offload part,
  // it uses MPI_Comm_get_parent, so use NULL here
+  timeTasks_set_task(TimeTasks::FLDS_CLUSTER_BOOSTER_COMM);
   send_field_to_kinetic_solver(true,NULL);
   //synch between cluster and booster
   //#endif
@@ -1800,6 +1803,8 @@ void MIsolver::run_Booster(MPI_Comm clustercomm)
 {
   //timeTasks.set_output("booster.out");
   initialize(clustercomm);
+  printf("MIC: Initialize: ");
+  my_clock->Print_OnAir();
   // shouldn't we call this?
   //WriteOutput(FirstCycle()-1);
   struct timeval begin, end;
@@ -1839,6 +1844,8 @@ void MIsolver::run_Booster(MPI_Comm clustercomm)
 
 void MIsolver::run_Cluster(){
   initialize(MPI_COMM_NULL);
+  printf("Xeon: Initialize: ");
+  my_clock->Print_OnAir();
   struct timeval begin, end;
   for (int i = FirstCycle(); i <= FinalCycle(); i++){
     if (is_rank0())
@@ -1870,6 +1877,8 @@ void MIsolver::run_Cluster(){
 
 void MIsolver::run(){
   initialize(MPI_COMM_WORLD);
+    printf("Initialize: ");
+    my_clock->Print_OnAir();
   //printf("nxn: %d\n",nxn);
   //printf("nyn: %d\n",nyn);
   //printf("nzn: %d\n",nzn);

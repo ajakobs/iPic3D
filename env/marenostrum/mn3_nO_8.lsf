@@ -1,0 +1,31 @@
+#!/bin/bash
+#BSUB -a intelmpi
+#BSUB -W "0:20"
+#BSUB -J "iPiC3D.intel64"
+#BSUB -o "%J.out"
+#BSUB -e "%J.err"
+#BSUB -q mic
+#BUSB -x
+#BSUB -n "128"
+#BSUB -R "span[ptile=16]"
+
+# Resource requirements
+export CN=8
+export PPN_CN=16
+
+export OMP_NUM_THREADS=1
+#export NX_ARGS=--summary
+
+source $IPIC_HOME/env/marenostrum/set_environment_nooffload.sh
+
+#mkdir -p $IPIC_HOME/build.xeon/.tmpdir
+export I_MPI_DEBUG=5
+export I_MPI_WAIT_MODE=1
+export I_MPI_FABRICS=shm:dapl
+#export NX_HOSTFILE="$IPIC_HOME/build.xeon/.tmpdir/cn.hosts.$LSB_JOBID"
+#export NX_OFFL_HOSTFILE="$IPIC_HOME/build.xeon/spawnfile"
+#$( echo $LSB_MCPU_HOSTS | xargs -n 2 | awk '{print $1}' > $NX_OFFL_HOSTFILE )
+#$( head -n $CN $NX_OFFL_HOSTFILE > $NX_HOSTFILE )
+#$( sed -i "1,${CN}d" "$NX_OFFL_HOSTFILE" )
+
+mpiexec.hydra $IPIC_HOME/build.noOffload/iPic3D benchmark/parameters_8.inp

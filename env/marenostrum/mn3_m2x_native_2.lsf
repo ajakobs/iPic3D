@@ -1,0 +1,64 @@
+#!/bin/bash
+#BSUB -a intelmpi
+#BSUB -W "0:10"
+#BSUB -J "test.mic"
+#BSUB -o "%J.out"
+#BSUB -e "%J.err"
+#BSUB -q mic
+#BUSB -x
+#BSUB -n "32"
+#BSUB -R "span[ptile=16]"
+
+# Resource requirements
+export CN=2
+export PPN_CN=16 # this number has to match the one given in '-R span[ptile=X]' option
+export BN=2 # only 2 mic cards for each node on marenostrum
+export PPN_BN=16
+export OMP_NUM_THREADS=30
+export MIC_ENV_PREFIX=MICPRE
+export MICPRE_KMP_AFFINITY=balanced
+
+# Set environment variables
+export IPIC_HOME=/gpfs/scratch/bsc63/bsc63255/ipic3d
+source $IPIC_HOME/env/marenostrum/set_environment_x2m_native.sh
+echo $PROCS
+# Set up host files for CN and BN
+mkdir -p $IPIC_HOME/build.xeonphi/.tmpdir
+
+export NX_HOSTFILE="$IPIC_HOME/build.xeonphi/.tmpdir/cn.hosts.$LSB_JOBID"
+export NX_OFFL_HOSTFILE="$IPIC_HOME/build.xeonphi/spawnfile"
+
+# Clear and create a new hostfile for mics
+#$( ../mn3/create_mic_nx_hostlist $BN $PPN_BN > $NX_OFFL_HOSTFILE )
+
+# Append sufix '-host' to cluster nodes 
+# This domain name belongs to the network that 
+# connects hosts with mics
+echo $LSB_DJOB_HOSTFILE
+> $NX_HOSTFILE
+> $NX_OFFL_HOSTFILE
+count=1
+for i in $( cat $LSB_DJOB_HOSTFILE ); do
+        sed 's/$/-host/' <<< $i >> $NX_OFFL_HOSTFILE
+        if [ `expr $count % 2` -eq 0 ]
+	then
+        	sed 's/$/-mic0/' <<< $i >> $NX_HOSTFILE
+	else
+		sed 's/$/-mic1/' <<< $i >> $NX_HOSTFILE
+	fi
+	count=`expr $count + 1`
+done
+
+export I_MPI_MIC=1
+export I_MPI_DEBUG=5
+export I_MPI_WAIT_MODE=1
+export I_MPI_HYDRA_BOOTSTRAP=ssh # si no, da error: Validation failed due to bad host name <s18r3b18-mic0>
+#export I_MPI_DEVICE=ssm #necesario
+export I_MPI_FABRICS=shm:dapl #necesario
+
+#source /apps/INTEL/vtune/vtune_amplifier_xe_2013/amplxe-vars.sh intel64
+
+# Workaround for multiple processes to mic: duplicate entries in hostfile and set binding manually
+mpiexec.hydra -machinefile $NX_HOSTFILE -np $(( $BN * $PPN_BN )) -ppn 1 -iface br.667 $IPIC_HOME/build.xeonphi/iPic3D.mic benchmark/parameters_2.inp #$(( $BN * $PPN_BN )) 1 TASKSET
+#/apps/INTEL/vtune/vtune_amplifier_xe_2013/bin64/amplxe-cl --collect knc-general-exploration -knob target-cards=0 -- mpiexec.hydra -machinefile $NX_HOSTFILE -np 8 $IPIC_HOME/build.xeonphi/iPic3D.mic parameters.inp #$(( $BN * $PPN_BN )) 1 TASKSET
+

@@ -44,50 +44,36 @@ typedef unsigned long long longid;
 
 #define pcls_MPI_Isend(first, args...) \
   { \
-    #pragma omp master \
-    { \
-      assert(timeTasks.is_active(TimeTasks::PCLS_COMM)); \
-      timeTasks_set_task(TimeTasks::PCLS_MPI_Isend); \
-    } \
     MPI_Isend(first, ## args); \
   }
 
 #define pcls_MPI_Irecv(first, args...) \
   { \
-    timeTasks_set_task(TimeTasks::PCLS_MPI_Irecv); \
     MPI_Irecv(first, ## args); \
   }
 
 #define pcls_MPI_Wait(first, args...) \
   { \
-    assert(timeTasks.is_active(TimeTasks::PCLS_COMM)); \
-    timeTasks_set_task(TimeTasks::PCLS_MPI_Wait); \
     MPI_Wait(first, ## args); \
   }
 
 #define pcls_MPI_Cancel(first, args...) \
   { \
-    timeTasks_set_task(TimeTasks::PCLS_MPI_Cancel); \
     MPI_Cancel(first, ## args); \
   }
 
 #define pcls_MPI_Request_free(first, args...) \
   { \
-    timeTasks_set_task(TimeTasks::PCLS_MPI_Request_free); \
     MPI_Request_free(first, ## args); \
   }
 
 #define pcls_MPI_Test(first, args...) \
   { \
-    assert(timeTasks.is_active(TimeTasks::PCLS_COMM)); \
-    timeTasks_set_task(TimeTasks::PCLS_MPI_Test); \
     MPI_Test(first, ## args); \
   }
 
 #define pcls_MPI_Waitany(first, args...) \
   { \
-    assert(timeTasks.is_active(TimeTasks::PCLS_COMM)); \
-    timeTasks_set_task(TimeTasks::PCLS_MPI_Waitany); \
     MPI_Waitany(first, ## args); \
   }
 

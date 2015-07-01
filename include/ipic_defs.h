@@ -44,8 +44,11 @@ typedef unsigned long long longid;
 
 #define pcls_MPI_Isend(first, args...) \
   { \
-    assert(timeTasks.is_active(TimeTasks::PCLS_COMM)); \
-    timeTasks_set_task(TimeTasks::PCLS_MPI_Isend); \
+    #pragma omp master \
+    { \
+      assert(timeTasks.is_active(TimeTasks::PCLS_COMM)); \
+      timeTasks_set_task(TimeTasks::PCLS_MPI_Isend); \
+    } \
     MPI_Isend(first, ## args); \
   }
 

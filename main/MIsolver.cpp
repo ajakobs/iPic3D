@@ -1803,8 +1803,8 @@ void MIsolver::run_Booster(MPI_Comm clustercomm)
 {
   //timeTasks.set_output("booster.out");
   initialize(clustercomm);
-  printf("MIC: Initialize: ");
-  my_clock->Print_OnAir();
+  //printf("MIC: Initialize: ");
+  //my_clock->Print_OnAir();
   // shouldn't we call this?
   //WriteOutput(FirstCycle()-1);
   struct timeval begin, end;
@@ -1844,8 +1844,8 @@ void MIsolver::run_Booster(MPI_Comm clustercomm)
 
 void MIsolver::run_Cluster(){
   initialize(MPI_COMM_NULL);
-  printf("Xeon: Initialize: ");
-  my_clock->Print_OnAir();
+  //printf("Xeon: Initialize: ");
+  //my_clock->Print_OnAir();
   struct timeval begin, end;
   for (int i = FirstCycle(); i <= FinalCycle(); i++){
     if (is_rank0())
@@ -1877,8 +1877,8 @@ void MIsolver::run_Cluster(){
 
 void MIsolver::run(){
   initialize(MPI_COMM_WORLD);
-    printf("Initialize: ");
-    my_clock->Print_OnAir();
+    //printf("Initialize: ");
+    //my_clock->Print_OnAir();
   //printf("nxn: %d\n",nxn);
   //printf("nyn: %d\n",nyn);
   //printf("nzn: %d\n",nzn);

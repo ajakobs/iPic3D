@@ -11,9 +11,9 @@
 #include <sys/time.h>
 
 using namespace iPic3D;
-struct timeval begin, end;
+//struct timeval begin, end;
 int main(int argc, const char **argv) {
-  gettimeofday(&begin,0);
+  //gettimeofday(&begin,0);
   MPIdata::init(&argc, argv);
 
   Parameters::init_parameters();
@@ -128,9 +128,9 @@ int main(int argc, const char **argv) {
   }
   MPIdata::instance().finalize_mpi();
 #endif
-  gettimeofday(&end,0);
-  double time=(1000000*(end.tv_sec - begin.tv_sec)+(end.tv_usec - begin.tv_usec))*0.000001;
-  printf("Application runtime: %f\n",time);
+  //gettimeofday(&end,0);
+  //double time=(1000000*(end.tv_sec - begin.tv_sec)+(end.tv_usec - begin.tv_usec))*0.000001;
+  //printf("Application runtime: %f\n",time);
   //MPIdata::instance().finalize_mpi();
   return 0;
 }

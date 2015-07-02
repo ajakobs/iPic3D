@@ -73,9 +73,9 @@ int main(int argc, const char **argv) {
   }
 
 //#pragma omp taskwait 
-  
   deep_booster_free(&clustercomm);
   MPIdata::instance().finalize_mpi();
+
 #else // End of OMPSS_OFFLOAD
   {
     /* Set type of solver */
@@ -90,7 +90,7 @@ int main(int argc, const char **argv) {
       timeTasks.set_output("output_booster.out");
       //solver has to be created here to be able to set different output files beforehand
       iPic3D::c_Solver solver(argc, argv);
-      printf("Native Version. Particle solver: %d on %s\n",MPIdata::get_rank(),hostname);
+      printf("Native Version. Particle solver: process %d on %s\n",MPIdata::get_rank(),hostname);
       MPI_Info info;
       MPI_Info_create(&info);
 	/* We should improve this */
@@ -104,23 +104,21 @@ int main(int argc, const char **argv) {
       timeTasks.set_output("output_cluster.out");
       //solver has to be created here to be able to set different output files beforehand
       iPic3D::c_Solver solver(argc, argv);
-      printf("Native Version. Fields solver: %d on %s\n",MPIdata::get_rank(),hostname);
+      printf("Native Version. Fields solver: process %d on %s\n",MPIdata::get_rank(),hostname);
       solver.run_Cluster();
     }
   }
   MPIdata::instance().finalize_mpi();
 #endif // End of OFFLOAD
 #else
-  // Placeholder for the normal code
   {
-    //timeTasks.set_output("output.out");
     char hostname[255];
     gethostname(hostname,255);
     printf("No Offload Version. Application on %s\n",hostname);
     #ifdef OPENMP
-    printf("OpenMP wird genutzt!\n");
+    printf("OpenMP is used!\n");
     #else
-    printf("OpenMP wird nicht genutzt!\n");
+    printf("OpenMP is not used!\n");
     #endif
     timeTasks.set_output("output_noOffload.out");
     iPic3D::c_Solver solver(argc, argv);

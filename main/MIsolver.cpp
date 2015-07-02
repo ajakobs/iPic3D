@@ -1734,7 +1734,7 @@ void MIsolver::WriteOutput(int cycle) {
     if(col->getParticlesOutputCycle()==1)
     {
       warning_printf(
-        "ParticlesOutputCycle=1 now means output particles with evey cycle.\n"
+        "ParticlesOutputCycle=1 now means output particles with every cycle.\n"
         "\tParticlesOutputCycle = 0 turns off particle output.");
     }
     eprintf("The new name for serial hdf5 output is shdf5.\n"
@@ -1838,7 +1838,7 @@ void MIsolver::run_Booster(MPI_Comm clustercomm)
     fflush(timeTasks.get_output());
     timeTasks.print_cycle_times(i);
   } 
-  printf("########################################################################\n# Time efield: %f\n# Time parti     cle mover: %f\n# Time bfield: %f\n# Time moments: %f\n#\t Time accumulate moments: %f\n#\t Time compute moments from species: %f\n#############################################################     ###########",efield_time,particle_mover_time,bfield_time,moments_time,acc_mom_time,comp_mom_time);
+  printf("########################################################################\n# Time efield: %f\n# Time particle mover: %f\n# Time bfield: %f\n# Time moments: %f\n#\t Time accumulate moments: %f\n#\t Time compute moments from species: %f\n########################################################################",efield_time,particle_mover_time,bfield_time,moments_time,acc_mom_time,comp_mom_time);
   Finalize();
 }
 
@@ -1871,7 +1871,7 @@ void MIsolver::run_Cluster(){
     fflush(timeTasks.get_output());
     timeTasks.print_cycle_times(i);
   }
-  printf("########################################################################\n# Time efield: %f\n# Time parti     cle mover: %f\n# Time bfield: %f\n# Time moments: %f\n#############################################################     ###########",efield_time,particle_mover_time,bfield_time,moments_time);
+  printf("########################################################################\n# Time efield: %f\n# Time particle mover: %f\n# Time bfield: %f\n# Time moments: %f\n########################################################################",efield_time,particle_mover_time,bfield_time,moments_time);
   Finalize();
 }
 

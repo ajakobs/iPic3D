@@ -19,7 +19,7 @@ export MIC_ENV_PREFIX=MICPRE
 export MICPRE_KMP_AFFINITY=balanced
 
 # Set environment variables
-export IPIC_HOME=/gpfs/scratch/bsc63/bsc63255/ipic3d
+### export IPIC_HOME=/gpfs/scratch/bsc63/bsc63255/ipic3d
 source $IPIC_HOME/env/marenostrum/set_environment_x2m_native.sh
 echo $PROCS
 # Set up host files for CN and BN
@@ -59,6 +59,6 @@ export I_MPI_FABRICS=shm:dapl #necesario
 #source /apps/INTEL/vtune/vtune_amplifier_xe_2013/amplxe-vars.sh intel64
 
 # Workaround for multiple processes to mic: duplicate entries in hostfile and set binding manually
-mpiexec.hydra -machinefile $NX_HOSTFILE -np $(( $BN * $PPN_BN )) -ppn 1 -iface br.667 $IPIC_HOME/build.xeonphi/iPic3D.mic benchmark/parameters_4.inp #$(( $BN * $PPN_BN )) 1 TASKSET
+mpiexec.hydra -machinefile $NX_HOSTFILE -np $(( $BN * $PPN_BN )) -ppn 1 -iface br.667 $IPIC_HOME/build.xeonphi/iPic3D.mic ../inputfiles/parameters_4.inp #$(( $BN * $PPN_BN )) 1 TASKSET
 #/apps/INTEL/vtune/vtune_amplifier_xe_2013/bin64/amplxe-cl --collect knc-general-exploration -knob target-cards=0 -- mpiexec.hydra -machinefile $NX_HOSTFILE -np 8 $IPIC_HOME/build.xeonphi/iPic3D.mic parameters.inp #$(( $BN * $PPN_BN )) 1 TASKSET
 

@@ -28,4 +28,4 @@ export I_MPI_FABRICS=shm:dapl
 #$( head -n $CN $NX_OFFL_HOSTFILE > $NX_HOSTFILE )
 #$( sed -i "1,${CN}d" "$NX_OFFL_HOSTFILE" )
 
-mpiexec.hydra $IPIC_HOME/build.noOffload/iPic3D benchmark/parameters_32.inp
+mpiexec.hydra $IPIC_HOME/build.noOffload/iPic3D ../inputfiles/parameters_32.inp

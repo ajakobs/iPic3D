@@ -1,0 +1,38 @@
+#!/bin/bash
+#BSUB -a intelmpi
+#BSUB -W "0:20"
+#BSUB -J "iPiC3D.intel64"
+#BSUB -o "%J.out"
+#BSUB -e "%J.err"
+#BSUB -q mic
+#BUSB -x
+#BSUB -n "2"
+#BSUB -R "span[ptile=1]"
+
+# Resource requirements
+export CN=2
+export PPN_CN=8
+export BN=2
+export PPN_BN=8
+
+#export OMP_NUM_THREADS=4
+#export NX_ARGS=--summary
+
+#source $IPIC_HOME/env/marenostrum/set_environment_x2x_native.sh
+
+mkdir -p $IPIC_HOME/testdir
+
+export NX_HOSTFILE="$IPIC_HOME/testdir/cn.hosts.$LSB_JOBID"
+export NX_OFFL_HOSTFILE="$IPIC_HOME/testdir/bn.hosts.$LSB_JOBID"
+> $NX_HOSTFILE
+> $NX_OFFL_HOSTFILE
+
+for i in $( cat $LSB_DJOB_HOSTFILE ); do
+	for j in `seq 1 $PPN_CN`; do
+		sed 's/$/-host/' <<< $i >> $NX_OFFL_HOSTFILE
+		sed 's/$/-mic/' <<< $i >> $NX_HOSTFILE
+	done
+done
+
+#mpiexec.hydra -hostfile $NX_HOSTFILE -ppn $PPN_CN $IPIC_HOME/build.xeon/iPic3D.intel64 parameters.inp
+

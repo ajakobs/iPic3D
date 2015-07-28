@@ -10,13 +10,13 @@ RestartDirName = data
 NpMaxNpRatio = 3.0
 
 # New flags:
-Case              = GEM       # Select the case
+Case              = Dipole       # Select the case
 PoissonCorrection = no        # Poisson correction
 WriteMethod       = shdf5     # Output method [shdf5, H5hut, phdf5]
-SimulationName    = GEM       # Simulation name for the output
+SimulationName    = Dipole       # Simulation name for the output
 
 #  %%%%%%%%%%%%%%%%%%% Magnetic Reconnection %%%%%%%%%%%%%%%%%%
-B0x = 0.0097
+B0x = 0.00
 B0y = 0.00
 B0z = 0.00
 
@@ -28,8 +28,8 @@ B1z = 0.000
 delta = 0.5
 
 #  %%%%%%%%%%%%%%%%%%% TIME %%%%%%%%%%%%%%%%%%
-dt =   0.5                  # dt = time step  
-ncycles = 30 		     # cycles
+dt =   0.25                  # dt = time step  
+ncycles = 200 		     # cycles
 th = 1.0                     # th =   decentering parameter
 c = 1.0                      # c = light speed 
 
@@ -38,27 +38,27 @@ Smooth = 0.5                  # Smoothing value (5-points stencil)
 
 
 # %%%%%%%%%%%%%%%%%% BOX SIZE %%%%%%%%%%%%%%%
-Lx =   10.0                  # Lx = simulation box length - x direction   
-Ly =   10.0                  # Ly = simulation box length - y direction
-Lz =   10.0                  # Lz = simulation box length - z direction   
+Lx =   20.0                  # Lx = simulation box length - x direction   
+Ly =   20.0                  # Ly = simulation box length - y direction
+Lz =   1.0                  # Lz = simulation box length - z direction   
 
 x_center =   1.                  # Lx = simulation box length - x direction in m  
 y_center =   1.                  # Ly = simulation box length - y direction in m
 z_center =   1.                  # Lz = simulation box length - z direction in m  
 L_square =   .1
 
-nxc = 60                   # nxc = number of cells - x direction        
-nyc = 60                   # nyc = number of cells - y direction
+nxc = 256                   # nxc = number of cells - x direction        
+nyc = 256                   # nyc = number of cells - y direction
 nzc = 1                    # nzc = number of cells - z direction        
 
 # %%%%%%%%%%%%%% MPI TOPOLOGY %%%%%%%%%%%%%%
 # number of MPI subdomains in each direction
-XLEN = 2
-YLEN = 2
+XLEN = 4
+YLEN = 4
 ZLEN = 1
 # topology of subdomains in each dimension (1=true, 0=false)
 PERIODICX = 1
-PERIODICY = 0
+PERIODICY = 1
 PERIODICZ = 1
 
 # %%%%%%%%%%%%%% PARTICLES %%%%%%%%%%%%%%%%%
@@ -74,11 +74,11 @@ rhoINJECT =  1.0   1.0
 # TrackParticleID[species] = 1=true, 0=false --> Assign ID to particles 
 TrackParticleID = 0	0
 # npcelx = number of particles per cell - Direction X 
-npcelx =   4	4
+npcelx =   18	18
 # npcely = number of particles per cell - Direction Y 
-npcely =   4	4
+npcely =   18	18
 # npcelz = number of particles per cell - Direction Z 
-npcelz =   4	4
+npcelz =   1	1
 # qom = charge to mass ratio for different species 
 qom =  -256.0	1.0
 # uth = thermal velocity for different species - Direction X  
@@ -88,11 +88,11 @@ vth  = 0.045      0.0063
 # wth = thermal velocity for different species - Direction Z 
 wth  = 0.045      0.0063
 # u0 = drift velocity   - Direction X    
-u0 = 0.0	0.0  
+u0 = 0.01	0.01  
 # v0 = drift velocity   - Direction Y    
 v0 = 0.0	0.0   
 # w0 = drift velocity   - Direction Z    
-w0 = 0.00325	-0.01624
+w0 = 0.0	0.0
 
 
 # &&&&&&&&&&&& boundary conditions &&&&&&&&&&&&&&&

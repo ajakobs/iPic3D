@@ -1,0 +1,41 @@
+#!/bin/bash
+#BSUB -a intelmpi
+#BSUB -W "0:40"
+#BSUB -J "iPiC3D.intel64"
+#BSUB -o "%J.out"
+#BSUB -e "%J.err"
+#BSUB -q mic
+#BUSB -x
+#BSUB -n "64"
+#BSUB -R "span[ptile=16]"
+
+# Resource requirements
+export CN=4
+export PPN_CN=16
+
+export OMP_NUM_THREADS=30
+#export NX_ARGS=--summary
+
+export NX_HOSTFILE=$IPIC_HOME/build_mic/hostfile
+> $NX_HOSTFILE
+count=1
+for i in $( cat $LSB_DJOB_HOSTFILE ); do
+        if [ `expr $count % 2` -eq 0 ]
+        then
+                sed 's/$/-mic0/' <<< $i >> $NX_HOSTFILE
+        else
+                sed 's/$/-mic1/' <<< $i >> $NX_HOSTFILE
+        fi
+        count=`expr $count + 1`
+done
+
+source $IPIC_HOME/env/marenostrum/set_environment_nooffload.sh
+
+export I_MPI_MIC=1
+export I_MPI_DEBUG=5
+export I_MPI_WAIT_MODE=1
+export I_MPI_HYDRA_BOOTSTRAP=ssh # si no, da error: Validation failed due to bad host name <s18r3b18-mic0>
+export I_MPI_FABRICS=shm:dapl #necesario
+
+mpiexec.hydra -machinefile $NX_HOSTFILE -np $(( $CN * $PPN_CN )) -ppn 1 -iface br.667 $IPIC_HOME/build_mic/iPic3D ../inputfiles/parameters_4.inp 
+

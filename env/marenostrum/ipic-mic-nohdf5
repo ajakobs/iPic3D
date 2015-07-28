@@ -1,0 +1,24 @@
+#%Module1.0####################################################################
+##
+##  mymodule modulefile
+##
+##  My new module that sets my personal environment
+##
+proc ModulesHelp { } {
+        puts stderr "\tset environment to compile and run iPic3D on MIC"
+}
+
+## Create a whatis file.  Not necessary but cool.
+module-whatis   "set environment to run iPic3D on MIC"
+
+module load ipic-mic-base
+
+### CMAKE doesn't get the following environment variable right
+
+#setenv IPIC_CMAKE_ARGS "-DCMAKE_CXX_FLAGS=\"-DOFFLOAD -DOPENMP -openmp -fno-exceptions -fp-model fast=2 -vec-report -mmic  -I/gpfs/apps/MN3/INTEL/impi/4.1.3.049/mic/include\" -DIPIC_HDF5_OUTPUT=OFF"
+
+#setenv IPIC_CMAKE_ARGS "-DCMAKE_CXX_FLAGS=\"-DOFFLOAD -fopenmp -fno-exceptions -fp-model fast=2 -vec-report -mmic  -I/gpfs/apps/MN3/INTEL/impi/4.1.3.049/mic/include\" -DCMAKE_LD_FLAGS=\" -L/gpfs/apps/MN3/INTEL/impi/4.1.3.049/mic/lib -Xlinker --enable-new-dtags -Xlinker -rpath -Xlinker /gpfs/apps/MN3/INTEL/impi/4.1.3.049/mic/lib -Xlinker -rpath -Xlinker /opt/intel/mpi-rt/4.1 -lmpigc4 -lmpigf -lmpi -lmpigi -ldl -lrt -lpthread\" -DIPIC_HDF5_OUTPUT=OFF"
+
+#export IPIC_CMAKE_ARGS="-DCMAKE_CXX_FLAGS='-DOFFLOAD -fopenmp -fno-exceptions -fp-model fast=2 -vec-report -mmic  -I/gpfs/apps/MN3/INTEL/impi/4.1.3.049/mic/include' -DCMAKE_LD_FLAGS=' -L/gpfs/apps/MN3/INTEL/impi/4.1.3.049/mic/lib -Xlinker --enable-new-dtags -Xlinker -rpath -Xlinker /gpfs/apps/MN3/INTEL/impi/4.1.3.049/mic/lib -Xlinker -rpath -Xlinker /opt/intel/mpi-rt/4.1 -lmpigc4 -lmpigf -lmpi -lmpigi -ldl -lrt -lpthread' -DCMAKE_TOOLCHAIN_FILE=$env(IPIC_HOME)/build.xeonphi/cmake_template.cmake -DOFFLOAD -DIPIC_HDF5_OUTPUT=OFF"
+
+#setenv IPIC_CMAKE_ARGS "-DIPIC_HDF5_OUTPUT=OFF "

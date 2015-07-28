@@ -1,0 +1,46 @@
+#!/bin/bash
+#BSUB -a intelmpi
+#BSUB -W "0:20"
+#BSUB -J "iPiC3D"
+#BSUB -o "%J.out"
+#BSUB -e "%J.err"
+#BSUB -q mic
+#BUSB -x
+#BSUB -n "16"
+#BSUB -R "span[ptile=16]"
+
+# Resource requirements
+export CN=1
+export PPN_CN=16
+
+export OMP_NUM_THREADS=30
+#export NX_ARGS=--summary
+
+source $IPIC_HOME/env/marenostrum/set_environment_nooffload_mic.sh
+
+#mkdir -p $IPIC_HOME/build.xeon/.tmpdir
+export I_MPI_DEBUG=5
+export I_MPI_WAIT_MODE=1
+export I_MPI_FABRICS=shm:dapl
+
+# Set up host file
+mkdir -p $IPIC_HOME/build.noOffload_mic/.tmpdir
+
+export NX_HOSTFILE="$IPIC_HOME/build.noOffload_mic/.tmpdir/cn.hosts.$LSB_JOBID"
+
+count=1
+for i in $( cat $LSB_DJOB_HOSTFILE ); do
+        if [ `expr $count % 2` -eq 0 ]
+        then
+                sed 's/$/-mic0/' <<< $i >> $NX_HOSTFILE
+        #else
+        #        sed 's/$/-mic1/' <<< $i >> $NX_HOSTFILE
+        fi
+        count=`expr $count + 1`
+done
+
+export I_MPI_MIC=1
+export I_MPI_HYDRA_BOOTSTRAP=ssh # si no, da error: Validation failed due to bad host name <s18r3b18-mic0>
+
+mpiexec.hydra -machinefile $NX_HOSTFILE -np $PPN_CN $IPIC_HOME/build.noOffload_mic/iPic3D parameters.inp
+

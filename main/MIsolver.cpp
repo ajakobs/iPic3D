@@ -197,7 +197,7 @@ void MIsolver::send_field_to_kinetic_solver()
   EMf->set_fieldForPcls(*fieldForPcls);
 }
 //! MAXWELL SOLVER for Efield
-void MIsolver::advance_Efield_Cluster() 
+void MIsolver::advance_Efield() 
 {
   timeTasks_set_main_task(TimeTasks::FIELDS);
   if(I_am_field_solver())
@@ -207,10 +207,6 @@ void MIsolver::advance_Efield_Cluster()
     EMf->calculateE(get_miMoments());
   }
   send_field_to_kinetic_solver();
-  //synch between cluster and booster
-}
-
-void MIsolver::advance_Efield_Booster(){
   //synch between cluster and booster
 }
 
@@ -1727,16 +1723,13 @@ void MIsolver::run()
   initialize();
   // shouldn't we call this?
   //WriteOutput(FirstCycle()-1);
-  //MPI_Comm cluster; //This communicater should run on the cluster
-  //DEEP_Booster_alloc(MPI_COMM_WORLD, vct->get_rank(), 1, &cluster);
-  //#pragma omp task //this for-loop should run on the booster (where we start)
   for (int i = FirstCycle(); i <= FinalCycle(); i++)
   {
     if (is_rank0())
       printf(" ======= Cycle %d ======= \n",i);
 
     timeTasks.resetCycle();
-    advance_Efield_Cluster();
+    advance_Efield();
     move_particles();
     advance_Bfield();
     compute_moments();
@@ -1744,14 +1737,5 @@ void MIsolver::run()
     // print out total time for all tasks
     timeTasks.print_cycle_times(i);
   }
-  //#pragma omp task device(mpi) onto(cluster,vct->get_rank()) copy_deps
-  //for(int i = FirstCycle(); i <= FinalCycle(); i++)
-  //{
-  //	advance_Efield_Cluster();
-  //	advance_Bfield_Cluster();
-  //}
-  //
-  //#pragma omp taskwait
-  //DEEP_Booster_free(MPI_COMM_WORLD,vct->get_rank(), 1, &cluster);
   Finalize();
 }

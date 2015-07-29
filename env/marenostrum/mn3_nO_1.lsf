@@ -6,29 +6,35 @@
 #BSUB -e "%J.err"
 #BSUB -q mic
 #BUSB -x
-#BSUB -n "64"
+#BSUB -n "16"
 #BSUB -R "span[ptile=16]"
 
 # Resource requirements
-export CN=4
+export CN=1
 export PPN_CN=16
 
 export OMP_NUM_THREADS=30
 #export NX_ARGS=--summary
 
-export NX_HOSTFILE=$IPIC_HOME/build_mic/hostfile
+#export NX_HOSTFILE=$IPIC_HOME/build_mic/hostfile
+export NX_HOSTFILE=$IPIC_HOME/build/hostfile
+
 > $NX_HOSTFILE
+
 count=1
 for i in $( cat $LSB_DJOB_HOSTFILE ); do
-        if [ `expr $count % 2` -eq 0 ]
-        then
-                sed 's/$/-mic0/' <<< $i >> $NX_HOSTFILE
-        else
-                sed 's/$/-mic1/' <<< $i >> $NX_HOSTFILE
-        fi
-        count=`expr $count + 1`
+# creating host file for MICs
+#        if [ `expr $count % 2` -eq 0 ]
+#        then
+#                sed 's/$/-mic0/' <<< $i >> $NX_HOSTFILE
+#        else
+#                sed 's/$/-mic1/' <<< $i >> $NX_HOSTFILE
+#        fi
+#        count=`expr $count + 1`
+	$i >> $NX_HOSTFILE
 done
 
+#source $IPIC_HOME/env/marenostrum/set_environment_nooffload_mic.sh
 source $IPIC_HOME/env/marenostrum/set_environment_nooffload.sh
 
 export I_MPI_MIC=1
@@ -37,5 +43,6 @@ export I_MPI_WAIT_MODE=1
 export I_MPI_HYDRA_BOOTSTRAP=ssh # si no, da error: Validation failed due to bad host name <s18r3b18-mic0>
 export I_MPI_FABRICS=shm:dapl #necesario
 
-mpiexec.hydra -machinefile $NX_HOSTFILE -np $(( $CN * $PPN_CN )) -ppn 1 -iface br.667 $IPIC_HOME/build_mic/iPic3D ../inputfiles/parameters_4.inp 
+#mpiexec.hydra -machinefile $NX_HOSTFILE -np $(( $CN * $PPN_CN )) -ppn 1 -iface br.667 $IPIC_HOME/build_mic/iPic3D ../inputfiles/parameters_1.inp 
+mpiexec.hydra -machinefile $NX_HOSTFILE -np $(( $CN * $PPN_CN )) -ppn 1 -iface br.667 $IPIC_HOME/build/iPic3D ../inputfiles/parameters_1.inp 
 

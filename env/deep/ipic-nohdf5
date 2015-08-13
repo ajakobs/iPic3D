@@ -16,5 +16,7 @@ module load ipic-base
 
 setenv I_MPI_FABRICS shm:tcp
 #setenv IPIC_CMAKE_ARGS "-DCMAKE_CXX_FLAGS='-openmp -fno-exceptions -O3 -xHost -vec-report' -DIPIC_HDF5_OUTPUT=OFF"
-setenv IPIC_CMAKE_ARGS "-DCMAKE_CXX_FLAGS='-DNB_COMM -DOFFLOAD -DOPENMP -fno-exceptions -O3 -openmp -xHost -vec-report' -DIPIC_HDF5_OUTPUT=OFF"
+#setenv IPIC_CMAKE_ARGS "-DCMAKE_CXX_FLAGS='-DNB_COMM -DOFFLOAD -DOPENMP -fno-exceptions -O3 -openmp -xHost -vec-report' -DIPIC_HDF5_OUTPUT=OFF"
+## flags for using extrae_lite
+setenv IPIC_CMAKE_ARGS "-DCMAKE_CXX_FLAGS='-DNB_COMM -DOFFLOAD -DOPENMP -DEXTRAE_LITE -fno-exceptions -O3 -openmp -xHost -fPIC -L/homec/deep/deep36/extrae_lite/0.2/lib -lextrae-lite-c -Wl,-rpath,/homec/deep/deep36/extrae_lite/0.2/lib -I/homec/deep/deep36/extrae_lite/0.2/include' -DIPIC_HDF5_OUTPUT=OFF"
 setenv IPIC_RUNENV miclogin.xeon

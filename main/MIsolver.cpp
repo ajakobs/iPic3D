@@ -39,6 +39,10 @@
 #include "SolverType.h"
 #include <unistd.h>
 #include <sys/time.h>
+extern "C"
+{
+	#include "extrae_lite.h"
+}
 double efield_time=0.0, bfield_time=0.0, particle_mover_time=0.0, moments_time=0.0, acc_mom_time=0.0, comp_mom_time=0.0;
 using namespace iPic3D;
 MPIdata* mpi=0;
@@ -107,7 +111,7 @@ MIsolver::MIsolver(int argc, const char **argv)
   EMf = new EMfields3D(setting);
   fieldForPcls = new array4_double(nxn,nyn,nzn,2*DFIELD_3or4);
 
-  my_clock = new Timing(vct->get_rank());
+  //my_clock = new Timing(vct->get_rank());
 }
 
 int MIsolver::FirstCycle() { return col->get_first_cycle(); }
@@ -245,6 +249,9 @@ void MIsolver::advance_Efield_Cluster()
  // functions expects a MPI_Comm as second parameter, but is not needed on the offload part,
  // it uses MPI_Comm_get_parent, so use NULL here
   timeTasks_set_task(TimeTasks::FLDS_CLUSTER_BOOSTER_COMM);
+#ifdef EXTRAE_LITE
+extrae_lite_next_phase("ClusterBoosterCommunication");
+#endif
   send_field_to_kinetic_solver(true,NULL);
   //synch between cluster and booster
   //#endif
@@ -253,6 +260,9 @@ void MIsolver::advance_Efield_Cluster()
 void MIsolver::advance_Efield_Booster(MPI_Comm clustercomm){
   //synch from booster to cluster
   timeTasks_set_task(TimeTasks::FLDS_CLUSTER_BOOSTER_COMM);
+#ifdef EXTRAE_LITE
+extrae_lite_next_phase("ClusterBoosterCommunication");
+#endif
   send_field_to_kinetic_solver(false,&clustercomm);
 }
 
@@ -277,6 +287,9 @@ void MIsolver::advance_Bfield_Cluster()
 
   #if defined(OFFLOAD) || defined(OMPSS_OFFLOAD) 
   // send B_smooth to kinetic solver
+#ifdef EXTRAE_LITE
+extrae_lite_next_phase("ClusterBoosterCommunication");
+#endif
   send_Bsmooth_to_kinetic_solver(true, NULL);
     //  EMf->fetch_Bx_smooth(),
     //  EMf->fetch_By_smooth(),
@@ -289,6 +302,9 @@ void MIsolver::advance_Bfield_Booster(MPI_Comm clustercomm)
 {
 //receive B_smooth from field solver
     timeTasks_set_task(TimeTasks::FLDS_CLUSTER_BOOSTER_COMM);
+#ifdef EXTRAE_LITE
+extrae_lite_next_phase("ClusterBoosterCommunication");
+#endif
     send_Bsmooth_to_kinetic_solver(false, &clustercomm);
 }
 
@@ -1803,6 +1819,7 @@ void MIsolver::run_Booster(MPI_Comm clustercomm)
 {
   //timeTasks.set_output("booster.out");
   initialize(clustercomm);
+  my_clock = new Timing(vct->get_rank());
   //printf("MIC: Initialize: ");
   //my_clock->Print_OnAir();
   // shouldn't we call this?
@@ -1816,18 +1833,30 @@ void MIsolver::run_Booster(MPI_Comm clustercomm)
 
     timeTasks.resetCycle();
     gettimeofday(&begin,(struct timezone *)0);
+#ifdef EXTRAE_LITE
+extrae_lite_next_phase("Fields");
+#endif
     advance_Efield_Booster(clustercomm);
     gettimeofday(&end,(struct timezone *)0);
     efield_time+=(1000000*(end.tv_sec - begin.tv_sec)+(end.tv_usec - begin.tv_usec))*0.000001;
     gettimeofday(&begin,(struct timezone *)0);
+#ifdef EXTRAE_LITE
+extrae_lite_next_phase("Particles");
+#endif
     move_particles();
     gettimeofday(&end,(struct timezone *)0);
     particle_mover_time+=(1000000*(end.tv_sec - begin.tv_sec)+(end.tv_usec - begin.tv_usec))*0.000001;
     gettimeofday(&begin,(struct timezone *)0);
+#ifdef EXTRAE_LITE
+extrae_lite_next_phase("Fields");
+#endif
     advance_Bfield_Booster(clustercomm);
     gettimeofday(&end,(struct timezone *)0);
     bfield_time+=(1000000*(end.tv_sec - begin.tv_sec)+(end.tv_usec - begin.tv_usec))*0.000001;
     gettimeofday(&begin,(struct timezone *)0);
+#ifdef EXTRAE_LITE
+extrae_lite_next_phase("Moments");
+#endif
     mom=compute_moments_Booster(clustercomm);
     gettimeofday(&end,(struct timezone *)0);
     moments_time+=(1000000*(end.tv_sec - begin.tv_sec)+(end.tv_usec - begin.tv_usec))*0.000001;
@@ -1844,6 +1873,7 @@ void MIsolver::run_Booster(MPI_Comm clustercomm)
 
 void MIsolver::run_Cluster(){
   initialize(MPI_COMM_NULL);
+  my_clock = new Timing(vct->get_rank());
   //printf("Xeon: Initialize: ");
   //my_clock->Print_OnAir();
   struct timeval begin, end;
@@ -1852,10 +1882,16 @@ void MIsolver::run_Cluster(){
       fprintf(timeTasks.get_output()," ======= Cycle %d on Cluster ======= \n",i);
     timeTasks.resetCycle();
     gettimeofday(&begin,(struct timezone *)0);
+#ifdef EXTRAE_LITE
+extrae_lite_next_phase("Fields");
+#endif
     advance_Efield_Cluster();
     gettimeofday(&end,(struct timezone *)0);
     efield_time+=(1000000*(end.tv_sec - begin.tv_sec)+(end.tv_usec - begin.tv_usec))*0.000001;
     gettimeofday(&begin,(struct timezone *)0);
+#ifdef EXTRAE_LITE
+extrae_lite_next_phase("Fields");
+#endif
     advance_Bfield_Cluster();
     gettimeofday(&end,(struct timezone *)0);
     bfield_time+=(1000000*(end.tv_sec - begin.tv_sec)+(end.tv_usec - begin.tv_usec))*0.000001;
@@ -1865,6 +1901,9 @@ void MIsolver::run_Cluster(){
         MPI_Wait(&pending_request2,MPI_STATUS_IGNORE);
 #endif
     gettimeofday(&begin,(struct timezone *)0);
+#ifdef EXTRAE_LITE
+extrae_lite_next_phase("Moments");
+#endif
     compute_moments_Cluster();
     gettimeofday(&end,(struct timezone *)0);
     moments_time+=(1000000*(end.tv_sec - begin.tv_sec)+(end.tv_usec - begin.tv_usec))*0.000001;
@@ -1877,6 +1916,7 @@ void MIsolver::run_Cluster(){
 
 void MIsolver::run(){
   initialize(MPI_COMM_WORLD);
+  my_clock = new Timing(vct->get_rank());
     //printf("Initialize: ");
     //my_clock->Print_OnAir();
   //printf("nxn: %d\n",nxn);
